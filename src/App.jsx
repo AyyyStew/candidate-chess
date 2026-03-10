@@ -10,7 +10,7 @@ import { STARTING_FEN, isValidFen } from "./utils/chess";
 const CANDIDATE_LIMIT = 3;
 
 export default function App() {
-  const { ready, analyze, evaluateMove } = useStockfish();
+  const { ready, analyze, evaluateMove, evaluatePosition } = useStockfish();
 
   const [dark, setDark] = useState(false);
   const [fen, setFen] = useState(STARTING_FEN);
@@ -19,6 +19,7 @@ export default function App() {
   const [candidates, setCandidates] = useState([]);
   const [results, setResults] = useState(null);
   const topMovesRef = useRef([]);
+  const positionEvalRef = useRef(null);
 
   useEffect(() => {
     if (dark) {
@@ -45,8 +46,14 @@ export default function App() {
     setCandidates([]);
     setResults(null);
     topMovesRef.current = [];
+    positionEvalRef.current = null;
+
+    // run both in parallel
     analyze(fen).then((moves) => {
       topMovesRef.current = moves;
+    });
+    evaluatePosition(fen).then((score) => {
+      positionEvalRef.current = score;
     });
   }
 
@@ -92,22 +99,38 @@ export default function App() {
 
   async function handleCompare() {
     setPhase("comparing");
-    if (topMovesRef.current.length === 0) {
-      await new Promise((resolve) => {
-        const interval = setInterval(() => {
-          if (topMovesRef.current.length > 0) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 100);
-      });
-    }
+
+    // wait for both top moves and position eval
+    await new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (
+          topMovesRef.current.length > 0 &&
+          positionEvalRef.current !== null
+        ) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 100);
+    });
+
     const evaluated = [];
     for (const candidate of candidates) {
-      const score = await evaluateMove(fen, candidate.move);
-      evaluated.push({ ...candidate, eval: score });
+      const topMove = topMovesRef.current.find(
+        (m) => m.move === candidate.move,
+      );
+      if (topMove) {
+        evaluated.push({ ...candidate, eval: topMove.eval });
+      } else {
+        const score = await evaluateMove(fen, candidate.move);
+        evaluated.push({ ...candidate, eval: score });
+      }
     }
-    setResults({ topMoves: topMovesRef.current, candidates: evaluated });
+
+    setResults({
+      topMoves: topMovesRef.current,
+      candidates: evaluated,
+      positionEval: positionEvalRef.current,
+    });
     setPhase("done");
   }
 
@@ -175,6 +198,7 @@ export default function App() {
               candidates={candidates}
               results={results}
               bestEval={bestEval}
+              positionEval={results?.positionEval ?? 0}
             />
           )}
 
@@ -195,7 +219,11 @@ export default function App() {
           )}
 
           {isDone && results && (
-            <ResultsPanel results={results} onReset={handleReset} />
+            <ResultsPanel
+              results={results}
+              onReset={handleReset}
+              positionEval={results.positionEval}
+            />
           )}
         </div>
       </main>

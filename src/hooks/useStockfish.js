@@ -107,7 +107,16 @@ export function useStockfish() {
         }
 
         if (line.startsWith("bestmove")) {
-          resolve(lastEval !== null ? -lastEval : 0);
+          if (lastEval === null) {
+            resolve(0);
+            return;
+          }
+          // Stockfish always reports score from the perspective of the side to move.
+          // After the move, it's the opponent's turn, so we flip to get it from
+          // the original side's perspective.
+          const isWhiteToMoveOriginally = fen.includes(" w ");
+          const score = isWhiteToMoveOriginally ? -lastEval : lastEval;
+          resolve(score);
         }
       };
 
@@ -117,5 +126,32 @@ export function useStockfish() {
     });
   }
 
-  return { ready, analyze, evaluateMove };
+  function evaluatePosition(fen, depth = 12) {
+    return new Promise((resolve) => {
+      const worker = evaluateWorkerRef.current;
+      let lastEval = null;
+
+      worker.onmessage = (event) => {
+        if (typeof event.data !== "string") return;
+        const line = event.data.trim();
+        if (line.startsWith("info") && line.includes("score cp")) {
+          const scoreMatch = line.match(/score cp (-?\d+)/);
+          if (scoreMatch) lastEval = parseInt(scoreMatch[1]) / 100;
+        }
+        if (line.startsWith("bestmove")) {
+          // score is from side to move's perspective — convert to white's perspective
+          const isWhiteToMove = fen.includes(" w ");
+          resolve(
+            lastEval !== null ? (isWhiteToMove ? lastEval : -lastEval) : 0,
+          );
+        }
+      };
+
+      worker.postMessage("stop");
+      worker.postMessage(`position fen ${fen}`);
+      worker.postMessage(`go depth ${depth}`);
+    });
+  }
+
+  return { ready, analyze, evaluateMove, evaluatePosition };
 }

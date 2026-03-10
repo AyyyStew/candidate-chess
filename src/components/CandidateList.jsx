@@ -14,7 +14,12 @@ function borderColor(diff) {
   return "border-red-500";
 }
 
-export default function CandidateList({ candidates, results, bestEval }) {
+export default function CandidateList({
+  candidates,
+  results,
+  bestEval,
+  positionEval,
+}) {
   const isDone = !!results;
   const displayList = results?.candidates ?? candidates;
 
@@ -51,13 +56,15 @@ export default function CandidateList({ candidates, results, bestEval }) {
               )}
 
               {isDone && c.eval !== undefined && (
-                <span
-                  className="ml-auto text-sm font-medium"
-                  style={{ color: evalColor(diff) }}
-                >
-                  {formatEval(c.eval)}
-                  <span className="text-gray-400 font-normal ml-1.5">
-                    ({formatEval(diff)} vs best)
+                <span className="ml-auto text-sm font-medium flex gap-3">
+                  <span style={{ color: evalColor(c.eval - bestEval) }}>
+                    {formatEval(c.eval)}
+                  </span>
+                  <span className="text-gray-400">
+                    {formatEval(c.eval - bestEval)} vs best
+                  </span>
+                  <span className="text-gray-400">
+                    {formatEval(c.eval - positionEval)} vs position
                   </span>
                 </span>
               )}
