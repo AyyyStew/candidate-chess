@@ -5,14 +5,16 @@ import { useStockfish } from "./hooks/useStockfish";
 import FenInput from "./components/FenInput";
 import CandidateList from "./components/CandidateList";
 import ResultsPanel from "./components/ResultsPanel";
-import { STARTING_FEN, isValidFen } from "./utils/chess";
+import { STARTING_FEN, isValidFen, normalizeEval } from "./utils/chess";
 
 const CANDIDATE_LIMIT = 3;
 
 export default function App() {
   const { ready, analyze, evaluateMove, evaluatePosition } = useStockfish();
 
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
   const [fen, setFen] = useState(STARTING_FEN);
   const [fenInput, setFenInput] = useState("");
   const [phase, setPhase] = useState("idle");
@@ -50,6 +52,7 @@ export default function App() {
 
     // run both in parallel
     analyze(fen).then((moves) => {
+      console.log("top moves", moves); // add this
       topMovesRef.current = moves;
     });
     evaluatePosition(fen).then((score) => {
@@ -100,8 +103,12 @@ export default function App() {
   async function handleCompare() {
     setPhase("comparing");
 
-    // wait for both top moves and position eval
+    // Wait for top moves and position eval if still running
     await new Promise((resolve) => {
+      if (topMovesRef.current.length > 0 && positionEvalRef.current !== null) {
+        resolve(); // already done, resolve immediately
+        return;
+      }
       const interval = setInterval(() => {
         if (
           topMovesRef.current.length > 0 &&
@@ -119,17 +126,23 @@ export default function App() {
         (m) => m.move === candidate.move,
       );
       if (topMove) {
-        evaluated.push({ ...candidate, eval: topMove.eval });
+        evaluated.push({
+          ...candidate,
+          eval: normalizeEval(topMove.eval, fen),
+        });
       } else {
         const score = await evaluateMove(fen, candidate.move);
-        evaluated.push({ ...candidate, eval: score });
+        evaluated.push({ ...candidate, eval: normalizeEval(score, fen) });
       }
     }
 
     setResults({
-      topMoves: topMovesRef.current,
+      topMoves: topMovesRef.current.map((m) => ({
+        ...m,
+        eval: normalizeEval(m.eval, fen),
+      })),
       candidates: evaluated,
-      positionEval: positionEvalRef.current,
+      positionEval: normalizeEval(positionEvalRef.current, fen),
     });
     setPhase("done");
   }
