@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { useStockfish } from "./hooks/useStockfish";
@@ -12,17 +12,21 @@ const CANDIDATE_LIMIT = 3;
 export default function App() {
   const { ready, analyze, evaluateMove } = useStockfish();
 
-  // Position
+  const [dark, setDark] = useState(false);
   const [fen, setFen] = useState(STARTING_FEN);
   const [fenInput, setFenInput] = useState("");
-
-  // Phase: idle → active → comparing → done
   const [phase, setPhase] = useState("idle");
   const [candidates, setCandidates] = useState([]);
   const [results, setResults] = useState(null);
   const topMovesRef = useRef([]);
 
-  // ── Handlers ───────────────────────────────────────────────
+  useEffect(() => {
+    if (dark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [dark]);
 
   function handleSetPosition() {
     if (!fenInput.trim()) {
@@ -41,14 +45,12 @@ export default function App() {
     setCandidates([]);
     setResults(null);
     topMovesRef.current = [];
-
     analyze(fen).then((moves) => {
       topMovesRef.current = moves;
     });
   }
 
   function handlePieceDrop(sourceSquare, targetSquare) {
-    // Idle: setting up the position
     if (phase === "idle") {
       const game = new Chess(fen);
       let move;
@@ -66,8 +68,6 @@ export default function App() {
       setFenInput(game.fen());
       return true;
     }
-
-    // Active: picking candidate moves
     if (phase === "active") {
       if (candidates.length >= CANDIDATE_LIMIT) return false;
       const game = new Chess(fen);
@@ -85,16 +85,13 @@ export default function App() {
       const uci = `${sourceSquare}${targetSquare}`;
       if (candidates.some((c) => c.move === uci)) return false;
       setCandidates((prev) => [...prev, { move: uci, san: move.san }]);
-      return false; // reset board back to analysis position
+      return false;
     }
-
     return false;
   }
 
   async function handleCompare() {
     setPhase("comparing");
-
-    // Wait for top moves if still running
     if (topMovesRef.current.length === 0) {
       await new Promise((resolve) => {
         const interval = setInterval(() => {
@@ -105,14 +102,11 @@ export default function App() {
         }, 100);
       });
     }
-
-    // Evaluate each candidate sequentially
     const evaluated = [];
     for (const candidate of candidates) {
       const score = await evaluateMove(fen, candidate.move);
       evaluated.push({ ...candidate, eval: score });
     }
-
     setResults({ topMoves: topMovesRef.current, candidates: evaluated });
     setPhase("done");
   }
@@ -126,74 +120,85 @@ export default function App() {
     topMovesRef.current = [];
   }
 
-  // ── Derived state ──────────────────────────────────────────
-
   const isIdle = phase === "idle";
   const isActive = phase === "active";
   const isDone = phase === "done";
   const bestEval = results?.topMoves?.[0]?.eval ?? 0;
 
-  // ── Render ─────────────────────────────────────────────────
-
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: 32,
-        padding: 32,
-        fontFamily: "sans-serif",
-      }}
-    >
-      {/* Board */}
-      <div style={{ width: 480 }}>
-        <Chessboard
-          position={fen}
-          onPieceDrop={handlePieceDrop}
-          arePiecesDraggable={
-            isIdle || (isActive && candidates.length < CANDIDATE_LIMIT)
-          }
-        />
-      </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+      {/* Header */}
+      <header className="flex items-center justify-between px-8 py-4 border-b border-gray-200 dark:border-gray-800">
+        <h1 className="text-xl font-bold tracking-tight">♟ Chess Analyzer</h1>
+        <button
+          onClick={() => setDark(!dark)}
+          className="px-3 py-1.5 rounded-lg text-sm bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+        >
+          {dark ? "☀ Light" : "☾ Dark"}
+        </button>
+      </header>
 
-      {/* Controls */}
-      <div
-        style={{ flex: 1, display: "flex", flexDirection: "column", gap: 20 }}
-      >
-        <FenInput
-          value={fenInput}
-          onChange={setFenInput}
-          onSet={handleSetPosition}
-          disabled={!isIdle}
-        />
-
-        {isIdle && (
-          <button onClick={handleAnalyze} disabled={!ready}>
-            {ready ? "Analyze Position" : "Engine loading..."}
-          </button>
-        )}
-
-        {!isIdle && (
-          <CandidateList
-            candidates={candidates}
-            results={results}
-            bestEval={bestEval}
+      {/* Main */}
+      <main className="flex gap-8 p-8 max-w-6xl mx-auto">
+        {/* Board */}
+        <div className="w-[480px] shrink-0">
+          <Chessboard
+            position={fen}
+            onPieceDrop={handlePieceDrop}
+            arePiecesDraggable={
+              isIdle || (isActive && candidates.length < CANDIDATE_LIMIT)
+            }
           />
-        )}
+        </div>
 
-        {isActive && candidates.length > 0 && (
-          <button onClick={handleCompare}>
-            Compare {candidates.length} move{candidates.length > 1 ? "s" : ""}
-          </button>
-        )}
+        {/* Controls */}
+        <div className="flex-1 flex flex-col gap-5">
+          <FenInput
+            value={fenInput}
+            onChange={setFenInput}
+            onSet={handleSetPosition}
+            disabled={!isIdle}
+          />
 
-        {phase === "comparing" && (
-          <p style={{ color: "#888" }}>Evaluating your moves...</p>
-        )}
+          {isIdle && (
+            <button
+              onClick={handleAnalyze}
+              disabled={!ready}
+              className="w-full py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white transition-colors"
+            >
+              {ready ? "Analyze Position" : "Engine loading..."}
+            </button>
+          )}
 
-        {isDone && results && (
-          <ResultsPanel results={results} onReset={handleReset} />
-        )}
-      </div>
+          {!isIdle && (
+            <CandidateList
+              candidates={candidates}
+              results={results}
+              bestEval={bestEval}
+            />
+          )}
+
+          {isActive && candidates.length > 0 && (
+            <button
+              onClick={handleCompare}
+              className="w-full py-2.5 rounded-xl font-semibold bg-green-600 hover:bg-green-700 text-white transition-colors"
+            >
+              Compare {candidates.length} move
+              {candidates.length > 1 ? "s" : ""}
+            </button>
+          )}
+
+          {phase === "comparing" && (
+            <p className="text-gray-400 animate-pulse">
+              Evaluating your moves...
+            </p>
+          )}
+
+          {isDone && results && (
+            <ResultsPanel results={results} onReset={handleReset} />
+          )}
+        </div>
+      </main>
     </div>
   );
 }
