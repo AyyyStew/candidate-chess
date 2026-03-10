@@ -1,7 +1,7 @@
 import React from "react";
 import { formatEval } from "../utils/chess";
 
-export default function ResultsPanel({ results, onReset }) {
+export default function ResultsPanel({ results, onReset, positionEval }) {
   const best = results.topMoves[0]?.eval ?? 0;
 
   return (
@@ -18,6 +18,7 @@ export default function ResultsPanel({ results, onReset }) {
               <th className="px-4 py-2 text-left font-medium">Move</th>
               <th className="px-4 py-2 text-left font-medium">Eval</th>
               <th className="px-4 py-2 text-left font-medium">Δ Best</th>
+              <th className="px-4 py-2 text-left font-medium">Δ Position</th>
             </tr>
           </thead>
           <tbody>
@@ -36,6 +37,9 @@ export default function ResultsPanel({ results, onReset }) {
                   </td>
                   <td className="px-4 py-2.5 text-gray-400">
                     {formatEval(diff)}
+                  </td>
+                  <td className="px-4 py-2.5 text-gray-400">
+                    {formatEval(m.eval - positionEval)}
                   </td>
                 </tr>
               );
