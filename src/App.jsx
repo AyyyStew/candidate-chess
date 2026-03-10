@@ -8,8 +8,6 @@ import ResultsPanel from "./components/ResultsPanel";
 import AnalysisSettings from "./components/AnalysisSettings";
 import { STARTING_FEN, isValidFen, normalizeEval } from "./utils/chess";
 
-const CANDIDATE_LIMIT = 3;
-
 export default function App() {
   const { ready, analyze, evaluateMove, evaluatePosition } = useStockfish();
 
@@ -25,6 +23,7 @@ export default function App() {
   const positionEvalRef = useRef(null);
   const [depth, setDepth] = useState(15);
   const [topMoves, setTopMoves] = useState(5);
+  const [candidateLimit, setCandidateLimit] = useState(3);
 
   useEffect(() => {
     if (dark) {
@@ -80,7 +79,7 @@ export default function App() {
       return true;
     }
     if (phase === "active") {
-      if (candidates.length >= CANDIDATE_LIMIT) return false;
+      if (candidates.length >= candidateLimit) return false;
       const game = new Chess(fen);
       let move;
       try {
@@ -183,7 +182,7 @@ export default function App() {
             position={fen}
             onPieceDrop={handlePieceDrop}
             arePiecesDraggable={
-              isIdle || (isActive && candidates.length < CANDIDATE_LIMIT)
+              isIdle || (isActive && candidates.length < candidateLimit)
             }
           />
           <button
@@ -208,8 +207,10 @@ export default function App() {
               <AnalysisSettings
                 depth={depth}
                 topMoves={topMoves}
+                candidateLimit={candidateLimit}
                 onDepthChange={setDepth}
                 onTopMovesChange={setTopMoves}
+                onCandidateLimitChange={setCandidateLimit}
               />
               <button
                 onClick={handleAnalyze}
@@ -227,6 +228,7 @@ export default function App() {
               results={results}
               bestEval={bestEval}
               positionEval={results?.positionEval ?? 0}
+              candidateLimit={candidateLimit}
             />
           )}
 
