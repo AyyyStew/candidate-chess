@@ -19,6 +19,7 @@ export default function CandidateList({
   results,
   bestEval,
   positionEval,
+  candidateLimit,
 }) {
   const isDone = !!results;
   const displayList = results?.candidates ?? candidates;
@@ -26,7 +27,7 @@ export default function CandidateList({
   return (
     <div>
       <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-        Your Candidates ({candidates.length} / {CANDIDATE_LIMIT})
+        Your Candidates ({candidates.length} / {candidateLimit})
       </h3>
 
       {candidates.length === 0 && (

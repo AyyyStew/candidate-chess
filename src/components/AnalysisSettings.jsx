@@ -3,8 +3,10 @@ import React from "react";
 export default function AnalysisSettings({
   depth,
   topMoves,
+  candidateLimit,
   onDepthChange,
   onTopMovesChange,
+  onCandidateLimitChange,
 }) {
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 flex flex-col gap-4">
@@ -38,7 +40,7 @@ export default function AnalysisSettings({
       <div className="flex flex-col gap-1">
         <div className="flex justify-between text-sm">
           <label className="text-gray-600 dark:text-gray-300 font-medium">
-            Top Moves
+            Top Moves Shown
           </label>
           <span className="font-bold">{topMoves}</span>
         </div>
@@ -53,6 +55,28 @@ export default function AnalysisSettings({
         <div className="flex justify-between text-xs text-gray-400">
           <span>3</span>
           <span>10</span>
+        </div>
+      </div>
+
+      {/* Candidate limit slider */}
+      <div className="flex flex-col gap-1">
+        <div className="flex justify-between text-sm">
+          <label className="text-gray-600 dark:text-gray-300 font-medium">
+            Candidate Limit
+          </label>
+          <span className="font-bold">{candidateLimit}</span>
+        </div>
+        <input
+          type="range"
+          min={2}
+          max={5}
+          value={candidateLimit}
+          onChange={(e) => onCandidateLimitChange(Number(e.target.value))}
+          className="w-full accent-blue-600"
+        />
+        <div className="flex justify-between text-xs text-gray-400">
+          <span>2</span>
+          <span>5</span>
         </div>
       </div>
     </div>
