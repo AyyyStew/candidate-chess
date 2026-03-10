@@ -23,8 +23,8 @@ export default function App() {
   const [results, setResults] = useState(null);
   const topMovesRef = useRef([]);
   const positionEvalRef = useRef(null);
-  const [depth, setDepth] = useState(12);
-  const [topMoves, setTopMoves] = useState(10);
+  const [depth, setDepth] = useState(15);
+  const [topMoves, setTopMoves] = useState(5);
 
   useEffect(() => {
     if (dark) {
@@ -186,6 +186,12 @@ export default function App() {
               isIdle || (isActive && candidates.length < CANDIDATE_LIMIT)
             }
           />
+          <button
+            onClick={handleReset}
+            className="mt-4 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-red-500 dark:hover:bg-red-700 transition-colors"
+          >
+            Start Over
+          </button>
         </div>
 
         {/* Controls */}
@@ -243,7 +249,6 @@ export default function App() {
           {isDone && results && (
             <ResultsPanel
               results={results}
-              onReset={handleReset}
               positionEval={results.positionEval}
             />
           )}

@@ -1,7 +1,7 @@
 import React from "react";
 import { formatEval } from "../utils/chess";
 
-export default function ResultsPanel({ results, onReset, positionEval }) {
+export default function ResultsPanel({ results, positionEval }) {
   const best = results.topMoves[0]?.eval ?? 0;
 
   // build a set of candidate moves for quick lookup
@@ -25,6 +25,8 @@ export default function ResultsPanel({ results, onReset, positionEval }) {
         <table className="w-full text-sm">
           <thead className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
             <tr>
+              <th className="px-4 py-2 text-left font-medium"></th>
+
               <th className="px-4 py-2 text-left font-medium">#</th>
               <th className="px-4 py-2 text-left font-medium">Move</th>
               <th className="px-4 py-2 text-left font-medium">Eval</th>
@@ -45,14 +47,17 @@ export default function ResultsPanel({ results, onReset, positionEval }) {
                     ${i === 0 ? "bg-green-50 dark:bg-green-950" : "bg-white dark:bg-gray-900"}
                     ${isCandidate ? "ring-2 ring-inset ring-blue-400 dark:ring-blue-600" : ""}`}
                 >
-                  <td className="px-4 py-2.5 text-gray-400">{i + 1}</td>
-                  <td className="px-4 py-2.5 font-bold flex items-center gap-2">
-                    {m.san}
+                  <td className="px-4 py-2.5 text-gray-400">
+                    {" "}
                     {isCandidate && (
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                      <span className="text-xs font-bold rounded-full">
                         Your pick
                       </span>
                     )}
+                  </td>
+                  <td className="px-4 py-2.5 text-gray-400">{i + 1}</td>
+                  <td className="px-4 py-2.5 font-bold flex items-center gap-2">
+                    {m.san}
                   </td>
                   <td className="px-4 py-2.5 text-green-600 dark:text-green-400 font-medium">
                     {formatEval(m.eval)}
@@ -69,13 +74,6 @@ export default function ResultsPanel({ results, onReset, positionEval }) {
           </tbody>
         </table>
       </div>
-
-      <button
-        onClick={onReset}
-        className="mt-4 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-      >
-        Start Over
-      </button>
     </div>
   );
 }
