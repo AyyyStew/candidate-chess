@@ -9,9 +9,9 @@ function getStockfishRank(move, topMoves) {
 }
 
 function borderColor(diff) {
-  if (diff >= -0.3) return "border-green-500";
-  if (diff >= -1.0) return "border-orange-400";
-  return "border-red-500";
+  if (diff >= -0.3) return "border-green-500 dark:border-green-400";
+  if (diff >= -1.0) return "border-orange-400 dark:border-orange-300";
+  return "border-red-500 dark:border-red-400";
 }
 
 export default function CandidateList({
@@ -33,45 +33,69 @@ export default function CandidateList({
         <p className="text-gray-400 text-sm">Drag a piece to try a move</p>
       )}
 
-      <ul className="flex flex-col gap-2">
-        {displayList.map((c, i) => {
-          const diff = (c.eval ?? 0) - bestEval;
-          const rank = isDone
-            ? getStockfishRank(c.move, results.topMoves)
-            : null;
-
-          return (
-            <li
-              key={i}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl border-l-4 bg-white dark:bg-gray-900 shadow-sm
-                ${isDone ? borderColor(diff) : "border-gray-300 dark:border-gray-700"}`}
-            >
-              <span className="text-gray-400 text-sm w-5">{i + 1}.</span>
-              <span className="font-bold text-lg">{c.san}</span>
-
-              {rank && (
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                  #{rank} Stockfish
-                </span>
+      <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+            <tr>
+              <th className="px-4 py-2 text-left font-medium">#</th>
+              <th className="px-4 py-2 text-left font-medium">Move</th>
+              {isDone && (
+                <>
+                  <th className="px-4 py-2 text-left font-medium">Eval</th>
+                  <th className="px-4 py-2 text-left font-medium">Δ Best</th>
+                  <th className="px-4 py-2 text-left font-medium">
+                    Δ Position
+                  </th>
+                  <th className="px-4 py-2 text-left font-medium">SF Rank</th>
+                </>
               )}
+            </tr>
+          </thead>
+          <tbody>
+            {displayList.map((c, i) => {
+              const diff = (c.eval ?? 0) - bestEval;
+              const diffPos = (c.eval ?? 0) - positionEval;
+              const rank = isDone
+                ? getStockfishRank(c.move, results.topMoves)
+                : null;
 
-              {isDone && c.eval !== undefined && (
-                <span className="ml-auto text-sm font-medium flex gap-3">
-                  <span style={{ color: evalColor(c.eval - bestEval) }}>
-                    {formatEval(c.eval)}
-                  </span>
-                  <span className="text-gray-400">
-                    {formatEval(c.eval - bestEval)} vs best
-                  </span>
-                  <span className="text-gray-400">
-                    {formatEval(c.eval - positionEval)} vs position
-                  </span>
-                </span>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+              return (
+                <tr
+                  key={i}
+                  className={`border-l-4 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900
+    ${isDone ? borderColor(diff) : ""}`}
+                >
+                  <td className="px-4 py-2.5 text-gray-400">{i + 1}</td>
+                  <td className="px-4 py-2.5 font-bold">{c.san}</td>
+                  {isDone && (
+                    <>
+                      <td
+                        className="px-4 py-2.5 font-medium"
+                        style={{ color: evalColor(diff) }}
+                      >
+                        {formatEval(c.eval)}
+                      </td>
+                      <td className="px-4 py-2.5 text-gray-400">
+                        {formatEval(diff)}
+                      </td>
+                      <td className="px-4 py-2.5 text-gray-400">
+                        {formatEval(diffPos)}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        {rank && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                            #{rank}
+                          </span>
+                        )}
+                      </td>
+                    </>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

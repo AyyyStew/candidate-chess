@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Chess } from "chess.js";
 
 export function useStockfish() {
-  const analyzeWorkerRef = useRef(null); // dedicated to top moves
-  const evaluateWorkerRef = useRef(null); // dedicated to candidate evals
+  const analyzeWorkerRef = useRef(null); // top moves (MultiPV)
+  const evaluateWorkerRef = useRef(null); // candidate evals
+  const positionWorkerRef = useRef(null); // position eval
   const [ready, setReady] = useState(false);
   const readyCount = useRef(0);
 
@@ -16,26 +17,29 @@ export function useStockfish() {
       return worker;
     }
 
-    const w1 = makeWorker(10); // analyze worker — needs MultiPV
-    const w2 = makeWorker(1); // evaluate worker — single PV is faster
+    const w1 = makeWorker(10); // analyze
+    const w2 = makeWorker(1); // evaluate moves
+    const w3 = makeWorker(1); // evaluate position
 
-    // Wait for both workers to be ready
     function onReady(event) {
       if (typeof event.data !== "string") return;
       if (event.data.trim() === "readyok") {
         readyCount.current += 1;
-        if (readyCount.current >= 2) setReady(true);
+        if (readyCount.current >= 3) setReady(true);
       }
     }
     w1.onmessage = onReady;
     w2.onmessage = onReady;
+    w3.onmessage = onReady;
 
     analyzeWorkerRef.current = w1;
     evaluateWorkerRef.current = w2;
+    positionWorkerRef.current = w3;
 
     return () => {
       w1.terminate();
       w2.terminate();
+      w3.terminate();
     };
   }, []);
 
@@ -128,7 +132,7 @@ export function useStockfish() {
 
   function evaluatePosition(fen, depth = 12) {
     return new Promise((resolve) => {
-      const worker = evaluateWorkerRef.current;
+      const worker = positionWorkerRef.current;
       let lastEval = null;
 
       worker.onmessage = (event) => {
@@ -139,7 +143,6 @@ export function useStockfish() {
           if (scoreMatch) lastEval = parseInt(scoreMatch[1]) / 100;
         }
         if (line.startsWith("bestmove")) {
-          // score is from side to move's perspective — convert to white's perspective
           const isWhiteToMove = fen.includes(" w ");
           resolve(
             lastEval !== null ? (isWhiteToMove ? lastEval : -lastEval) : 0,

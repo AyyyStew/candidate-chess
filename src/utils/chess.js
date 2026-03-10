@@ -21,3 +21,8 @@ export function evalColor(diffFromBest) {
   if (diffFromBest >= -1.0) return "#ff9800"; // orange — inaccuracy
   return "#f44336"; // red    — blunder
 }
+
+export function normalizeEval(evalScore, fen) {
+  const isBlackToMove = fen.includes(" b ");
+  return isBlackToMove ? -evalScore : evalScore;
+}

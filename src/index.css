@@ -1,2 +1,4 @@
 @import "tailwindcss";
 @variant dark (&:where(.dark, .dark *));
+
+@source inline("border-green-500 border-orange-400 border-red-500");
