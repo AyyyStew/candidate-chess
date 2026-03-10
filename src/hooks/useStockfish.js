@@ -44,7 +44,7 @@ export function useStockfish() {
   }, []);
 
   // Get top N moves for a position
-  function analyze(fen, depth = 12) {
+  function analyze(fen, depth = 12, topMovesCount = 10) {
     return new Promise((resolve) => {
       const worker = analyzeWorkerRef.current;
       const results = {};
@@ -78,11 +78,12 @@ export function useStockfish() {
         }
 
         if (line.startsWith("bestmove")) {
-          resolve(Object.values(results).slice(0, 10));
+          resolve(Object.values(results).slice(0, topMovesCount));
         }
       };
 
       worker.postMessage("stop");
+      worker.postMessage(`setoption name MultiPV value ${topMovesCount}`);
       worker.postMessage(`position fen ${fen}`);
       worker.postMessage(`go depth ${depth}`);
     });

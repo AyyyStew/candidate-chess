@@ -5,6 +5,7 @@ import { useStockfish } from "./hooks/useStockfish";
 import FenInput from "./components/FenInput";
 import CandidateList from "./components/CandidateList";
 import ResultsPanel from "./components/ResultsPanel";
+import AnalysisSettings from "./components/AnalysisSettings";
 import { STARTING_FEN, isValidFen, normalizeEval } from "./utils/chess";
 
 const CANDIDATE_LIMIT = 3;
@@ -22,6 +23,8 @@ export default function App() {
   const [results, setResults] = useState(null);
   const topMovesRef = useRef([]);
   const positionEvalRef = useRef(null);
+  const [depth, setDepth] = useState(12);
+  const [topMoves, setTopMoves] = useState(10);
 
   useEffect(() => {
     if (dark) {
@@ -50,12 +53,10 @@ export default function App() {
     topMovesRef.current = [];
     positionEvalRef.current = null;
 
-    // run both in parallel
-    analyze(fen).then((moves) => {
-      console.log("top moves", moves); // add this
+    analyze(fen, depth, topMoves).then((moves) => {
       topMovesRef.current = moves;
     });
-    evaluatePosition(fen).then((score) => {
+    evaluatePosition(fen, depth).then((score) => {
       positionEvalRef.current = score;
     });
   }
@@ -197,13 +198,21 @@ export default function App() {
           />
 
           {isIdle && (
-            <button
-              onClick={handleAnalyze}
-              disabled={!ready}
-              className="w-full py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white transition-colors"
-            >
-              {ready ? "Analyze Position" : "Engine loading..."}
-            </button>
+            <>
+              <AnalysisSettings
+                depth={depth}
+                topMoves={topMoves}
+                onDepthChange={setDepth}
+                onTopMovesChange={setTopMoves}
+              />
+              <button
+                onClick={handleAnalyze}
+                disabled={!ready}
+                className="w-full py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white transition-colors"
+              >
+                {ready ? "Analyze Position" : "Engine loading..."}
+              </button>
+            </>
           )}
 
           {!isIdle && (
