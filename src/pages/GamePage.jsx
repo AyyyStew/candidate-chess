@@ -1,30 +1,37 @@
 import React from "react";
-import { useStockfish } from "../hooks/useStockfish";
-import { useEngineAnalysis } from "../hooks/useEngineAnalysis";
+import { EngineProvider, useEngine } from "../contexts/EngineContext";
+import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useGameLogic } from "../hooks/useGameLogic";
-import { useBoardSetup } from "../hooks/useBoardSetup";
 import BoardPanel from "../components/BoardPanel";
-import ControlPanel from "../components/ControlPanel";
+import SetupPanel from "../components/SetupPanel";
+import GamePanel from "../components/GamePanel";
 
-export default function GamePage() {
-  const engine = useStockfish();
-  const board = useBoardSetup();
-  const engineAnalysis = useEngineAnalysis({ engine });
+function GamePageContent() {
+  const { engineAnalysis } = useEngine();
+  const board = useBoard();
   const gameLogic = useGameLogic({
     engine: engineAnalysis,
     lockedFen: board.fen,
   });
+  const { isIdle } = gameLogic;
 
   return (
     <main className="flex gap-8 p-8 max-w-6xl mx-auto">
-      <BoardPanel board={board} mode={gameLogic} />
-      <ControlPanel
-        board={board}
-        mode={gameLogic}
-        modeType="game"
-        engine={engine}
-        engineAnalysis={engineAnalysis}
-      />
+      <BoardPanel mode={gameLogic} />
+      <div className="flex-1 flex flex-col gap-5">
+        {isIdle && <SetupPanel mode={gameLogic} modeType="game" />}
+        {!isIdle && <GamePanel mode={gameLogic} />}
+      </div>
     </main>
+  );
+}
+
+export default function GamePage() {
+  return (
+    <EngineProvider>
+      <BoardProvider>
+        <GamePageContent />
+      </BoardProvider>
+    </EngineProvider>
   );
 }

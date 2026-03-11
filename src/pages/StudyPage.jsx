@@ -1,30 +1,43 @@
 import React from "react";
-import { useStockfish } from "../hooks/useStockfish";
-import { useEngineAnalysis } from "../hooks/useEngineAnalysis";
+import { EngineProvider, useEngine } from "../contexts/EngineContext";
+import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useAnalysisMode } from "../hooks/useAnalysisMode";
-import { useBoardSetup } from "../hooks/useBoardSetup";
 import BoardPanel from "../components/BoardPanel";
-import ControlPanel from "../components/ControlPanel";
+import SetupPanel from "../components/SetupPanel";
+import StudyPanel from "../components/StudyPanel";
 
-export default function StudyPage() {
-  const engine = useStockfish();
-  const board = useBoardSetup();
-  const engineAnalysis = useEngineAnalysis({ engine });
+function StudyPageContent() {
+  const { engineAnalysis } = useEngine();
+  const board = useBoard();
   const analysisMode = useAnalysisMode({
     engineAnalysis,
     lockedFen: board.fen,
   });
+  const { isIdle } = analysisMode;
 
   return (
     <main className="flex gap-8 p-8 max-w-6xl mx-auto">
-      <BoardPanel board={board} mode={analysisMode} />
-      <ControlPanel
-        board={board}
-        mode={analysisMode}
-        modeType="analysis"
-        engine={engine}
-        engineAnalysis={engineAnalysis}
-      />
+      <BoardPanel mode={analysisMode} />
+      <div className="flex-1 flex flex-col gap-5">
+        {isIdle && <SetupPanel mode={analysisMode} modeType="analysis" />}
+        {!isIdle && <StudyPanel mode={analysisMode} />}
+      </div>
     </main>
+  );
+}
+
+function StudyPageInner() {
+  return (
+    <BoardProvider>
+      <StudyPageContent />
+    </BoardProvider>
+  );
+}
+
+export default function StudyPage() {
+  return (
+    <EngineProvider>
+      <StudyPageInner />
+    </EngineProvider>
   );
 }

@@ -115,6 +115,7 @@ export default function FamilyFeudBoard({
   strikes,
   maxStrikes,
   onReset,
+  resetMessage,
 }) {
   const [revealedMoves, setRevealedMoves] = useState(new Set());
 
@@ -230,7 +231,7 @@ export default function FamilyFeudBoard({
           onClick={onReset}
           className="w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
         >
-          Start Over
+          {resetMessage ? resetMessage : "Start Over"}
         </button>
       )}
     </div>

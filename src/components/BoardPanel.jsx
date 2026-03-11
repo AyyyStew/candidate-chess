@@ -1,15 +1,16 @@
 import React, { useState } from "react";
 import { Chessboard } from "react-chessboard";
 import MoveHistory from "./MoveHistory";
+import { useBoard } from "../contexts/BoardContext";
 
 export default function BoardPanel({
-  board,
   mode,
   onReset,
   locked = false,
   gameInfo,
 }) {
   const [showArrows, setShowArrows] = useState(true);
+  const board = useBoard();
 
   const {
     fen,
@@ -110,7 +111,7 @@ export default function BoardPanel({
             }
             className="mt-2 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-red-500 dark:hover:bg-red-700 hover:text-white transition-colors"
           >
-            Start Over
+            Reset Game
           </button>
         </>
       )}
