@@ -2,3 +2,17 @@
 @variant dark (&:where(.dark, .dark *));
 
 @source inline("border-green-500 border-orange-400 border-red-500");
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-slide-in {
+  animation: slideIn 0.2s ease-out forwards;
+}

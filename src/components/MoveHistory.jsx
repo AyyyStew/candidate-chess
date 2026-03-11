@@ -1,15 +1,20 @@
 import React, { useEffect } from "react";
 
-export default function MoveHistory({ history, currentIndex, onNavigate }) {
-  // keyboard arrow keys
+export default function MoveHistory({
+  history,
+  currentIndex,
+  onNavigate,
+  disabled,
+}) {
   useEffect(() => {
     function handleKey(e) {
+      if (disabled) return; // block keyboard nav
       if (e.key === "ArrowLeft") onNavigate(currentIndex - 1);
       if (e.key === "ArrowRight") onNavigate(currentIndex + 1);
     }
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [currentIndex, onNavigate]);
+  }, [currentIndex, onNavigate, disabled]);
 
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3">
@@ -27,6 +32,7 @@ export default function MoveHistory({ history, currentIndex, onNavigate }) {
               )}
               <button
                 onClick={() => onNavigate(i)}
+                disabled={disabled || currentIndex < 0}
                 className={`px-1.5 py-0.5 rounded text-sm font-medium transition-colors
                   ${
                     isActive
@@ -45,14 +51,14 @@ export default function MoveHistory({ history, currentIndex, onNavigate }) {
       <div className="flex gap-2">
         <button
           onClick={() => onNavigate(-1)}
-          disabled={currentIndex < 0}
+          disabled={disabled || currentIndex < 0}
           className="flex-1 py-1.5 rounded-lg text-sm bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors"
         >
           ⟪
         </button>
         <button
           onClick={() => onNavigate(currentIndex - 1)}
-          disabled={currentIndex < 0}
+          disabled={disabled || currentIndex < 0}
           className="flex-1 py-1.5 rounded-lg text-sm bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors"
         >
           ←
