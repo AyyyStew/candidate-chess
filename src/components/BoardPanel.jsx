@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Chessboard } from "react-chessboard";
 import MoveHistory from "./MoveHistory";
 
-export default function BoardPanel({ board, analysis }) {
+export default function BoardPanel({ board, mode }) {
   const [showArrows, setShowArrows] = useState(true);
 
   const {
@@ -13,15 +13,7 @@ export default function BoardPanel({ board, analysis }) {
     historyIndex,
     handleNavigate,
   } = board;
-  const {
-    isIdle,
-    isActive,
-    isDone,
-    candidates,
-    results,
-    candidateLimit,
-    handleReset,
-  } = analysis;
+  const { isIdle, isActive, isDone, candidates, results } = mode;
 
   const candidateArrows = showArrows
     ? [
@@ -60,22 +52,17 @@ export default function BoardPanel({ board, analysis }) {
 
   function handlePieceDrop(sourceSquare, targetSquare) {
     if (isIdle) return board.handleIdleDrop(sourceSquare, targetSquare, fen);
-    if (isActive) return analysis.handleActiveDrop(sourceSquare, targetSquare);
+    if (isActive) return mode.handleDrop(sourceSquare, targetSquare);
     return false;
   }
 
   return (
-    <div className="flex flex-col gap-2 w-120 shrink-0">
-      {/* Board controls */}
+    <div className="flex flex-col gap-2 w-[480px] shrink-0">
       <div className="flex gap-2 self-end">
         <button
           onClick={() => setShowArrows((a) => !a)}
           className={`px-3 py-1.5 rounded-lg text-sm transition-colors
-            ${
-              showArrows
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
-            }`}
+            ${showArrows ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"}`}
         >
           ↗ Arrows
         </button>
@@ -87,18 +74,14 @@ export default function BoardPanel({ board, analysis }) {
         </button>
       </div>
 
-      {/* Board */}
       <Chessboard
         position={fen}
         onPieceDrop={handlePieceDrop}
         boardOrientation={boardOrientation}
-        arePiecesDraggable={
-          isIdle || (isActive && candidates.length < candidateLimit)
-        }
+        arePiecesDraggable={isIdle || (isActive && !isDone)}
         customArrows={candidateArrows}
       />
 
-      {/* Move history */}
       <MoveHistory
         history={moveHistory}
         currentIndex={historyIndex}
@@ -106,10 +89,9 @@ export default function BoardPanel({ board, analysis }) {
         disabled={!isIdle}
       />
 
-      {/* Reset button */}
       <button
         onClick={() => {
-          analysis.handleReset();
+          mode.reset();
           board.reset();
         }}
         className="mt-2 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-red-500 dark:hover:bg-red-700 hover:text-white transition-colors"
