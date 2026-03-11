@@ -9,6 +9,7 @@ export function useEngineAnalysis({ engine }) {
   const topMovesRef = useRef(null);
   const positionEvalRef = useRef(null);
   const lockedFenRef = useRef(null);
+  const refsReadyRef = useRef(null); // holds { resolve } for current waiter
   const [liveTopMoves, setLiveTopMoves] = useState([]);
   const [depth, setDepth] = useState(15);
   const [useMovetime, setUseMovetime] = useState(false);
@@ -20,11 +21,36 @@ export function useEngineAnalysis({ engine }) {
     ? `go movetime ${movetime}`
     : `go depth ${depth}`;
 
+  // Call this whenever both refs become populated
+  function notifyRefsReady() {
+    if (
+      topMovesRef.current?.length > 0 &&
+      positionEvalRef.current !== null &&
+      refsReadyRef.current
+    ) {
+      refsReadyRef.current.resolve();
+      refsReadyRef.current = null;
+    }
+  }
+
+  function waitForRefs() {
+    // Already populated — resolve immediately, no polling
+    if (topMovesRef.current?.length > 0 && positionEvalRef.current !== null) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      refsReadyRef.current = { resolve };
+    });
+  }
+
   function startAnalysis(fen) {
+    console.log("[engineAnalysis] startAnalysis called — engine will think");
     lockedFenRef.current = fen;
     topMovesRef.current = null;
     positionEvalRef.current = null;
+    refsReadyRef.current = null;
     setLiveTopMoves([]);
+
     startBackgroundAnalysis({
       fen,
       topMovesCount: searchMoveCount,
@@ -32,20 +58,29 @@ export function useEngineAnalysis({ engine }) {
       engine,
       topMovesRef,
       positionEvalRef,
-      onTopMovesReady: (moves) => setLiveTopMoves(moves.slice(0, topMoveCount)),
+      onTopMovesReady: (moves) => {
+        setLiveTopMoves(moves.slice(0, topMoveCount));
+        notifyRefsReady();
+      },
+      onPositionEvalReady: () => {
+        notifyRefsReady();
+      },
     });
   }
 
-  // Load pre-computed results directly into refs — skips engine analysis
   function loadPrecomputed(fen, topMoves, positionEval) {
+    console.log("[engineAnalysis] loadPrecomputed called — should be instant");
     lockedFenRef.current = fen;
     topMovesRef.current = topMoves;
     positionEvalRef.current = positionEval;
+    refsReadyRef.current = null; // clear any stale waiter
     setLiveTopMoves(topMoves.slice(0, topMoveCount));
+    // No need to notify — refs are set synchronously, waitForRefs()
+    // will see them immediately when called
   }
 
   async function evaluateMove(uci, san) {
-    await waitForRefs(topMovesRef, positionEvalRef);
+    await waitForRefs();
     return evaluateSingleCandidate({
       fen: lockedFenRef.current,
       candidate: { move: uci, san },
@@ -81,6 +116,7 @@ export function useEngineAnalysis({ engine }) {
     topMovesRef.current = null;
     positionEvalRef.current = null;
     lockedFenRef.current = null;
+    refsReadyRef.current = null; // cancel any pending waiter
     setLiveTopMoves([]);
   }
 
@@ -103,20 +139,4 @@ export function useEngineAnalysis({ engine }) {
     searchMoveCount,
     setSearchMoveCount,
   };
-}
-
-function waitForRefs(topMovesRef, positionEvalRef, timeout = 30000) {
-  return new Promise((resolve, reject) => {
-    const start = Date.now();
-    const interval = setInterval(() => {
-      if (topMovesRef.current?.length > 0 && positionEvalRef.current !== null) {
-        clearInterval(interval);
-        resolve();
-      }
-      if (Date.now() - start > timeout) {
-        clearInterval(interval);
-        reject(new Error("Engine timed out"));
-      }
-    }, 100);
-  });
 }

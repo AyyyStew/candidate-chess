@@ -25,7 +25,6 @@ function GamePageInner() {
 
   return (
     <BoardProvider
-      key={queue.current.fen}
       initialFen={queue.current.fen}
       initialOrientation={queue.current.orientation}
     >
@@ -33,42 +32,56 @@ function GamePageInner() {
     </BoardProvider>
   );
 }
+
 function GamePageContent({ queue }) {
-  const { engine, engineAnalysis } = useEngine();
   const board = useBoard();
+  const { engine, engineAnalysis } = useEngine();
   const gameLogic = useGameLogic({
     engine: engineAnalysis,
     lockedFen: queue.current.fen,
   });
-  const { isIdle } = gameLogic;
-  const skipAutoStartRef = useRef(false);
 
+  // Only for cold initial start on page load
+  const hasStartedRef = useRef(false);
   useEffect(() => {
-    if (engine.ready && isIdle) {
-      if (skipAutoStartRef.current) {
-        skipAutoStartRef.current = false;
-        return;
-      }
+    if (engine.ready && !hasStartedRef.current) {
+      hasStartedRef.current = true;
       gameLogic.start(queue.current.fen);
     }
-  }, [engine.ready, isIdle]);
+  }, [engine.ready]);
 
-  function handleReset() {
+  const handleResetRef = useRef(null);
+  handleResetRef.current = function handleReset() {
     const next = queue.advance();
+    console.log(
+      "[handleReset] preloaded:",
+      next.preloaded,
+      "topMoves:",
+      next.topMoves?.length ?? null,
+      "positionEval:",
+      next.positionEval,
+    );
+    board.resetTo(next.position.fen, next.position.orientation);
+    gameLogic.reset();
+
     if (next.preloaded) {
-      skipAutoStartRef.current = true;
       engineAnalysis.loadPrecomputed(
         next.position.fen,
         next.topMoves,
         next.positionEval,
       );
-      gameLogic.reset();
       gameLogic.startWithPreloaded(next.position.fen);
+      console.log(
+        "[handleReset] phase after startWithPreloaded:",
+        gameLogic.phase,
+      );
     } else {
-      gameLogic.reset();
-      // useEffect fires naturally when engine.ready && isIdle
+      console.log("[handleReset] fallback — calling start directly");
+      gameLogic.start(next.position.fen);
     }
-  }
+  };
+
+  const { isIdle } = gameLogic;
 
   return (
     <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
@@ -83,14 +96,19 @@ function GamePageContent({ queue }) {
                 {queue.current.label}
               </div>
               <div className="text-blue-600 dark:text-blue-300">
-                {queue.current.event} — Move {queue.current.moveNumber}
+                {queue.current.event} – Move {queue.current.moveNumber}
               </div>
             </div>
           }
         />
         <div className="flex-1 flex flex-col gap-5">
           {isIdle && <LoadingPanel />}
-          {!isIdle && <GamePanel mode={gameLogic} onReset={handleReset} />}
+          {!isIdle && (
+            <GamePanel
+              mode={gameLogic}
+              onReset={() => handleResetRef.current()}
+            />
+          )}
         </div>
       </div>
     </main>
