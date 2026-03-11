@@ -56,3 +56,8 @@ export function getDailyPosition() {
     DAILY_POSITIONS.length;
   return DAILY_POSITIONS[dayIndex];
 }
+
+export function getRandomPosition() {
+  const index = Math.floor(Math.random() * DAILY_POSITIONS.length);
+  return DAILY_POSITIONS[index];
+}

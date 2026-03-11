@@ -81,6 +81,14 @@ export function useBoardSetup({
     setFenInput(last.fenAfter);
   }
 
+  function resetTo(fen, orientation = "white") {
+    setFen(fen);
+    setFenInput(fen);
+    setMoveHistory([]);
+    setHistoryIndex(-1);
+    setBoardOrientation(orientation);
+  }
+
   return {
     fen,
     setFen,
@@ -95,5 +103,6 @@ export function useBoardSetup({
     handleIdleDrop,
     reset,
     snapToEnd,
+    resetTo,
   };
 }

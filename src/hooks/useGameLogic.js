@@ -89,6 +89,16 @@ export function useGameLogic({ engine: engineAnalysis, lockedFen }) {
     engineAnalysis.reset();
   }
 
+  function startWithPreloaded(fen) {
+    strikesRef.current = 0;
+    hitsRef.current = 0;
+    setPhase("active");
+    setCandidates([]);
+    setResults(null);
+    setStrikes(0);
+    // engineAnalysis already has refs loaded — no startAnalysis call needed
+  }
+
   return {
     phase,
     candidates,
@@ -104,5 +114,6 @@ export function useGameLogic({ engine: engineAnalysis, lockedFen }) {
     isIdle: phase === "idle",
     isActive: phase === "active",
     isDone: phase === "done",
+    startWithPreloaded,
   };
 }

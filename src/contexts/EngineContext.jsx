@@ -1,11 +1,11 @@
 import React, { createContext, useContext } from "react";
-import { useStockfish } from "../hooks/useStockfish";
+import { useEnginePool } from "../hooks/useEnginePool";
 import { useEngineAnalysis } from "../hooks/useEngineAnalysis";
 
 const EngineContext = createContext(null);
 
 export function EngineProvider({ children }) {
-  const engine = useStockfish();
+  const engine = useEnginePool();
   const engineAnalysis = useEngineAnalysis({ engine });
 
   return (
