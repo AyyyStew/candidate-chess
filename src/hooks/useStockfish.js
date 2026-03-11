@@ -87,6 +87,16 @@ export function useStockfish() {
             };
           }
         }
+        if (line.startsWith("bestmove")) {
+          console.log(
+            "final top moves:",
+            Object.values(results).map((m) => ({
+              san: m.san,
+              rawEval: m.rawEval,
+            })),
+          );
+          resolve(Object.values(results).slice(0, topMovesCount));
+        }
 
         if (line.startsWith("bestmove")) {
           resolve(Object.values(results).slice(0, topMovesCount));

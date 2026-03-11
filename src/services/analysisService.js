@@ -1,4 +1,4 @@
-import { getMoveCategory } from "../utils/chess";
+import { getMoveCategory, evalToWinPercent } from "../utils/chess";
 
 function waitForRef(ref, checkFn = (v) => v !== null && v !== undefined) {
   return new Promise((resolve) => {
@@ -53,8 +53,27 @@ export async function evaluateSingleCandidate({
     ? topMove.rawEval
     : await engine.getRawMoveEval(fen, candidate.move, goCommand);
 
-  const category = getMoveCategory(rawPositionEval, rawMoveEval, isBlack);
+  const category = getMoveCategory(
+    rawPositionEval,
+    rawMoveEval,
+    isBlack,
+    rawBestEval,
+  );
   const rankIdx = rawTopMoves.findIndex((m) => m.move === candidate.move);
+
+  const before = isBlack
+    ? evalToWinPercent(-rawPositionEval)
+    : evalToWinPercent(rawPositionEval);
+  const after = isBlack
+    ? evalToWinPercent(-rawMoveEval)
+    : evalToWinPercent(rawMoveEval);
+  console.log(candidate.san, {
+    rawPositionEval,
+    rawMoveEval,
+    before,
+    after,
+    drop: before - after,
+  });
 
   return {
     ...candidate,
