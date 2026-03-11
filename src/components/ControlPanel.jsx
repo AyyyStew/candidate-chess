@@ -1,21 +1,21 @@
 import React from "react";
+import { useEngine } from "../contexts/EngineContext";
 import FenInput from "./FenInput";
 import AnalysisSettings from "./AnalysisSettings";
 import FamilyFeudBoard from "./FamilyFeudBoard";
 import CandidateList from "./CandidateList";
 import ResultsPanel from "./ResultsPanel";
+import { useBoard } from "../contexts/BoardContext";
 
 export default function ControlPanel({
-  board,
   mode,
   modeType,
-  engine,
-  engineAnalysis,
   locked = false,
   onReset,
 }) {
-  const { isIdle, isActive, isComparing, isDone, phase, candidates, results } =
-    mode;
+  const { engine, engineAnalysis } = useEngine();
+  const board = useBoard();
+  const { isIdle, isActive, isComparing, isDone, candidates, results } = mode;
   const boardTopMoves = isDone ? results.topMoves : engineAnalysis.liveTopMoves;
 
   function handleAnalyze() {
@@ -25,7 +25,6 @@ export default function ControlPanel({
 
   return (
     <div className="flex-1 flex flex-col gap-5">
-      {/* Hidden on daily page */}
       {!locked && (
         <FenInput
           value={board.fenInput}
@@ -34,7 +33,6 @@ export default function ControlPanel({
           disabled={!isIdle}
         />
       )}
-
       {!locked && isIdle && (
         <AnalysisSettings
           depth={engineAnalysis.depth}
@@ -55,7 +53,6 @@ export default function ControlPanel({
           onMovetimeChange={engineAnalysis.setMovetime}
         />
       )}
-
       {!locked && isIdle && (
         <button
           onClick={handleAnalyze}
@@ -65,15 +62,11 @@ export default function ControlPanel({
           {engine.ready ? "Analyze Position" : "Engine loading..."}
         </button>
       )}
-
-      {/* Loading state while engine spins up on daily page */}
       {locked && isIdle && (
         <p className="text-sm text-gray-400 animate-pulse">
           {engine.ready ? "Starting analysis..." : "Engine loading..."}
         </p>
       )}
-
-      {/* Game mode UI */}
       {modeType === "game" && !isIdle && (
         <FamilyFeudBoard
           topMoves={boardTopMoves}
@@ -91,8 +84,6 @@ export default function ControlPanel({
           }
         />
       )}
-
-      {/* Analysis mode UI */}
       {modeType === "analysis" && !isIdle && (
         <>
           <CandidateList
@@ -117,10 +108,13 @@ export default function ControlPanel({
           {isDone && results && (
             <ResultsPanel
               results={results}
-              onReset={() => {
-                mode.reset();
-                board.reset();
-              }}
+              onReset={
+                onReset ??
+                (() => {
+                  mode.reset();
+                  board.reset();
+                })
+              }
             />
           )}
         </>
