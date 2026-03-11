@@ -3,7 +3,6 @@ import {
   startBackgroundAnalysis,
   evaluateSingleCandidate,
 } from "../services/analysisService";
-
 import { getMoveCategory } from "../utils/chess";
 
 export function useEngineAnalysis({ engine }) {
@@ -11,12 +10,11 @@ export function useEngineAnalysis({ engine }) {
   const positionEvalRef = useRef(null);
   const lockedFenRef = useRef(null);
   const [liveTopMoves, setLiveTopMoves] = useState([]);
-
   const [depth, setDepth] = useState(15);
   const [useMovetime, setUseMovetime] = useState(false);
   const [movetime, setMovetime] = useState(2000);
-  const [topMoveCount, setTopMoveCount] = useState(5); // shown on board
-  const [searchMoveCount, setSearchMoveCount] = useState(20); // evaluated by SF
+  const [topMoveCount, setTopMoveCount] = useState(5);
+  const [searchMoveCount, setSearchMoveCount] = useState(20);
 
   const goCommand = useMovetime
     ? `go movetime ${movetime}`
@@ -27,16 +25,23 @@ export function useEngineAnalysis({ engine }) {
     topMovesRef.current = null;
     positionEvalRef.current = null;
     setLiveTopMoves([]);
-
     startBackgroundAnalysis({
       fen,
-      topMovesCount: searchMoveCount, // search more than we show
+      topMovesCount: searchMoveCount,
       goCommand,
       engine,
       topMovesRef,
       positionEvalRef,
-      onTopMovesReady: (moves) => setLiveTopMoves(moves.slice(0, topMoveCount)), // only show top N
+      onTopMovesReady: (moves) => setLiveTopMoves(moves.slice(0, topMoveCount)),
     });
+  }
+
+  // Load pre-computed results directly into refs — skips engine analysis
+  function loadPrecomputed(fen, topMoves, positionEval) {
+    lockedFenRef.current = fen;
+    topMovesRef.current = topMoves;
+    positionEvalRef.current = positionEval;
+    setLiveTopMoves(topMoves.slice(0, topMoveCount));
   }
 
   async function evaluateMove(uci, san) {
@@ -57,20 +62,18 @@ export function useEngineAnalysis({ engine }) {
     const rawPosEval = positionEvalRef.current ?? 0;
     const fen = lockedFenRef.current ?? "";
     const isBlack = fen.includes(" b ");
-
     return {
       fen,
       positionEval: rawPosEval,
       bestEval: rawBestEval,
       topMoves: rawTopMoves.slice(0, topMoveCount).map((m) => ({
-        // only show top N
         ...m,
         eval: m.rawEval,
         diffBest: m.rawEval - rawBestEval,
         diffPos: m.rawEval - rawPosEval,
         category: getMoveCategory(rawPosEval, m.rawEval, isBlack, rawBestEval),
       })),
-      allMoves: rawTopMoves, // full list for miss evaluation
+      allMoves: rawTopMoves,
     };
   }
 
@@ -93,6 +96,7 @@ export function useEngineAnalysis({ engine }) {
     movetime,
     setMovetime,
     startAnalysis,
+    loadPrecomputed,
     evaluateMove,
     buildTopMovesResult,
     reset,
