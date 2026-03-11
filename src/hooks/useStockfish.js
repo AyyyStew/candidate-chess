@@ -44,10 +44,12 @@ export function useStockfish() {
   }, []);
 
   // Get top N moves for a position
-  function analyze(fen, depth = 12, topMovesCount = 10) {
+  function analyze(fen, topMovesCount = 10, goCommand = "go depth 12") {
     return new Promise((resolve) => {
       const worker = analyzeWorkerRef.current;
       const results = {};
+      const depthMatch = goCommand.match(/depth (\d+)/);
+      const targetDepth = depthMatch ? parseInt(depthMatch[1]) : null;
 
       worker.onmessage = (event) => {
         if (typeof event.data !== "string") return;
@@ -56,8 +58,15 @@ export function useStockfish() {
         if (line.startsWith("info") && line.includes("multipv")) {
           const pvMatch = line.match(/multipv (\d+).*pv (\S+)/);
           const scoreMatch = line.match(/score cp (-?\d+)/);
-          const depthMatch = line.match(/depth (\d+)/);
-          if (pvMatch && scoreMatch && parseInt(depthMatch[1]) === depth) {
+          const infoDepth = line.match(/depth (\d+)/);
+
+          // for depth mode, only capture at target depth
+          // for movetime mode, keep updating so we always have latest
+          const depthOk = targetDepth
+            ? parseInt(infoDepth?.[1]) === targetDepth
+            : true;
+
+          if (pvMatch && scoreMatch && depthOk) {
             const uciMove = pvMatch[2];
             const tempGame = new Chess(fen);
             let san = uciMove;
@@ -85,12 +94,12 @@ export function useStockfish() {
       worker.postMessage("stop");
       worker.postMessage(`setoption name MultiPV value ${topMovesCount}`);
       worker.postMessage(`position fen ${fen}`);
-      worker.postMessage(`go depth ${depth}`);
+      worker.postMessage(goCommand);
     });
   }
 
   // Get eval for a single move
-  function evaluateMove(fen, move, depth = 12) {
+  function evaluateMove(fen, move, goCommand = "go depth 12") {
     return new Promise((resolve) => {
       const worker = evaluateWorkerRef.current;
       const game = new Chess(fen);
@@ -105,33 +114,22 @@ export function useStockfish() {
       worker.onmessage = (event) => {
         if (typeof event.data !== "string") return;
         const line = event.data.trim();
-
         if (line.startsWith("info") && line.includes("score cp")) {
           const scoreMatch = line.match(/score cp (-?\d+)/);
           if (scoreMatch) lastEval = parseInt(scoreMatch[1]) / 100;
         }
-
         if (line.startsWith("bestmove")) {
-          if (lastEval === null) {
-            resolve(0);
-            return;
-          }
-          // Stockfish always reports score from the perspective of the side to move.
-          // After the move, it's the opponent's turn, so we flip to get it from
-          // the original side's perspective.
-          const isWhiteToMoveOriginally = fen.includes(" w ");
-          const score = isWhiteToMoveOriginally ? -lastEval : lastEval;
-          resolve(score);
+          resolve(lastEval !== null ? -lastEval : 0);
         }
       };
 
       worker.postMessage("stop");
       worker.postMessage(`position fen ${fenAfter}`);
-      worker.postMessage(`go depth ${depth}`);
+      worker.postMessage(goCommand);
     });
   }
 
-  function evaluatePosition(fen, depth = 12) {
+  function evaluatePosition(fen, goCommand = "go depth 12") {
     return new Promise((resolve) => {
       const worker = positionWorkerRef.current;
       let lastEval = null;
@@ -153,7 +151,7 @@ export function useStockfish() {
 
       worker.postMessage("stop");
       worker.postMessage(`position fen ${fen}`);
-      worker.postMessage(`go depth ${depth}`);
+      worker.postMessage(goCommand);
     });
   }
 
