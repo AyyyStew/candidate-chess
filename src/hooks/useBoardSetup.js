@@ -2,16 +2,19 @@ import { useState } from "react";
 import { Chess } from "chess.js";
 import { STARTING_FEN, isValidFen } from "../utils/chess";
 
-export function useBoardSetup() {
-  const [fen, setFen] = useState(STARTING_FEN);
+export function useBoardSetup({
+  initialFen = STARTING_FEN,
+  initialOrientation = "white",
+} = {}) {
+  const [fen, setFen] = useState(initialFen);
   const [fenInput, setFenInput] = useState("");
-  const [boardOrientation, setBoardOrientation] = useState("white");
+  const [boardOrientation, setBoardOrientation] = useState(initialOrientation);
   const [moveHistory, setMoveHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
   function handleSetPosition() {
     if (!fenInput.trim()) {
-      setFen(STARTING_FEN);
+      setFen(initialFen);
       setMoveHistory([]);
       setHistoryIndex(-1);
       return;
@@ -28,7 +31,7 @@ export function useBoardSetup() {
   function handleNavigate(index) {
     const clamped = Math.max(-1, Math.min(index, moveHistory.length - 1));
     setHistoryIndex(clamped);
-    setFen(clamped === -1 ? STARTING_FEN : moveHistory[clamped].fenAfter);
+    setFen(clamped === -1 ? initialFen : moveHistory[clamped].fenAfter);
     setFenInput(clamped === -1 ? "" : moveHistory[clamped].fenAfter);
   }
 
@@ -36,7 +39,6 @@ export function useBoardSetup() {
     const baseHistory = moveHistory.slice(0, historyIndex + 1);
     const baseFen =
       historyIndex >= 0 ? baseHistory[historyIndex].fenAfter : currentFen;
-
     const game = new Chess(baseFen);
     let move;
     try {
@@ -49,7 +51,6 @@ export function useBoardSetup() {
       return false;
     }
     if (!move) return false;
-
     const newHistory = [
       ...baseHistory,
       { san: move.san, fenAfter: game.fen() },
@@ -66,7 +67,7 @@ export function useBoardSetup() {
   }
 
   function reset() {
-    setFen(STARTING_FEN);
+    setFen(initialFen);
     setFenInput("");
     setMoveHistory([]);
     setHistoryIndex(-1);
@@ -74,8 +75,10 @@ export function useBoardSetup() {
 
   function snapToEnd() {
     if (moveHistory.length === 0) return;
+    const last = moveHistory[moveHistory.length - 1];
     setHistoryIndex(moveHistory.length - 1);
-    setFen(moveHistory[moveHistory.length - 1].fenAfter);
+    setFen(last.fenAfter);
+    setFenInput(last.fenAfter);
   }
 
   return {

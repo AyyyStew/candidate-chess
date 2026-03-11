@@ -101,16 +101,17 @@ export function useEngineAnalysis({ engine }) {
   };
 }
 
-function waitForRefs(topMovesRef, positionEvalRef) {
-  return new Promise((resolve) => {
-    if (topMovesRef.current?.length > 0 && positionEvalRef.current !== null) {
-      resolve();
-      return;
-    }
+function waitForRefs(topMovesRef, positionEvalRef, timeout = 30000) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
     const interval = setInterval(() => {
       if (topMovesRef.current?.length > 0 && positionEvalRef.current !== null) {
         clearInterval(interval);
         resolve();
+      }
+      if (Date.now() - start > timeout) {
+        clearInterval(interval);
+        reject(new Error("Engine timed out"));
       }
     }, 100);
   });

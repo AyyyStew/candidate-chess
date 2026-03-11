@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import { Chessboard } from "react-chessboard";
 import MoveHistory from "./MoveHistory";
 
-export default function BoardPanel({ board, mode }) {
+export default function BoardPanel({
+  board,
+  mode,
+  onReset,
+  locked = false,
+  gameInfo,
+}) {
   const [showArrows, setShowArrows] = useState(true);
 
   const {
@@ -58,20 +64,23 @@ export default function BoardPanel({ board, mode }) {
 
   return (
     <div className="flex flex-col gap-2 w-[480px] shrink-0">
-      <div className="flex gap-2 self-end">
-        <button
-          onClick={() => setShowArrows((a) => !a)}
-          className={`px-3 py-1.5 rounded-lg text-sm transition-colors
+      <div className="flex gap-2 justify-between">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowArrows((a) => !a)}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors
             ${showArrows ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"}`}
-        >
-          ↗ Arrows
-        </button>
-        <button
-          onClick={flipOrientation}
-          className="px-3 py-1.5 rounded-lg text-sm bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-        >
-          ⇅ Flip Board
-        </button>
+          >
+            ↗ Arrows
+          </button>
+          <button
+            onClick={flipOrientation}
+            className="px-3 py-1.5 rounded-lg text-sm bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+          >
+            ⇅ Flip Board
+          </button>
+        </div>
+        {gameInfo}
       </div>
 
       <Chessboard
@@ -82,22 +91,29 @@ export default function BoardPanel({ board, mode }) {
         customArrows={candidateArrows}
       />
 
-      <MoveHistory
-        history={moveHistory}
-        currentIndex={historyIndex}
-        onNavigate={handleNavigate}
-        disabled={!isIdle}
-      />
+      {!locked && (
+        <>
+          <MoveHistory
+            history={moveHistory}
+            currentIndex={historyIndex}
+            onNavigate={handleNavigate}
+            disabled={!isIdle}
+          />
 
-      <button
-        onClick={() => {
-          mode.reset();
-          board.reset();
-        }}
-        className="mt-2 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-red-500 dark:hover:bg-red-700 hover:text-white transition-colors"
-      >
-        Start Over
-      </button>
+          <button
+            onClick={
+              onReset ??
+              (() => {
+                mode.reset();
+                board.reset();
+              })
+            }
+            className="mt-2 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-red-500 dark:hover:bg-red-700 hover:text-white transition-colors"
+          >
+            Start Over
+          </button>
+        </>
+      )}
     </div>
   );
 }

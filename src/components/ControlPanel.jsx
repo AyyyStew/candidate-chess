@@ -11,10 +11,11 @@ export default function ControlPanel({
   modeType,
   engine,
   engineAnalysis,
+  locked = false,
+  onReset,
 }) {
   const { isIdle, isActive, isComparing, isDone, phase, candidates, results } =
     mode;
-
   const boardTopMoves = isDone ? results.topMoves : engineAnalysis.liveTopMoves;
 
   function handleAnalyze() {
@@ -24,14 +25,17 @@ export default function ControlPanel({
 
   return (
     <div className="flex-1 flex flex-col gap-5">
-      <FenInput
-        value={board.fenInput}
-        onChange={board.setFenInput}
-        onSet={board.handleSetPosition}
-        disabled={!isIdle}
-      />
+      {/* Hidden on daily page */}
+      {!locked && (
+        <FenInput
+          value={board.fenInput}
+          onChange={board.setFenInput}
+          onSet={board.handleSetPosition}
+          disabled={!isIdle}
+        />
+      )}
 
-      {isIdle && (
+      {!locked && isIdle && (
         <AnalysisSettings
           depth={engineAnalysis.depth}
           topMoves={engineAnalysis.topMoveCount}
@@ -52,7 +56,7 @@ export default function ControlPanel({
         />
       )}
 
-      {isIdle && (
+      {!locked && isIdle && (
         <button
           onClick={handleAnalyze}
           disabled={!engine.ready}
@@ -60,6 +64,13 @@ export default function ControlPanel({
         >
           {engine.ready ? "Analyze Position" : "Engine loading..."}
         </button>
+      )}
+
+      {/* Loading state while engine spins up on daily page */}
+      {locked && isIdle && (
+        <p className="text-sm text-gray-400 animate-pulse">
+          {engine.ready ? "Starting analysis..." : "Engine loading..."}
+        </p>
       )}
 
       {/* Game mode UI */}
@@ -71,10 +82,13 @@ export default function ControlPanel({
           isDone={isDone}
           strikes={mode.strikes}
           maxStrikes={mode.maxStrikes}
-          onReset={() => {
-            mode.reset();
-            board.reset();
-          }}
+          onReset={
+            onReset ??
+            (() => {
+              mode.reset();
+              board.reset();
+            })
+          }
         />
       )}
 
@@ -87,7 +101,6 @@ export default function ControlPanel({
             candidateLimit={mode.candidateLimit}
             onRemove={mode.removeCandidate}
           />
-
           {isActive && candidates.filter((c) => !c.pending).length > 0 && (
             <button
               onClick={mode.handleCompare}
@@ -96,13 +109,11 @@ export default function ControlPanel({
               Compare {candidates.length} move{candidates.length > 1 ? "s" : ""}
             </button>
           )}
-
           {isComparing && (
             <p className="text-gray-400 animate-pulse">
               Evaluating your moves...
             </p>
           )}
-
           {isDone && results && (
             <ResultsPanel
               results={results}
