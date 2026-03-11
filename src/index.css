@@ -16,3 +16,29 @@
 .animate-slide-in {
   animation: slideIn 0.2s ease-out forwards;
 }
+
+.flip-card {
+  perspective: 600px;
+  width: 100%;
+}
+.flip-card-inner {
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+  position: relative;
+  width: 100%;
+}
+.flip-card-inner.flipped {
+  transform: rotateX(180deg);
+}
+.flip-card-front,
+.flip-card-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.flip-card-back {
+  transform: rotateX(180deg);
+}
