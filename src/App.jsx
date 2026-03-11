@@ -26,6 +26,7 @@ export default function App() {
   const [candidateLimit, setCandidateLimit] = useState(3);
   const [useMovetime, setUseMovetime] = useState(false);
   const [movetime, setMovetime] = useState(2000);
+  const [boardOrientation, setBoardOrientation] = useState("white");
 
   const goCommand = useMovetime
     ? `go movetime ${movetime}`
@@ -171,7 +172,7 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
       {/* Header */}
       <header className="flex items-center justify-between px-8 py-4 border-b border-gray-200 dark:border-gray-800">
-        <h1 className="text-xl font-bold tracking-tight">♟ Chess Analyzer</h1>
+        <h1 className="text-xl font-bold tracking-tight">♟ Candidate Chess</h1>
         <button
           onClick={() => setDark(!dark)}
           className="px-3 py-1.5 rounded-lg text-sm bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
@@ -184,13 +185,24 @@ export default function App() {
       <main className="flex gap-8 p-8 max-w-6xl mx-auto">
         {/* Board */}
         <div className="w-120 shrink-0">
-          <Chessboard
-            position={fen}
-            onPieceDrop={handlePieceDrop}
-            arePiecesDraggable={
-              isIdle || (isActive && candidates.length < candidateLimit)
-            }
-          />
+          <div style={{ width: 480 }} className="flex flex-col gap-2">
+            <button
+              onClick={() =>
+                setBoardOrientation((o) => (o === "white" ? "black" : "white"))
+              }
+              className="self-end px-3 py-1.5 rounded-lg text-sm bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              ⇅ Flip Board
+            </button>
+            <Chessboard
+              position={fen}
+              onPieceDrop={handlePieceDrop}
+              boardOrientation={boardOrientation}
+              arePiecesDraggable={
+                isIdle || (isActive && candidates.length < candidateLimit)
+              }
+            />
+          </div>
           <button
             onClick={handleReset}
             className="mt-4 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-red-500 dark:hover:bg-red-700 transition-colors"
