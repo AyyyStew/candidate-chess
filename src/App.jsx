@@ -10,6 +10,7 @@ import FenInput from "./components/FenInput";
 import CandidateList from "./components/CandidateList";
 import ResultsPanel from "./components/ResultsPanel";
 import AnalysisSettings from "./components/AnalysisSettings";
+import MoveHistory from "./components/MoveHistory";
 import { STARTING_FEN, isValidFen } from "./utils/chess";
 
 export default function App() {
@@ -29,6 +30,9 @@ export default function App() {
   const [candidateLimit, setCandidateLimit] = useState(3);
   const [useMovetime, setUseMovetime] = useState(false);
   const [movetime, setMovetime] = useState(2000);
+  const [moveHistory, setMoveHistory] = useState([]); // array of {san, fen after move}
+  const [historyIndex, setHistoryIndex] = useState(-1); // -1 = starting position
+  const [showArrows, setShowArrows] = useState(true);
 
   const topMovesRef = useRef(null);
   const positionEvalRef = useRef(null);
@@ -41,16 +45,28 @@ export default function App() {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
+  function handleNavigate(index) {
+    const clamped = Math.max(-1, Math.min(index, moveHistory.length - 1));
+    setHistoryIndex(clamped);
+    setFen(clamped === -1 ? STARTING_FEN : moveHistory[clamped].fenAfter);
+    setFenInput(clamped === -1 ? "" : moveHistory[clamped].fenAfter);
+  }
+
   function handleSetPosition() {
     if (!fenInput.trim()) {
       setFen(STARTING_FEN);
+      setMoveHistory([]);
+      setHistoryIndex(-1);
       return;
     }
     if (!isValidFen(fenInput.trim())) {
       alert("Invalid FEN string");
+
       return;
     }
     setFen(fenInput.trim());
+    setMoveHistory([]);
+    setHistoryIndex(-1);
   }
 
   function handleAnalyze() {
@@ -69,21 +85,34 @@ export default function App() {
 
   function handlePieceDrop(sourceSquare, targetSquare) {
     if (phase === "idle") {
-      const game = new Chess(fen);
-      let move;
-      try {
-        move = game.move({
-          from: sourceSquare,
-          to: targetSquare,
-          promotion: "q",
-        });
-      } catch {
-        return false;
+      if (phase === "idle") {
+        const baseHistory = moveHistory.slice(0, historyIndex + 1);
+        const baseFen =
+          historyIndex >= 0 ? baseHistory[historyIndex].fenAfter : fen; // use fen not STARTING_FEN
+
+        const game = new Chess(baseFen);
+        let move;
+        try {
+          move = game.move({
+            from: sourceSquare,
+            to: targetSquare,
+            promotion: "q",
+          });
+        } catch {
+          return false;
+        }
+        if (!move) return false;
+
+        const newHistory = [
+          ...baseHistory,
+          { san: move.san, fenAfter: game.fen() },
+        ];
+        setMoveHistory(newHistory);
+        setHistoryIndex(newHistory.length - 1);
+        setFen(game.fen());
+        setFenInput(game.fen());
+        return true;
       }
-      if (!move) return false;
-      setFen(game.fen());
-      setFenInput(game.fen());
-      return true;
     }
 
     if (phase === "active") {
@@ -137,6 +166,43 @@ export default function App() {
   const isActive = phase === "active";
   const isDone = phase === "done";
 
+  const candidateArrows = showArrows
+    ? [
+        // candidate arrows — render first (lower priority)
+        ...candidates.map((c) => [
+          c.move.slice(0, 2),
+          c.move.slice(2, 4),
+          "rgb(0, 100, 255)",
+        ]),
+
+        // top 3 stockfish arrows — render last (higher priority, drawn on top)
+        ...(isDone && results
+          ? [
+              results.topMoves[0]
+                ? [
+                    results.topMoves[0].move.slice(0, 2),
+                    results.topMoves[0].move.slice(2, 4),
+                    "rgb(255, 180, 0)",
+                  ]
+                : null,
+              results.topMoves[1]
+                ? [
+                    results.topMoves[1].move.slice(0, 2),
+                    results.topMoves[1].move.slice(2, 4),
+                    "rgb(180, 180, 180)",
+                  ]
+                : null,
+              results.topMoves[2]
+                ? [
+                    results.topMoves[2].move.slice(0, 2),
+                    results.topMoves[2].move.slice(2, 4),
+                    "rgb(180, 100, 0)",
+                  ]
+                : null,
+            ].filter(Boolean)
+          : []),
+      ]
+    : [];
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
       {/* Header */}
@@ -154,14 +220,27 @@ export default function App() {
       <main className="flex gap-8 p-8 max-w-6xl mx-auto">
         {/* Board */}
         <div className="flex flex-col gap-2 w-120 shrink-0">
-          <button
-            onClick={() =>
-              setBoardOrientation((o) => (o === "white" ? "black" : "white"))
-            }
-            className="self-end px-3 py-1.5 rounded-lg text-sm bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-          >
-            ⇅ Flip Board
-          </button>
+          <div className="flex gap-2 self-end">
+            <button
+              onClick={() => setShowArrows((a) => !a)}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-colors
+      ${
+        showArrows
+          ? "bg-blue-600 text-white hover:bg-blue-700"
+          : "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
+      }`}
+            >
+              ↗ Arrows
+            </button>
+            <button
+              onClick={() =>
+                setBoardOrientation((o) => (o === "white" ? "black" : "white"))
+              }
+              className="px-3 py-1.5 rounded-lg text-sm bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              ⇅ Flip Board
+            </button>
+          </div>
           <Chessboard
             position={fen}
             onPieceDrop={handlePieceDrop}
@@ -169,7 +248,14 @@ export default function App() {
             arePiecesDraggable={
               isIdle || (isActive && candidates.length < candidateLimit)
             }
+            customArrows={candidateArrows}
           />
+          <MoveHistory
+            history={moveHistory}
+            currentIndex={historyIndex}
+            onNavigate={handleNavigate}
+          />
+
           <button
             onClick={handleReset}
             className="mt-4 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-red-500 dark:hover:bg-red-700 transition-colors"
