@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { Chess } from "chess.js";
 
 export function useStockfish() {
-  const analyzeWorkerRef = useRef(null); // top moves (MultiPV)
-  const evaluateWorkerRef = useRef(null); // candidate evals
-  const positionWorkerRef = useRef(null); // position eval
-  const [ready, setReady] = useState(false);
+  const analyzeWorkerRef = useRef(null);
+  const evaluateWorkerRef = useRef(null);
+  const positionWorkerRef = useRef(null);
   const readyCount = useRef(0);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     function makeWorker(multiPV) {
@@ -17,10 +17,6 @@ export function useStockfish() {
       return worker;
     }
 
-    const w1 = makeWorker(10); // analyze
-    const w2 = makeWorker(1); // evaluate moves
-    const w3 = makeWorker(1); // evaluate position
-
     function onReady(event) {
       if (typeof event.data !== "string") return;
       if (event.data.trim() === "readyok") {
@@ -28,6 +24,11 @@ export function useStockfish() {
         if (readyCount.current >= 3) setReady(true);
       }
     }
+
+    const w1 = makeWorker(10);
+    const w2 = makeWorker(1);
+    const w3 = makeWorker(1);
+
     w1.onmessage = onReady;
     w2.onmessage = onReady;
     w3.onmessage = onReady;
@@ -43,13 +44,14 @@ export function useStockfish() {
     };
   }, []);
 
-  // Get top N moves for a position
-  function analyze(fen, topMovesCount = 10, goCommand = "go depth 12") {
+  // Always returns white-perspective evals
+  function getTopMoves(fen, topMovesCount, goCommand) {
     return new Promise((resolve) => {
       const worker = analyzeWorkerRef.current;
       const results = {};
       const depthMatch = goCommand.match(/depth (\d+)/);
       const targetDepth = depthMatch ? parseInt(depthMatch[1]) : null;
+      const isBlack = fen.includes(" b ");
 
       worker.onmessage = (event) => {
         if (typeof event.data !== "string") return;
@@ -59,9 +61,6 @@ export function useStockfish() {
           const pvMatch = line.match(/multipv (\d+).*pv (\S+)/);
           const scoreMatch = line.match(/score cp (-?\d+)/);
           const infoDepth = line.match(/depth (\d+)/);
-
-          // for depth mode, only capture at target depth
-          // for movetime mode, keep updating so we always have latest
           const depthOk = targetDepth
             ? parseInt(infoDepth?.[1]) === targetDepth
             : true;
@@ -78,10 +77,13 @@ export function useStockfish() {
               });
               san = m.san;
             } catch {}
+
+            // always store as white-perspective
+            const rawScore = parseInt(scoreMatch[1]) / 100;
             results[pvMatch[1]] = {
               move: uciMove,
               san,
-              eval: parseInt(scoreMatch[1]) / 100,
+              rawEval: isBlack ? -rawScore : rawScore,
             };
           }
         }
@@ -98,11 +100,38 @@ export function useStockfish() {
     });
   }
 
-  // Get eval for a single move
-  function evaluateMove(fen, move, goCommand = "go depth 12") {
+  // Always returns white-perspective eval
+  function getPositionEval(fen, goCommand) {
+    return new Promise((resolve) => {
+      const worker = positionWorkerRef.current;
+      const isBlack = fen.includes(" b ");
+      let lastEval = null;
+
+      worker.onmessage = (event) => {
+        if (typeof event.data !== "string") return;
+        const line = event.data.trim();
+        if (line.startsWith("info") && line.includes("score cp")) {
+          const scoreMatch = line.match(/score cp (-?\d+)/);
+          if (scoreMatch) lastEval = parseInt(scoreMatch[1]) / 100;
+        }
+        if (line.startsWith("bestmove")) {
+          // flip if black — stockfish reports from side to move's perspective
+          resolve(lastEval !== null ? (isBlack ? -lastEval : lastEval) : 0);
+        }
+      };
+
+      worker.postMessage("stop");
+      worker.postMessage(`position fen ${fen}`);
+      worker.postMessage(goCommand);
+    });
+  }
+
+  // Always returns white-perspective eval for a candidate move
+  function getRawMoveEval(fen, move, goCommand) {
     return new Promise((resolve) => {
       const worker = evaluateWorkerRef.current;
       const game = new Chess(fen);
+      const isBlack = fen.includes(" b ");
       game.move({
         from: move.slice(0, 2),
         to: move.slice(2, 4),
@@ -119,7 +148,9 @@ export function useStockfish() {
           if (scoreMatch) lastEval = parseInt(scoreMatch[1]) / 100;
         }
         if (line.startsWith("bestmove")) {
-          resolve(lastEval !== null ? -lastEval : 0);
+          // after the move it's opponent's turn, so flip back to white perspective
+          const raw = lastEval !== null ? -lastEval : 0;
+          resolve(isBlack ? -raw : raw);
         }
       };
 
@@ -129,31 +160,5 @@ export function useStockfish() {
     });
   }
 
-  function evaluatePosition(fen, goCommand = "go depth 12") {
-    return new Promise((resolve) => {
-      const worker = positionWorkerRef.current;
-      let lastEval = null;
-
-      worker.onmessage = (event) => {
-        if (typeof event.data !== "string") return;
-        const line = event.data.trim();
-        if (line.startsWith("info") && line.includes("score cp")) {
-          const scoreMatch = line.match(/score cp (-?\d+)/);
-          if (scoreMatch) lastEval = parseInt(scoreMatch[1]) / 100;
-        }
-        if (line.startsWith("bestmove")) {
-          const isWhiteToMove = fen.includes(" w ");
-          resolve(
-            lastEval !== null ? (isWhiteToMove ? lastEval : -lastEval) : 0,
-          );
-        }
-      };
-
-      worker.postMessage("stop");
-      worker.postMessage(`position fen ${fen}`);
-      worker.postMessage(goCommand);
-    });
-  }
-
-  return { ready, analyze, evaluateMove, evaluatePosition };
+  return { ready, getTopMoves, getPositionEval, getRawMoveEval };
 }
