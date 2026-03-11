@@ -3,20 +3,23 @@ import { formatEval } from "../utils/chess";
 
 function StrikeIndicator({ strikes, maxStrikes }) {
   return (
-    <div className="flex gap-2">
-      {Array.from({ length: maxStrikes }).map((_, i) => (
-        <div
-          key={i}
-          className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-sm transition-colors
-            ${
-              i < strikes
-                ? "bg-red-500 border-red-500 text-white"
-                : "border-gray-300 dark:border-gray-600 text-transparent"
-            }`}
-        >
-          X
-        </div>
-      ))}
+    <div className="flex gap-1.5 items-center">
+      {Array.from({ length: maxStrikes }).map((_, i) => {
+        const lost = i < strikes;
+        return (
+          <span
+            key={i}
+            className="text-2xl transition-all duration-300"
+            style={{
+              opacity: lost ? 0.15 : 1,
+              transform: lost ? "scale(0.8)" : "scale(1)",
+              filter: lost ? "grayscale(1)" : "none",
+            }}
+          >
+            ❤️
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -34,7 +37,15 @@ function HiddenRow({ rank }) {
   );
 }
 
-function RevealedRow({ rank, san, evalScore, category, diffBest, animate }) {
+function RevealedRow({
+  rank,
+  san,
+  evalScore,
+  category,
+  diffBest,
+  animate,
+  wasGuessed,
+}) {
   const [flipped, setFlipped] = useState(false);
 
   useEffect(() => {
@@ -50,13 +61,12 @@ function RevealedRow({ rank, san, evalScore, category, diffBest, animate }) {
     <tr
       className="border-t border-gray-100 dark:border-gray-800 transition-all duration-500"
       style={{
-        backgroundColor: flipped
-          ? (category?.color + "22" ?? "#22c55e22")
-          : "#1e3a5f",
-        borderLeft: flipped
-          ? `4px solid ${category?.color ?? "#22c55e"}`
-          : "4px solid transparent",
-        opacity: flipped ? 1 : 0.3,
+        backgroundColor:
+          wasGuessed && flipped ? category?.color + "22" : undefined,
+        borderLeft:
+          wasGuessed && flipped
+            ? `4px solid ${category?.color}`
+            : "4px solid transparent",
       }}
     >
       <td className="px-4 py-3 text-yellow-400 font-bold w-8">{rank}</td>
@@ -65,7 +75,7 @@ function RevealedRow({ rank, san, evalScore, category, diffBest, animate }) {
       </td>
       <td
         className="px-4 py-3 text-sm font-medium"
-        style={{ color: category?.color }}
+        style={{ color: wasGuessed ? category?.color : "#6b7280" }}
       >
         {flipped ? (category?.label ?? "") : ""}
       </td>
@@ -76,9 +86,12 @@ function RevealedRow({ rank, san, evalScore, category, diffBest, animate }) {
   );
 }
 
-function MissRow({ san, evalScore, category }) {
+function MissRow({ san, evalScore, category, index }) {
   return (
-    <tr className="border-t border-red-900 bg-red-950 animate-slide-in">
+    <tr
+      style={{ borderTop: "1px solid rgba(185, 28, 28, 0.6)" }}
+      className="bg-red-950 animate-slide-in"
+    >
       <td className="px-4 py-3 text-red-500 font-bold text-lg">✗</td>
       <td className="px-4 py-3 font-bold text-gray-300">{san}</td>
       <td
@@ -157,7 +170,7 @@ export default function FamilyFeudBoard({
               {slots.map((m, i) => {
                 const isRevealed = !!m.hit || isDone;
                 const isNew = !!m.hit && revealedMoves.has(m.hit?.move);
-                const category = m.hit?.category ?? null;
+                const category = m.hit?.category ?? m.category ?? null;
 
                 if (isRevealed) {
                   return (
@@ -169,6 +182,7 @@ export default function FamilyFeudBoard({
                       category={category}
                       diffBest={m.diffBest}
                       animate={isNew}
+                      wasGuessed={m.hit}
                     />
                   );
                 }
@@ -183,17 +197,18 @@ export default function FamilyFeudBoard({
       {missMoves.length > 0 && (
         <div>
           <h4 className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">
-            Not in top {targetMoves}
+            Misses
           </h4>
           <div className="rounded-xl overflow-hidden border border-red-900">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm divide-y divide-red-500">
               <tbody>
-                {missMoves.map((c) => (
+                {missMoves.map((c, index) => (
                   <MissRow
                     key={c.move}
                     san={c.san}
                     evalScore={c.eval}
                     category={c.category}
+                    index={index}
                   />
                 ))}
               </tbody>

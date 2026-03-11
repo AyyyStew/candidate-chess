@@ -32,20 +32,17 @@ export function evalToWinPercent(evalScore) {
 export function getMoveCategory(
   rawPositionEval,
   rawMoveEval,
-  rawBestEval,
   isBlack,
+  rawBestEval = null,
 ) {
   const sign = isBlack ? -1 : 1;
-
-  // if this is within 0.05 win% of the best move, it's Best
-  const moveWin = evalToWinPercent(sign * rawMoveEval);
-  const bestWin = evalToWinPercent(sign * rawBestEval);
-  if (Math.abs(moveWin - bestWin) <= 0.5)
-    return { label: "Best", icon: "★", color: "#22c55e" };
-
-  // otherwise categorize by drop from position
   const before = evalToWinPercent(sign * rawPositionEval);
-  const drop = before - moveWin;
+  const after = evalToWinPercent(sign * rawMoveEval);
+  const drop = before - after;
+
+  // only the actual best move gets Best
+  if (rawBestEval !== null && rawMoveEval === rawBestEval)
+    return { label: "Best", icon: "★", color: "#22c55e" };
 
   if (drop < 1) return { label: "Excellent", icon: "✦", color: "#84cc16" };
   if (drop < 3) return { label: "Good", icon: "✓", color: "#a3e635" };

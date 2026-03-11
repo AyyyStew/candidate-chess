@@ -4,6 +4,8 @@ import {
   evaluateSingleCandidate,
 } from "../services/analysisService";
 
+import { getMoveCategory } from "../utils/chess";
+
 export function useEngineAnalysis({ engine }) {
   const topMovesRef = useRef(null);
   const positionEvalRef = useRef(null);
@@ -11,9 +13,10 @@ export function useEngineAnalysis({ engine }) {
   const [liveTopMoves, setLiveTopMoves] = useState([]);
 
   const [depth, setDepth] = useState(15);
-  const [topMoveCount, setTopMoveCount] = useState(5);
   const [useMovetime, setUseMovetime] = useState(false);
   const [movetime, setMovetime] = useState(2000);
+  const [topMoveCount, setTopMoveCount] = useState(5); // shown on board
+  const [searchMoveCount, setSearchMoveCount] = useState(20); // evaluated by SF
 
   const goCommand = useMovetime
     ? `go movetime ${movetime}`
@@ -27,12 +30,12 @@ export function useEngineAnalysis({ engine }) {
 
     startBackgroundAnalysis({
       fen,
-      topMovesCount: topMoveCount,
+      topMovesCount: searchMoveCount, // search more than we show
       goCommand,
       engine,
       topMovesRef,
       positionEvalRef,
-      onTopMovesReady: (moves) => setLiveTopMoves(moves),
+      onTopMovesReady: (moves) => setLiveTopMoves(moves.slice(0, topMoveCount)), // only show top N
     });
   }
 
@@ -52,16 +55,22 @@ export function useEngineAnalysis({ engine }) {
     const rawTopMoves = topMovesRef.current ?? [];
     const rawBestEval = rawTopMoves[0]?.rawEval ?? 0;
     const rawPosEval = positionEvalRef.current ?? 0;
+    const fen = lockedFenRef.current ?? "";
+    const isBlack = fen.includes(" b ");
+
     return {
-      fen: lockedFenRef.current,
+      fen,
       positionEval: rawPosEval,
       bestEval: rawBestEval,
-      topMoves: rawTopMoves.map((m) => ({
+      topMoves: rawTopMoves.slice(0, topMoveCount).map((m) => ({
+        // only show top N
         ...m,
         eval: m.rawEval,
         diffBest: m.rawEval - rawBestEval,
         diffPos: m.rawEval - rawPosEval,
+        category: getMoveCategory(rawPosEval, m.rawEval, isBlack, rawBestEval),
       })),
+      allMoves: rawTopMoves, // full list for miss evaluation
     };
   }
 
@@ -87,6 +96,8 @@ export function useEngineAnalysis({ engine }) {
     evaluateMove,
     buildTopMovesResult,
     reset,
+    searchMoveCount,
+    setSearchMoveCount,
   };
 }
 

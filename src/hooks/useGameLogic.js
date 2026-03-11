@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Chess } from "chess.js";
 
-const MAX_STRIKES = 1; // bump to 3 later
+const MAX_STRIKES = 3; // bump to 3 later
 
 export function useGameLogic({ engine: engineAnalysis, lockedFen }) {
   const [phase, setPhase] = useState("idle");
