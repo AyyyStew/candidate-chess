@@ -1,3 +1,4 @@
+// FILE: src/hooks/usePositionQueue.js
 import { useRef, useState, useEffect } from "react";
 import { getRandomPosition } from "../services/dailyService";
 
@@ -14,7 +15,18 @@ export function usePositionQueue({ engine, goCommand, searchMoveCount }) {
       .preloadAnalysis(position.fen, searchMoveCount, goCommand)
       .then((result) => {
         preloadingRef.current = false;
-        if (!result) return;
+        if (!result) {
+          console.log(
+            "[preloadNext] result was null — engine returned nothing",
+          );
+          return;
+        }
+        console.log(
+          "[preloadNext] done, topMoves:",
+          result.topMoves?.length,
+          "positionEval:",
+          result.positionEval,
+        );
         nextRef.current = { position, ...result };
       });
   }
@@ -24,20 +36,34 @@ export function usePositionQueue({ engine, goCommand, searchMoveCount }) {
   }, [engine.ready]);
 
   function advance() {
-    if (nextRef.current) {
-      const { position, topMoves, positionEval } = nextRef.current;
-      nextRef.current = null;
-      setCurrent(position);
-      // only rotate after we've grabbed the preloaded data
-      engine.rotate();
+    const cached = nextRef.current;
+    console.log(
+      "[advance] cached:",
+      !!cached,
+      "| preloading:",
+      preloadingRef.current,
+    );
+    console.log("[advance] t=", performance.now());
+    nextRef.current = null;
+
+    // Rotate first so the new standby starts warming up ASAP
+    engine.rotate();
+
+    if (cached) {
+      setCurrent(cached.position);
+      // Preload the position after that on the freshly-spawned standby
       preloadNext();
-      return { position, topMoves, positionEval, preloaded: true };
+      return {
+        position: cached.position,
+        topMoves: cached.topMoves,
+        positionEval: cached.positionEval,
+        preloaded: true,
+      };
     }
 
     // Fallback — preload wasn't ready
     const position = getRandomPosition();
     setCurrent(position);
-    engine.rotate();
     preloadNext();
     return { position, topMoves: null, positionEval: null, preloaded: false };
   }

@@ -23,6 +23,7 @@ export function startBackgroundAnalysis({
   topMovesRef,
   positionEvalRef,
   onTopMovesReady,
+  onPositionEvalReady, // new
 }) {
   topMovesRef.current = null;
   positionEvalRef.current = null;
@@ -34,6 +35,7 @@ export function startBackgroundAnalysis({
 
   engine.getPositionEval(fen, goCommand).then((score) => {
     positionEvalRef.current = score;
+    onPositionEvalReady?.(); // new
   });
 }
 
