@@ -24,6 +24,12 @@ export default function App() {
   const [depth, setDepth] = useState(15);
   const [topMoves, setTopMoves] = useState(5);
   const [candidateLimit, setCandidateLimit] = useState(3);
+  const [useMovetime, setUseMovetime] = useState(false);
+  const [movetime, setMovetime] = useState(2000);
+
+  const goCommand = useMovetime
+    ? `go movetime ${movetime}`
+    : `go depth ${depth}`;
 
   useEffect(() => {
     if (dark) {
@@ -52,10 +58,10 @@ export default function App() {
     topMovesRef.current = [];
     positionEvalRef.current = null;
 
-    analyze(fen, depth, topMoves).then((moves) => {
+    analyze(fen, topMoves, goCommand).then((moves) => {
       topMovesRef.current = moves;
     });
-    evaluatePosition(fen, depth).then((score) => {
+    evaluatePosition(fen, goCommand).then((score) => {
       positionEvalRef.current = score;
     });
   }
@@ -131,7 +137,7 @@ export default function App() {
           eval: normalizeEval(topMove.eval, fen),
         });
       } else {
-        const score = await evaluateMove(fen, candidate.move);
+        const score = await evaluateMove(fen, candidate.move, goCommand);
         evaluated.push({ ...candidate, eval: normalizeEval(score, fen) });
       }
     }
@@ -177,7 +183,7 @@ export default function App() {
       {/* Main */}
       <main className="flex gap-8 p-8 max-w-6xl mx-auto">
         {/* Board */}
-        <div className="w-[480px] shrink-0">
+        <div className="w-120 shrink-0">
           <Chessboard
             position={fen}
             onPieceDrop={handlePieceDrop}
@@ -208,9 +214,13 @@ export default function App() {
                 depth={depth}
                 topMoves={topMoves}
                 candidateLimit={candidateLimit}
+                useMovetime={useMovetime}
+                movetime={movetime}
                 onDepthChange={setDepth}
                 onTopMovesChange={setTopMoves}
                 onCandidateLimitChange={setCandidateLimit}
+                onUseMovetimeChange={setUseMovetime}
+                onMovetimeChange={setMovetime}
               />
               <button
                 onClick={handleAnalyze}
