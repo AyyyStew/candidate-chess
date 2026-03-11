@@ -27,7 +27,7 @@ export default function AnalysisSettings({
         </span>
         <button
           onClick={() => onUseMovetimeChange(!useMovetime)}
-          className={`relative w-10 h-6 rounded-full transition-colors flex-shrink-0
+          className={`relative w-10 h-6 rounded-full transition-colors shrink-0
     ${useMovetime ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-600"}`}
         >
           <span

@@ -1,26 +1,7 @@
 import React from "react";
-import { formatEval, evalColor } from "../utils/chess";
+import { formatEval } from "../utils/chess";
 
-const CANDIDATE_LIMIT = 3;
-
-function getStockfishRank(move, topMoves) {
-  const idx = topMoves.findIndex((m) => m.move === move);
-  return idx === -1 ? null : idx + 1;
-}
-
-function borderColor(diff) {
-  if (diff >= -0.3) return "border-green-500 dark:border-green-400";
-  if (diff >= -1.0) return "border-orange-400 dark:border-orange-300";
-  return "border-red-500 dark:border-red-400";
-}
-
-export default function CandidateList({
-  candidates,
-  results,
-  bestEval,
-  positionEval,
-  candidateLimit,
-}) {
+export default function CandidateList({ candidates, results, candidateLimit }) {
   const isDone = !!results;
   const displayList = results?.candidates ?? candidates;
 
@@ -42,6 +23,7 @@ export default function CandidateList({
               <th className="px-4 py-2 text-left font-medium">Move</th>
               {isDone && (
                 <>
+                  <th className="px-4 py-2 text-left font-medium">Category</th>
                   <th className="px-4 py-2 text-left font-medium">Eval</th>
                   <th className="px-4 py-2 text-left font-medium">Δ Best</th>
                   <th className="px-4 py-2 text-left font-medium">
@@ -54,36 +36,51 @@ export default function CandidateList({
           </thead>
           <tbody>
             {displayList.map((c, i) => {
-              const diff = (c.eval ?? 0) - bestEval;
-              const diffPos = (c.eval ?? 0) - positionEval;
               const rank = isDone
-                ? getStockfishRank(c.move, results.topMoves)
+                ? results.topMoves.findIndex((m) => m.move === c.move) + 1 ||
+                  null
                 : null;
 
               return (
                 <tr
                   key={i}
-                  className={`border-l-4 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900
-    ${isDone ? borderColor(diff) : ""}`}
+                  className="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900"
+                  style={{
+                    borderLeft: isDone
+                      ? `4px solid ${c.category?.color}`
+                      : "4px solid transparent",
+                  }}
                 >
                   <td className="px-4 py-2.5 text-gray-400">{i + 1}</td>
                   <td className="px-4 py-2.5 font-bold">{c.san}</td>
+
                   {isDone && (
                     <>
+                      <td className="px-4 py-2.5">
+                        <span
+                          className="flex items-center gap-1.5 font-medium"
+                          style={{ color: c.category?.color }}
+                        >
+                          <span className="text-base leading-none">
+                            {c.category?.icon}
+                          </span>
+                          <span>{c.category?.label}</span>
+                        </span>
+                      </td>
                       <td
                         className="px-4 py-2.5 font-medium"
-                        style={{ color: evalColor(diff) }}
+                        style={{ color: c.category?.color }}
                       >
                         {formatEval(c.eval)}
                       </td>
                       <td className="px-4 py-2.5 text-gray-400">
-                        {formatEval(diff)}
+                        {formatEval(c.diffBest)}
                       </td>
                       <td className="px-4 py-2.5 text-gray-400">
-                        {formatEval(diffPos)}
+                        {formatEval(c.diffPos)}
                       </td>
                       <td className="px-4 py-2.5">
-                        {rank && (
+                        {rank > 0 && (
                           <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
                             #{rank}
                           </span>
