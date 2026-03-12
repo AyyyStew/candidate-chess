@@ -1,116 +1,93 @@
-import React, { useEffect, useRef } from "react";
-import { EngineProvider, useEngine } from "../contexts/EngineContext";
+// FILE: src/pages/GamePage.jsx
+import React, { useEffect, useRef, useState } from "react";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
-import { useGameLogic } from "../hooks/useGameLogic";
-import { usePositionQueue } from "../hooks/usePositionQueue";
+import { useGameCoordinator } from "../hooks/useGameCoordinator";
+import { createGameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
-import LoadingPanel from "../components/LoadingPanel";
 
-export default function GamePage() {
-  return (
-    <EngineProvider>
-      <GamePageInner />
-    </EngineProvider>
-  );
-}
-
-function GamePageInner() {
-  const { engine, engineAnalysis } = useEngine();
-  const queue = usePositionQueue({
-    engine,
-    goCommand: engineAnalysis.goCommand,
-    searchMoveCount: engineAnalysis.searchMoveCount,
-  });
-
-  return (
-    <BoardProvider
-      initialFen={queue.current.fen}
-      initialOrientation={queue.current.orientation}
-    >
-      <GamePageContent queue={queue} />
-    </BoardProvider>
-  );
-}
-
-function GamePageContent({ queue }) {
+function GamePageContent() {
   const board = useBoard();
-  const { engine, engineAnalysis } = useEngine();
-  const gameLogic = useGameLogic({
-    engine: engineAnalysis,
-    lockedFen: queue.current.fen,
-  });
-
-  // Only for cold initial start on page load
+  const { ready, coordinatorRef } = useGameCoordinator();
+  const sessionRef = useRef(null);
+  const [snap, setSnap] = useState(null);
+  const [loadingMessage, setLoadingMessage] = useState("Engine loading...");
   const hasStartedRef = useRef(false);
+
   useEffect(() => {
-    if (engine.ready && !hasStartedRef.current) {
-      hasStartedRef.current = true;
-      gameLogic.start(queue.current.fen);
+    if (!ready || hasStartedRef.current) return;
+    hasStartedRef.current = true;
+    setLoadingMessage("Starting analysis...");
+    startNext();
+  }, [ready]);
+
+  async function startNext() {
+    setSnap(null);
+    setLoadingMessage("Loading position...");
+
+    const coordinator = coordinatorRef.current;
+    if (!coordinator) return;
+
+    const { position, analysis, preloaded } = await coordinator.advance();
+    board.resetTo(position.fen, position.orientation);
+
+    if (!preloaded) {
+      setLoadingMessage("Engine thinking...");
+      await analysis.waitForAnalysis(); // now safe — resolves immediately if already done
     }
-  }, [engine.ready]);
 
-  const handleResetRef = useRef(null);
-  handleResetRef.current = function handleReset() {
-    const next = queue.advance();
-    console.log(
-      "[handleReset] preloaded:",
-      next.preloaded,
-      "topMoves:",
-      next.topMoves?.length ?? null,
-      "positionEval:",
-      next.positionEval,
-    );
-    board.resetTo(next.position.fen, next.position.orientation);
-    gameLogic.reset();
-
-    if (next.preloaded) {
-      engineAnalysis.loadPrecomputed(
-        next.position.fen,
-        next.topMoves,
-        next.positionEval,
-      );
-      gameLogic.startWithPreloaded(next.position.fen);
-      console.log(
-        "[handleReset] phase after startWithPreloaded:",
-        gameLogic.phase,
-      );
-    } else {
-      console.log("[handleReset] fallback — calling start directly");
-      gameLogic.start(next.position.fen);
-    }
-  };
-
-  const { isIdle } = gameLogic;
+    const session = createGameSession({ analysis, position });
+    session.onChange = setSnap;
+    sessionRef.current = session;
+    setSnap(session.getSnapshot());
+  }
 
   return (
     <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold text-center underline mb-6">Game</h1>
-      <div className="flex gap-8">
-        <BoardPanel
-          mode={gameLogic}
-          locked={true}
-          gameInfo={
-            <div className="text-right">
-              <div className="font-semibold text-blue-700 dark:text-blue-200">
-                {queue.current.label}
-              </div>
-              <div className="text-blue-600 dark:text-blue-300">
-                {queue.current.event} – Move {queue.current.moveNumber}
-              </div>
-            </div>
-          }
-        />
-        <div className="flex-1 flex flex-col gap-5">
-          {isIdle && <LoadingPanel />}
-          {!isIdle && (
-            <GamePanel
-              mode={gameLogic}
-              onReset={() => handleResetRef.current()}
-            />
-          )}
+
+      {!snap ? (
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-400 animate-pulse text-lg">
+            {loadingMessage}
+          </p>
         </div>
-      </div>
+      ) : (
+        <div className="flex gap-8">
+          <BoardPanel
+            snap={snap}
+            onDrop={(from, to) => sessionRef.current.submitMove(from, to)}
+            locked={true}
+            gameInfo={
+              <div className="text-right">
+                <div className="font-semibold text-blue-700 dark:text-blue-200">
+                  {snap.label}
+                </div>
+                <div className="text-blue-600 dark:text-blue-300">
+                  {snap.event} — Move {snap.moveNumber}
+                </div>
+              </div>
+            }
+          />
+          <div className="flex-1 flex flex-col gap-5">
+            <GamePanel
+              snap={snap}
+              results={
+                snap.phase === "done" ? sessionRef.current.getResults() : null
+              }
+              onNext={startNext}
+            />
+          </div>
+        </div>
+      )}
     </main>
+  );
+}
+
+export default function GamePage() {
+  return (
+    <BoardProvider>
+      <GamePageContent />
+    </BoardProvider>
   );
 }
