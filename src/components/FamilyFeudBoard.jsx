@@ -150,9 +150,33 @@ export default function FamilyFeudBoard({
 
       {/* Engine still loading */}
       {topMoves.length === 0 && (
-        <p className="text-sm text-gray-400 animate-pulse">
-          Engine analyzing position...
-        </p>
+        <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+              <tr>
+                <th className="px-4 py-2 text-left font-medium w-8">#</th>
+                <th className="px-4 py-2 text-left font-medium">Move</th>
+                <th className="px-4 py-2 text-left font-medium">Quality</th>
+                <th className="px-4 py-2 text-right font-medium">Eval</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: targetMoves }).map((_, i) => (
+                <tr
+                  key={i}
+                  className="border-t border-gray-100 dark:border-gray-800 bg-blue-950"
+                >
+                  <td className="px-4 py-3 text-yellow-400 font-bold w-8">
+                    {i + 1}
+                  </td>
+                  <td className="px-4 py-3" colSpan={3}>
+                    <div className="h-4 w-24 rounded bg-gray-700 animate-pulse" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Main board table */}
