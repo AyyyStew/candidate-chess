@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Chess } from "chess.js";
-import { STARTING_FEN, isValidFen } from "../utils/chess";
+import { STARTING_FEN, isValidFen, parsePgn } from "../utils/chess";
 
 interface MoveHistoryEntry {
   san: string;
@@ -18,6 +18,7 @@ export function useBoardSetup({
   );
   const [moveHistory, setMoveHistory] = useState<MoveHistoryEntry[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [baselineFen, setBaselineFen] = useState(initialFen);
 
   function handleSetPosition(): void {
     if (!fenInput.trim()) {
@@ -38,8 +39,23 @@ export function useBoardSetup({
   function handleNavigate(index: number): void {
     const clamped = Math.max(-1, Math.min(index, moveHistory.length - 1));
     setHistoryIndex(clamped);
-    setFen(clamped === -1 ? initialFen : moveHistory[clamped].fenAfter);
+    setFen(clamped === -1 ? baselineFen : moveHistory[clamped].fenAfter);
     setFenInput(clamped === -1 ? "" : moveHistory[clamped].fenAfter);
+  }
+
+  function handleSetPgn(pgn: string): boolean {
+    const parsed = parsePgn(pgn);
+    if (!parsed) {
+      alert("Invalid PGN");
+      return false;
+    }
+    const { moves, initialFen: pgnInitialFen } = parsed;
+    setBaselineFen(pgnInitialFen);
+    setMoveHistory(moves);
+    setHistoryIndex(moves.length - 1);
+    setFen(moves[moves.length - 1].fenAfter);
+    setFenInput(moves[moves.length - 1].fenAfter);
+    return true;
   }
 
   function handleIdleDrop(
@@ -82,6 +98,15 @@ export function useBoardSetup({
     setFenInput("");
     setMoveHistory([]);
     setHistoryIndex(-1);
+    setBaselineFen(initialFen);
+  }
+
+  function truncateToCurrentPosition(): void {
+    if (historyIndex < 0) {
+      setMoveHistory([]);
+      return;
+    }
+    setMoveHistory(moveHistory.slice(0, historyIndex + 1));
   }
 
   function snapToEnd(): void {
@@ -113,8 +138,10 @@ export function useBoardSetup({
     moveHistory,
     historyIndex,
     handleSetPosition,
+    handleSetPgn,
     handleNavigate,
     handleIdleDrop,
+    truncateToCurrentPosition,
     reset,
     snapToEnd,
     resetTo,

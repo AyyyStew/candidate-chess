@@ -29,7 +29,7 @@ function StudyPageContent() {
   const isDone = snap?.phase === "done";
 
   function handleAnalyze() {
-    board.snapToEnd();
+    board.truncateToCurrentPosition();
     const cmd = useMovetime ? `go movetime ${movetime}` : `go depth ${depth}`;
     const analysis = createEngineAnalysis({
       pool: engine,
@@ -75,6 +75,7 @@ function StudyPageContent() {
               value={board.fenInput}
               onChange={board.setFenInput}
               onSet={board.handleSetPosition}
+              onSetPgn={board.handleSetPgn}
               disabled={false}
             />
             <AnalysisSettings
