@@ -198,6 +198,21 @@ export function useBoardSetup({
     setIsPreviewing(false);
   }
 
+  function startFromFen(newFen: string): void {
+    if (previewIntervalRef.current !== null) {
+      clearInterval(previewIntervalRef.current);
+      previewIntervalRef.current = null;
+    }
+    previewSavedFenRef.current = null;
+    setIsPreviewing(false);
+    setFen(newFen);
+    setFenInput(newFen);
+    setMoveHistory([]);
+    setHistoryIndex(-1);
+    setBaselineFen(newFen);
+    setCheckpoint({ fen: newFen, moveHistory: [], historyIndex: -1, baselineFen: newFen });
+  }
+
   function snapToEnd(): void {
     if (moveHistory.length === 0) return;
     const last = moveHistory[moveHistory.length - 1];
@@ -239,5 +254,6 @@ export function useBoardSetup({
     showPreviewFen,
     clearPreview,
     isPreviewing,
+    startFromFen,
   };
 }

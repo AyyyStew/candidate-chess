@@ -58,6 +58,13 @@ function StudyPageContent() {
     setSnap(null);
   }
 
+  function handleStudyFromPreview() {
+    const positionFen = board.fen;
+    sessionRef.current?.reset();
+    setSnap(null);
+    board.startFromFen(positionFen);
+  }
+
   const boardSnap = snap
     ? {
         phase: snap.phase,
@@ -150,6 +157,14 @@ function StudyPageContent() {
               onRemove={null}
             />
             <ResultsPanel results={snap.results} onReset={handleReset} />
+            {board.isPreviewing && (
+              <button
+                onClick={handleStudyFromPreview}
+                className="w-full py-2.5 rounded-xl font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
+              >
+                Study this position →
+              </button>
+            )}
           </>
         )}
       </div>
