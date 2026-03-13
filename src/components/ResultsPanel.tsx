@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+import { Chess } from "chess.js";
 import { formatEval } from "../utils/chess";
 import type { AnalysisResult } from "../types";
+import PvLine from "./PvLine";
+import { useBoard } from "../contexts/BoardContext";
 
 const DEFAULT_VISIBLE = 5;
 
@@ -11,7 +14,18 @@ interface ResultsPanelProps {
 
 export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
   const [expanded, setExpanded] = useState(false);
+  const { showPreviewFen } = useBoard();
   const { topMoves, positionEval, candidates } = results;
+
+  function getFenAfterMove(uci: string): string | null {
+    try {
+      const g = new Chess(results.fen);
+      g.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] ?? "q" });
+      return g.fen();
+    } catch {
+      return null;
+    }
+  }
   const candidateMoves = new Set(candidates.map((c) => c.move));
   const visibleMoves = expanded ? topMoves : topMoves.slice(0, DEFAULT_VISIBLE);
   const hasMore = topMoves.length > DEFAULT_VISIBLE;
@@ -61,7 +75,14 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
                     style={rowStyle}
                   >
                     <td className="px-4 pt-2.5 pb-0 text-gray-400">{i + 1}</td>
-                    <td className="px-4 pt-2.5 pb-0 font-bold">{m.san}</td>
+                    <td className="px-4 pt-2.5 pb-0 font-bold">
+                      <button
+                        className="hover:text-blue-500 transition-colors"
+                        onClick={() => { const f = getFenAfterMove(m.move); if (f) showPreviewFen(f); }}
+                      >
+                        {m.san}
+                      </button>
+                    </td>
                     <td
                       className="px-4 pt-2.5 pb-0 text-sm font-medium"
                       style={{ color: m.category?.color }}
@@ -90,10 +111,7 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
                         colSpan={5}
                         className="px-4 pt-0.5 pb-2 text-xs font-mono text-gray-400 dark:text-gray-500"
                       >
-                        <span className="text-gray-300 dark:text-gray-600 mr-1">
-                          line:
-                        </span>
-                        {line}
+                        <PvLine startFen={results.fen} sans={m.line.sans} />
                       </td>
                     </tr>
                   )}

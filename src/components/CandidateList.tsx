@@ -1,6 +1,9 @@
 import React from "react";
+import { Chess } from "chess.js";
 import { formatEval } from "../utils/chess";
 import type { Candidate, AnalysisResult, TopMove } from "../types";
+import PvLine from "./PvLine";
+import { useBoard } from "../contexts/BoardContext";
 
 function getStockfishRank(move: string, topMoves: TopMove[]): number | null {
   const idx = topMoves.findIndex((m) => m.move === move);
@@ -18,6 +21,7 @@ export default function CandidateList({
   results,
   onRemove,
 }: CandidateListProps) {
+  const { showPreviewFen, clearPreview } = useBoard();
   const isDone = !!results;
   const displayList = results?.candidates ?? candidates;
   const isThinking = !isDone && candidates.length > 0;
@@ -40,6 +44,14 @@ export default function CandidateList({
             ? getStockfishRank(c.move, results!.topMoves)
             : null;
           const category = isDone ? c.category : null;
+          let fenAfter = results?.fen ?? null;
+          if (isDone && fenAfter) {
+            try {
+              const g = new Chess(results!.fen);
+              g.move({ from: c.move.slice(0, 2), to: c.move.slice(2, 4), promotion: c.move[4] ?? "q" });
+              fenAfter = g.fen();
+            } catch { /* keep original */ }
+          }
           return (
             <div
               key={c.move}
@@ -54,7 +66,12 @@ export default function CandidateList({
                 <span className="text-gray-400 text-sm w-4 shrink-0">
                   {i + 1}
                 </span>
-                <span className="font-bold text-lg">{c.san}</span>
+                <button
+                  className="font-bold text-lg hover:text-blue-500 transition-colors"
+                  onClick={() => isDone && fenAfter ? showPreviewFen(fenAfter) : clearPreview()}
+                >
+                  {c.san}
+                </button>
                 {rank && (
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
                     #{rank} SF
@@ -91,12 +108,9 @@ export default function CandidateList({
                   </button>
                 )}
               </div>
-              {isDone && c.line && c.line.sans.length > 0 && (
+              {isDone && fenAfter && c.line && c.line.sans.length > 0 && (
                 <span className="mt-1 pl-7 text-xs font-mono text-gray-400 dark:text-gray-500">
-                  <span className="text-gray-300 dark:text-gray-600 mr-1">
-                    line:
-                  </span>
-                  {c.line.sans.slice(0, 5).join(" ")}
+                  <PvLine startFen={fenAfter} sans={c.line.sans} />
                 </span>
               )}
             </div>

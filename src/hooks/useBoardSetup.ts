@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Chess } from "chess.js";
 import { STARTING_FEN, isValidFen, parsePgn } from "../utils/chess";
 
@@ -27,6 +27,9 @@ export function useBoardSetup({
     baselineFen: string;
   }
   const [checkpoint, setCheckpoint] = useState<Checkpoint | null>(null);
+  const previewIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const previewSavedFenRef = useRef<string | null>(null);
+  const [isPreviewing, setIsPreviewing] = useState(false);
 
   function handleSetPosition(): void {
     if (!fenInput.trim()) {
@@ -140,6 +143,61 @@ export function useBoardSetup({
     }
   }
 
+  function previewLine(startFen: string, sans: string[]): void {
+    if (previewIntervalRef.current !== null) {
+      clearInterval(previewIntervalRef.current);
+      previewIntervalRef.current = null;
+    }
+    previewSavedFenRef.current = fen;
+    setIsPreviewing(true);
+
+    const fens: string[] = [startFen];
+    const game = new Chess(startFen);
+    for (const san of sans) {
+      try {
+        game.move(san);
+        fens.push(game.fen());
+      } catch {
+        break;
+      }
+    }
+
+    setFen(fens[0]);
+    let step = 1;
+    previewIntervalRef.current = setInterval(() => {
+      if (step >= fens.length) {
+        clearInterval(previewIntervalRef.current!);
+        previewIntervalRef.current = null;
+        return;
+      }
+      setFen(fens[step++]);
+    }, 700);
+  }
+
+  function showPreviewFen(fenToShow: string): void {
+    if (previewIntervalRef.current !== null) {
+      clearInterval(previewIntervalRef.current);
+      previewIntervalRef.current = null;
+    }
+    if (previewSavedFenRef.current === null) {
+      previewSavedFenRef.current = fen;
+    }
+    setIsPreviewing(true);
+    setFen(fenToShow);
+  }
+
+  function clearPreview(): void {
+    if (previewIntervalRef.current !== null) {
+      clearInterval(previewIntervalRef.current);
+      previewIntervalRef.current = null;
+    }
+    if (previewSavedFenRef.current !== null) {
+      setFen(previewSavedFenRef.current);
+      previewSavedFenRef.current = null;
+    }
+    setIsPreviewing(false);
+  }
+
   function snapToEnd(): void {
     if (moveHistory.length === 0) return;
     const last = moveHistory[moveHistory.length - 1];
@@ -177,5 +235,9 @@ export function useBoardSetup({
     resetToCheckpoint,
     snapToEnd,
     resetTo,
+    previewLine,
+    showPreviewFen,
+    clearPreview,
+    isPreviewing,
   };
 }
