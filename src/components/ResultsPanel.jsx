@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { formatEval } from "../utils/chess";
 
+const DEFAULT_VISIBLE = 5;
+
 export default function ResultsPanel({ results, onReset }) {
-  const { topMoves, positionEval, bestEval, candidates } = results;
+  const [expanded, setExpanded] = useState(false);
+  const { topMoves, positionEval, candidates } = results;
   const candidateMoves = new Set(candidates.map((c) => c.move));
+  const visibleMoves = expanded ? topMoves : topMoves.slice(0, DEFAULT_VISIBLE);
+  const hasMore = topMoves.length > DEFAULT_VISIBLE;
 
   return (
     <div>
@@ -25,20 +30,26 @@ export default function ResultsPanel({ results, onReset }) {
             <tr>
               <th className="px-4 py-2 text-left font-medium">#</th>
               <th className="px-4 py-2 text-left font-medium">Move</th>
+              <th className="px-4 py-2 text-left font-medium">Quality</th>
               <th className="px-4 py-2 text-left font-medium">Eval</th>
               <th className="px-4 py-2 text-left font-medium">Δ Best</th>
               <th className="px-4 py-2 text-left font-medium">Δ Position</th>
             </tr>
           </thead>
           <tbody>
-            {topMoves.map((m, i) => {
+            {visibleMoves.map((m, i) => {
               const isCandidate = candidateMoves.has(m.move);
               return (
                 <tr
                   key={i}
                   className={`border-t border-gray-100 dark:border-gray-800
-        ${i === 0 ? "bg-green-50 dark:bg-green-950" : "bg-white dark:bg-gray-900"}
-        ${isCandidate ? "ring-2 ring-inset ring-blue-400 dark:ring-blue-500" : ""}`}
+                    ${i === 0 ? "bg-green-50 dark:bg-green-950" : "bg-white dark:bg-gray-900"}
+                    ${isCandidate ? "ring-2 ring-inset ring-blue-400 dark:ring-blue-500" : ""}`}
+                  style={{
+                    borderLeft: m.category
+                      ? `4px solid ${m.category.color}`
+                      : undefined,
+                  }}
                 >
                   <td className="px-4 py-2.5 text-gray-400">{i + 1}</td>
                   <td className="px-4 py-2.5 font-bold">
@@ -50,6 +61,17 @@ export default function ResultsPanel({ results, onReset }) {
                         </span>
                       )}
                     </span>
+                  </td>
+                  <td
+                    className="px-4 py-2.5 text-sm font-medium"
+                    style={{ color: m.category?.color }}
+                  >
+                    {m.category && (
+                      <span className="flex items-center gap-1">
+                        <span>{m.category.icon}</span>
+                        <span>{m.category.label}</span>
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-2.5 text-green-600 dark:text-green-400 font-medium">
                     {formatEval(m.eval)}
@@ -65,6 +87,18 @@ export default function ResultsPanel({ results, onReset }) {
             })}
           </tbody>
         </table>
+
+        {/* Expander */}
+        {hasMore && (
+          <button
+            onClick={() => setExpanded((e) => !e)}
+            className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-t border-gray-200 dark:border-gray-700"
+          >
+            {expanded
+              ? "▲ Show less"
+              : `▼ Show ${topMoves.length - DEFAULT_VISIBLE} more moves`}
+          </button>
+        )}
       </div>
 
       <button
