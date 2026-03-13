@@ -17,14 +17,6 @@ export function formatEval(value) {
   return (value > 0 ? "+" : "") + value.toFixed(2);
 }
 
-export function isBlackToMove(fen) {
-  return fen.includes(" b ");
-}
-
-export function normalizeEval(evalScore, fen) {
-  return isBlackToMove(fen) ? -evalScore : evalScore;
-}
-
 export function evalToWinPercent(evalScore) {
   return 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * evalScore * 100)) - 1);
 }
