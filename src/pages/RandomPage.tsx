@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useGameCoordinator } from "../hooks/useGameCoordinator";
 import { createGameSession } from "../sessions/GameSession";
@@ -6,6 +7,7 @@ import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
 
 function RandomPageContent() {
+  const navigate = useNavigate();
   const board = useBoard();
   const { ready, coordinatorRef } = useGameCoordinator();
   const sessionRef = useRef(null);
@@ -72,6 +74,7 @@ function RandomPageContent() {
               snap.phase === "done" ? sessionRef.current.getResults() : null
             }
             onNext={startNext}
+            onStudy={(fen) => navigate("/study", { state: { fen } })}
           />
         </div>
       </div>

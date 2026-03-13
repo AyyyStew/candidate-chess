@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { formatEval } from "../utils/chess";
-import type { TopMove, Candidate, Category } from "../types";
+import type { TopMove, Candidate, Category, PVLine } from "../types";
+import PvLine from "./PvLine";
+import StudyFromPositionButton from "./StudyFromPositionButton";
 
 interface StrikeIndicatorProps {
   strikes: number;
@@ -37,7 +39,10 @@ interface RevealedRowProps {
   category: Category | null;
   animate: boolean;
   wasGuessed: boolean;
-  hidden: boolean; // ← rename: intentionally hidden (not yet guessed)
+  hidden: boolean;
+  startFen: string;
+  line: PVLine;
+  showLine: boolean;
 }
 
 function RevealedRow({
@@ -48,6 +53,9 @@ function RevealedRow({
   animate,
   wasGuessed,
   hidden,
+  startFen,
+  line,
+  showLine,
 }: RevealedRowProps) {
   const [flipped, setFlipped] = useState(false);
 
@@ -60,32 +68,49 @@ function RevealedRow({
     }
   }, [animate]);
 
+  const rowStyle = {
+    backgroundColor:
+      wasGuessed && flipped ? (category?.color ?? "") + "22" : undefined,
+    borderLeft:
+      wasGuessed && flipped
+        ? `4px solid ${category?.color}`
+        : "4px solid transparent",
+  };
+
+  const isRevealed = !hidden && flipped;
+
   return (
-    <tr
-      className="border-t border-gray-100 dark:border-gray-800 transition-all duration-500"
-      style={{
-        backgroundColor:
-          wasGuessed && flipped ? (category?.color ?? "") + "22" : undefined,
-        borderLeft:
-          wasGuessed && flipped
-            ? `4px solid ${category?.color}`
-            : "4px solid transparent",
-      }}
-    >
-      <td className="px-4 py-3 text-yellow-400 font-bold w-8">{rank}</td>
-      <td className="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">
-        {hidden ? "— — —" : flipped ? san : "— — —"}
-      </td>
-      <td
-        className="px-4 py-3 text-sm font-medium"
-        style={{ color: wasGuessed ? category?.color : "#6b7280" }}
+    <React.Fragment>
+      <tr
+        className="border-t border-gray-100 dark:border-gray-800 transition-all duration-500"
+        style={rowStyle}
       >
-        {!hidden && flipped ? (category?.label ?? "") : ""}
-      </td>
-      <td className="px-4 py-3 text-sm text-gray-400 text-right">
-        {!hidden && flipped ? formatEval(evalScore) : ""}
-      </td>
-    </tr>
+        <td className="px-4 py-3 text-yellow-400 font-bold w-8">{rank}</td>
+        <td className="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">
+          {hidden ? "— — —" : flipped ? san : "— — —"}
+        </td>
+        <td
+          className="px-4 py-3 text-sm font-medium"
+          style={{ color: wasGuessed ? category?.color : "#6b7280" }}
+        >
+          {isRevealed ? (category?.label ?? "") : ""}
+        </td>
+        <td className="px-4 py-3 text-sm text-gray-400 text-right">
+          {isRevealed ? formatEval(evalScore) : ""}
+        </td>
+      </tr>
+      {isRevealed && showLine && line.sans.length > 0 && (
+        <tr style={rowStyle}>
+          <td />
+          <td
+            colSpan={3}
+            className="px-4 pt-0.5 pb-2 text-xs font-mono text-gray-400 dark:text-gray-500"
+          >
+            <PvLine startFen={startFen} sans={line.sans} />
+          </td>
+        </tr>
+      )}
+    </React.Fragment>
   );
 }
 
@@ -117,6 +142,7 @@ function MissRow({ san, evalScore, category }: MissRowProps) {
 }
 
 interface FamilyFeudBoardProps {
+  fen: string;
   topMoves: TopMove[];
   candidates: Candidate[];
   targetMoves: number;
@@ -124,10 +150,12 @@ interface FamilyFeudBoardProps {
   strikes: number;
   maxStrikes: number;
   onReset: () => void;
+  onStudy?: (fen: string) => void;
   resetMessage?: string;
 }
 
 export default function FamilyFeudBoard({
+  fen,
   topMoves,
   candidates,
   targetMoves,
@@ -135,6 +163,7 @@ export default function FamilyFeudBoard({
   strikes,
   maxStrikes,
   onReset,
+  onStudy,
   resetMessage,
 }: FamilyFeudBoardProps) {
   console.log(
@@ -159,7 +188,6 @@ export default function FamilyFeudBoard({
   const missMoves = candidates.filter((c) => !c.pending && c.isMiss);
   const pending = candidates.some((c) => c.pending);
 
-  // Only show skeletons while engine is still thinking and game is not done
   const isLoading = topMoves.length === 0 && !isDone;
 
   type Slot =
@@ -232,6 +260,9 @@ export default function FamilyFeudBoard({
                   animate={isNew}
                   wasGuessed={!!m.hit}
                   hidden={!isRevealed}
+                  startFen={fen}
+                  line={m.line}
+                  showLine={isDone}
                 />
               );
             })}
@@ -268,12 +299,15 @@ export default function FamilyFeudBoard({
       )}
 
       {isDone && (
-        <button
-          onClick={onReset}
-          className="w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-        >
-          {resetMessage ?? "Start Over"}
-        </button>
+        <>
+          {onStudy && <StudyFromPositionButton onStudy={onStudy} />}
+          <button
+            onClick={onReset}
+            className="w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+          >
+            {resetMessage ?? "Start Over"}
+          </button>
+        </>
       )}
     </div>
   );
