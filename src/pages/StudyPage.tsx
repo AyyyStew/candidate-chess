@@ -46,9 +46,15 @@ function StudyPageContent() {
     if (!sessionRef.current) return false;
     return sessionRef.current.addCandidate(sourceSquare, targetSquare);
   }
-  function handleReset() {
+  function handleClearBoard() {
     sessionRef.current?.reset();
     board.reset();
+    setSnap(null);
+  }
+
+  function handleReset() {
+    sessionRef.current?.reset();
+    board.resetToCheckpoint();
     setSnap(null);
   }
 
@@ -66,7 +72,7 @@ function StudyPageContent() {
         snap={boardSnap}
         onDrop={handleDrop}
         locked={false}
-        onReset={handleReset}
+        onReset={handleClearBoard}
       />
       <div className="flex-1 flex flex-col gap-5">
         {isIdle && (

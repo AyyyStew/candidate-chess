@@ -20,11 +20,20 @@ export function useBoardSetup({
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [baselineFen, setBaselineFen] = useState(initialFen);
 
+  interface Checkpoint {
+    fen: string;
+    moveHistory: MoveHistoryEntry[];
+    historyIndex: number;
+    baselineFen: string;
+  }
+  const [checkpoint, setCheckpoint] = useState<Checkpoint | null>(null);
+
   function handleSetPosition(): void {
     if (!fenInput.trim()) {
       setFen(initialFen);
       setMoveHistory([]);
       setHistoryIndex(-1);
+      setCheckpoint(null);
       return;
     }
     if (!isValidFen(fenInput.trim())) {
@@ -34,6 +43,7 @@ export function useBoardSetup({
     setFen(fenInput.trim());
     setMoveHistory([]);
     setHistoryIndex(-1);
+    setCheckpoint({ fen: fenInput.trim(), moveHistory: [], historyIndex: -1, baselineFen: fenInput.trim() });
   }
 
   function handleNavigate(index: number): void {
@@ -55,6 +65,7 @@ export function useBoardSetup({
     setHistoryIndex(moves.length - 1);
     setFen(moves[moves.length - 1].fenAfter);
     setFenInput(moves[moves.length - 1].fenAfter);
+    setCheckpoint({ fen: moves[moves.length - 1].fenAfter, moveHistory: moves, historyIndex: moves.length - 1, baselineFen: pgnInitialFen });
     return true;
   }
 
@@ -99,14 +110,34 @@ export function useBoardSetup({
     setMoveHistory([]);
     setHistoryIndex(-1);
     setBaselineFen(initialFen);
+    setCheckpoint(null);
+  }
+
+  function resetToCheckpoint(): void {
+    if (!checkpoint) {
+      reset();
+      return;
+    }
+    setFen(checkpoint.fen);
+    setFenInput(checkpoint.historyIndex >= 0 ? checkpoint.fen : "");
+    setMoveHistory(checkpoint.moveHistory);
+    setHistoryIndex(checkpoint.historyIndex);
+    setBaselineFen(checkpoint.baselineFen);
   }
 
   function truncateToCurrentPosition(): void {
+    // Checkpoint keeps the full original history so Start Over can restore it,
+    // but records the current index so the board lands on the right position.
+    const fullHistory = checkpoint?.moveHistory.length
+      ? checkpoint.moveHistory
+      : moveHistory;
+    setCheckpoint({ fen, moveHistory: fullHistory, historyIndex, baselineFen });
+
     if (historyIndex < 0) {
       setMoveHistory([]);
-      return;
+    } else {
+      setMoveHistory(moveHistory.slice(0, historyIndex + 1));
     }
-    setMoveHistory(moveHistory.slice(0, historyIndex + 1));
   }
 
   function snapToEnd(): void {
@@ -143,6 +174,7 @@ export function useBoardSetup({
     handleIdleDrop,
     truncateToCurrentPosition,
     reset,
+    resetToCheckpoint,
     snapToEnd,
     resetTo,
   };
