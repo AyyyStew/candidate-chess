@@ -9,7 +9,6 @@ import FenInput from "../components/FenInput";
 import AnalysisSettings from "../components/AnalysisSettings";
 import CandidateList from "../components/CandidateList";
 import ResultsPanel from "../components/ResultsPanel";
-import StudyFromPositionButton from "../components/StudyFromPositionButton";
 import { Candidate } from "../types";
 
 const MAX_CANDIDATES = 10;
@@ -77,12 +76,15 @@ function StudyPageContent() {
 
   return (
     <main className="flex gap-8 p-8 max-w-6xl mx-auto">
-      <BoardPanel
-        snap={boardSnap}
-        onDrop={handleDrop}
-        locked={false}
-        onReset={handleClearBoard}
-      />
+      <div className="sticky top-8 self-start">
+        <BoardPanel
+          snap={boardSnap}
+          onDrop={handleDrop}
+          locked={false}
+          onReset={handleClearBoard}
+          onStudyFromPosition={handleStudyFromPreview}
+        />
+      </div>
       <div className="flex-1 flex flex-col gap-5">
         {isIdle && (
           <>
@@ -159,7 +161,6 @@ function StudyPageContent() {
               onRemove={null}
             />
             <ResultsPanel results={snap.results} onReset={handleReset} />
-            <StudyFromPositionButton onStudy={handleStudyFromPreview} />
           </>
         )}
       </div>

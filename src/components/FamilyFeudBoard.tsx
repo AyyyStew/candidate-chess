@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { formatEval } from "../utils/chess";
 import type { TopMove, Candidate, Category, PVLine } from "../types";
 import PvLine from "./PvLine";
-import StudyFromPositionButton from "./StudyFromPositionButton";
 
 interface StrikeIndicatorProps {
   strikes: number;
@@ -150,7 +149,6 @@ interface FamilyFeudBoardProps {
   strikes: number;
   maxStrikes: number;
   onReset: () => void;
-  onStudy?: (fen: string) => void;
   resetMessage?: string;
 }
 
@@ -163,7 +161,6 @@ export default function FamilyFeudBoard({
   strikes,
   maxStrikes,
   onReset,
-  onStudy,
   resetMessage,
 }: FamilyFeudBoardProps) {
   console.log(
@@ -300,7 +297,6 @@ export default function FamilyFeudBoard({
 
       {isDone && (
         <>
-          {onStudy && <StudyFromPositionButton onStudy={onStudy} />}
           <button
             onClick={onReset}
             className="w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
