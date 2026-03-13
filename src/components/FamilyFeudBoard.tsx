@@ -37,7 +37,7 @@ interface RevealedRowProps {
   category: Category | null;
   animate: boolean;
   wasGuessed: boolean;
-  loading: boolean;
+  hidden: boolean; // ← rename: intentionally hidden (not yet guessed)
 }
 
 function RevealedRow({
@@ -47,7 +47,7 @@ function RevealedRow({
   category,
   animate,
   wasGuessed,
-  loading,
+  hidden,
 }: RevealedRowProps) {
   const [flipped, setFlipped] = useState(false);
 
@@ -59,17 +59,6 @@ function RevealedRow({
       setFlipped(true);
     }
   }, [animate]);
-
-  if (loading) {
-    return (
-      <tr className="border-t border-gray-100 dark:border-gray-800 bg-blue-950">
-        <td className="px-4 py-3 text-yellow-400 font-bold w-8">{rank}</td>
-        <td className="px-4 py-3" colSpan={3}>
-          <div className="h-4 w-24 rounded bg-gray-700 animate-pulse" />
-        </td>
-      </tr>
-    );
-  }
 
   return (
     <tr
@@ -85,16 +74,16 @@ function RevealedRow({
     >
       <td className="px-4 py-3 text-yellow-400 font-bold w-8">{rank}</td>
       <td className="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">
-        {flipped ? san : "— — —"}
+        {hidden ? "— — —" : flipped ? san : "— — —"}
       </td>
       <td
         className="px-4 py-3 text-sm font-medium"
         style={{ color: wasGuessed ? category?.color : "#6b7280" }}
       >
-        {flipped ? (category?.label ?? "") : ""}
+        {!hidden && flipped ? (category?.label ?? "") : ""}
       </td>
       <td className="px-4 py-3 text-sm text-gray-400 text-right">
-        {flipped ? formatEval(evalScore) : ""}
+        {!hidden && flipped ? formatEval(evalScore) : ""}
       </td>
     </tr>
   );
@@ -148,6 +137,14 @@ export default function FamilyFeudBoard({
   onReset,
   resetMessage,
 }: FamilyFeudBoardProps) {
+  console.log(
+    "[FamilyFeudBoard] topMoves:",
+    topMoves.length,
+    "isDone:",
+    isDone,
+    "isLoading:",
+    topMoves.length === 0 && !isDone,
+  );
   const [revealedMoves, setRevealedMoves] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -161,17 +158,24 @@ export default function FamilyFeudBoard({
   const hitMoves = candidates.filter((c) => !c.pending && c.isHit);
   const missMoves = candidates.filter((c) => !c.pending && c.isMiss);
   const pending = candidates.some((c) => c.pending);
-  const isLoading = topMoves.length === 0;
 
-  const slots = isLoading
+  // Only show skeletons while engine is still thinking and game is not done
+  const isLoading = topMoves.length === 0 && !isDone;
+
+  type Slot =
+    | { loading: true; index: number }
+    | (TopMove & { hit: Candidate | undefined; loading: false });
+
+  const slots: Slot[] = isLoading
     ? Array.from({ length: targetMoves }).map((_, i) => ({
+        loading: true as const,
         index: i,
-        loading: true,
       }))
-    : topMoves.slice(0, targetMoves).map((m) => {
-        const hit = hitMoves.find((c) => c.move === m.move);
-        return { ...m, hit, loading: false };
-      });
+    : topMoves.slice(0, targetMoves).map((m) => ({
+        ...m,
+        hit: hitMoves.find((c) => c.move === m.move),
+        loading: false as const,
+      }));
 
   return (
     <div className="flex flex-col gap-4">
@@ -194,7 +198,7 @@ export default function FamilyFeudBoard({
           </thead>
           <tbody>
             {slots.map((slot, i) => {
-              if ((slot as any).loading) {
+              if (slot.loading) {
                 return (
                   <tr
                     key={i}
@@ -209,7 +213,11 @@ export default function FamilyFeudBoard({
                   </tr>
                 );
               }
-              const m = slot as TopMove & { hit?: Candidate };
+
+              const m = slot as TopMove & {
+                hit: Candidate | undefined;
+                loading: false;
+              };
               const isRevealed = !!m.hit || isDone;
               const isNew = !!m.hit && revealedMoves.has(m.hit.move);
               const category = m.hit?.category ?? m.category ?? null;
@@ -223,7 +231,7 @@ export default function FamilyFeudBoard({
                   category={category}
                   animate={isNew}
                   wasGuessed={!!m.hit}
-                  loading={!isRevealed}
+                  hidden={!isRevealed}
                 />
               );
             })}

@@ -20,12 +20,12 @@ function GamePageContent() {
 
   async function startNext() {
     setSnap(null);
-    const { position, analysis } = await coordinatorRef.current.advance();
+    const { position, analysis } = await coordinatorRef.current!.advance();
     board.resetTo(position.fen, position.orientation);
-    // Don't wait for analysis — session handles queueing
+
     const session = createGameSession({ analysis, position });
-    session.onChange = setSnap;
     sessionRef.current = session;
+    session.onChange = setSnap;
     setSnap(session.getSnapshot());
   }
 
