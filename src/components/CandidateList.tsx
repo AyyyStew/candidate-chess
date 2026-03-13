@@ -10,14 +10,12 @@ function getStockfishRank(move: string, topMoves: TopMove[]): number | null {
 interface CandidateListProps {
   candidates: Candidate[];
   results: AnalysisResult | null;
-  candidateLimit: number;
   onRemove: ((uci: string) => void) | null;
 }
 
 export default function CandidateList({
   candidates,
   results,
-  candidateLimit,
   onRemove,
 }: CandidateListProps) {
   const isDone = !!results;
@@ -30,11 +28,6 @@ export default function CandidateList({
         <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">
           Your Candidates
         </h3>
-        <span
-          className={`text-sm font-medium transition-colors ${candidates.length >= candidateLimit ? "text-green-600 dark:text-green-400" : "text-gray-400"}`}
-        >
-          {candidates.length} / {candidateLimit}
-        </span>
       </div>
       {candidates.length === 0 && (
         <div className="rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 p-6 text-center">
@@ -100,11 +93,6 @@ export default function CandidateList({
           );
         })}
       </div>
-      {candidates.length >= candidateLimit && !isDone && (
-        <p className="text-center text-sm text-green-600 dark:text-green-400 mt-3 font-medium">
-          All slots filled — ready to compare
-        </p>
-      )}
     </div>
   );
 }

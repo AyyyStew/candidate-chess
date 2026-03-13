@@ -111,7 +111,6 @@ function StudyPageContent() {
             <CandidateList
               candidates={snap.candidates}
               results={null}
-              candidateLimit={MAX_CANDIDATES}
               onRemove={(uci: string) =>
                 sessionRef.current!.removeCandidate(uci)
               }
@@ -148,7 +147,6 @@ function StudyPageContent() {
             <CandidateList
               candidates={snap.results.candidates}
               results={snap.results}
-              candidateLimit={MAX_CANDIDATES}
               onRemove={null}
             />
             <ResultsPanel results={snap.results} onReset={handleReset} />
