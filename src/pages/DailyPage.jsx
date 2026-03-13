@@ -1,27 +1,50 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { EngineProvider, useEngine } from "../contexts/EngineContext";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
-import { useGameLogic } from "../hooks/useGameLogic";
+import { useEnginePool } from "../hooks/useEnginePool";
+import { createEngineAnalysis } from "../engine/engineAnalysis";
+import { createGameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
-import LoadingPanel from "../components/LoadingPanel";
 import { getDailyPosition } from "../services/dailyService";
 
 function DailyPageContent({ daily }) {
   const navigate = useNavigate();
-  const { engine, engineAnalysis } = useEngine();
-  const gameLogic = useGameLogic({
-    engine: engineAnalysis,
-    lockedFen: daily.fen,
-  });
-  const { isIdle } = gameLogic;
+  const board = useBoard();
+  const engine = useEnginePool();
+  const sessionRef = useRef(null);
+  const [snap, setSnap] = useState(null);
+  const hasStartedRef = useRef(false);
+
+  const goCommand = "go depth 15";
 
   useEffect(() => {
-    if (engine.ready && isIdle) {
-      gameLogic.start(daily.fen);
-    }
-  }, [engine.ready, isIdle]);
+    if (!engine.ready || hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
+    const analysis = createEngineAnalysis({ pool: engine, goCommand });
+    analysis.startAnalysis(daily.fen);
+
+    const session = createGameSession({ analysis, position: daily });
+    session.onChange = setSnap;
+    sessionRef.current = session;
+    setSnap(session.getSnapshot());
+  }, [engine.ready]);
+
+  if (!snap) {
+    return (
+      <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-center underline mb-6">
+          Daily Game
+        </h1>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-400 animate-pulse text-lg">
+            Engine loading...
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
@@ -30,7 +53,8 @@ function DailyPageContent({ daily }) {
       </h1>
       <div className="flex gap-8">
         <BoardPanel
-          mode={gameLogic}
+          snap={snap}
+          onDrop={(from, to) => sessionRef.current.submitMove(from, to)}
           locked={true}
           gameInfo={
             <div className="text-right">
@@ -38,27 +62,26 @@ function DailyPageContent({ daily }) {
                 {daily.label}
               </div>
               <div className="text-blue-600 dark:text-blue-300">
-                {daily.event} - Move {daily.moveNumber}
+                {daily.event} — Move {daily.moveNumber}
               </div>
             </div>
           }
         />
         <div className="flex-1 flex flex-col gap-5">
-          {isIdle && <LoadingPanel />}
-          {!isIdle && (
-            <GamePanel
-              mode={gameLogic}
-              onReset={() => navigate("/game")}
-              resetMessage={"Play Another Position"}
-            />
-          )}
+          <GamePanel
+            snap={snap}
+            results={
+              snap.phase === "done" ? sessionRef.current.getResults() : null
+            }
+            onNext={() => navigate("/game")}
+          />
         </div>
       </div>
     </main>
   );
 }
 
-function DailyPageInner() {
+export default function DailyPage() {
   const daily = useMemo(() => getDailyPosition(), []);
   return (
     <BoardProvider
@@ -67,13 +90,5 @@ function DailyPageInner() {
     >
       <DailyPageContent daily={daily} />
     </BoardProvider>
-  );
-}
-
-export default function DailyPage() {
-  return (
-    <EngineProvider>
-      <DailyPageInner />
-    </EngineProvider>
   );
 }
