@@ -103,6 +103,8 @@ export function makeTopMove(
 export function makeCandidate(
   data: Partial<Candidate> & { move: string; san: string },
 ): Candidate {
+  if (!data.move) throw new Error("Candidate requires move (UCI)");
+  if (!data.san) throw new Error("Candidate requires san");
   return {
     move: data.move,
     san: data.san,
@@ -120,6 +122,7 @@ export function makeCandidate(
 export function makeAnalysisResult(
   data: Partial<AnalysisResult> & { fen: string },
 ): AnalysisResult {
+  if (!data.fen) throw new Error("AnalysisResult requires fen");
   return {
     fen: data.fen,
     positionEval: data.positionEval ?? 0,
@@ -132,6 +135,8 @@ export function makeAnalysisResult(
 export function makePosition(
   data: Partial<Position> & { fen: string; label: string },
 ): Position {
+  if (!data.fen) throw new Error("Position requires fen");
+  if (!data.label) throw new Error("Position requires label");
   return {
     id: data.id ?? 0,
     fen: data.fen,
