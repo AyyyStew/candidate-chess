@@ -22,6 +22,11 @@ interface EngineInstance {
     move: string,
     goCommand: string,
   ) => Promise<number>;
+  getMoveWithLine: (
+    fen: string,
+    move: string,
+    goCommand: string,
+  ) => Promise<{ eval: number; line: PVLine }>;
   isReady: () => boolean;
 }
 
@@ -40,6 +45,7 @@ export interface EnginePool {
   getTopMoves: (fen: string, n: number, cmd: string) => Promise<TopMove[]>;
   getPositionEval: (fen: string, cmd: string) => Promise<number>;
   getRawMoveEval: (fen: string, move: string, cmd: string) => Promise<number>;
+  getMoveWithLine: (fen: string, move: string, cmd: string) => Promise<{ eval: number; line: PVLine }>;
 }
 
 function createEngineInstance(): EngineInstance {
@@ -212,6 +218,14 @@ function createEngineInstance(): EngineInstance {
     move: string,
     goCommand: string,
   ): Promise<number> {
+    return getMoveWithLine(fen, move, goCommand).then((r) => r.eval);
+  }
+
+  function getMoveWithLine(
+    fen: string,
+    move: string,
+    goCommand: string,
+  ): Promise<{ eval: number; line: PVLine }> {
     const game = new Chess(fen);
     const isBlack = fen.includes(" b ");
     game.move({
@@ -221,19 +235,40 @@ function createEngineInstance(): EngineInstance {
     });
     const fenAfter = game.fen();
     let lastEval: number | null = null;
+    let lastLine: PVLine = { moves: [], sans: [] };
 
     return evaluateQueue
       .enqueue(
         ["stop", `position fen ${fenAfter}`, goCommand],
         (line: string) => {
           if (!line.startsWith("info") || !line.includes("score cp")) return;
-          const m = line.match(/score cp (-?\d+)/);
-          if (m) lastEval = parseInt(m[1]) / 100;
+          const scoreMatch = line.match(/score cp (-?\d+)/);
+          const pvMatch = line.match(/ pv (.+)$/);
+          if (scoreMatch) lastEval = parseInt(scoreMatch[1]) / 100;
+          if (pvMatch) {
+            const uciMoves = pvMatch[1].trim().split(" ");
+            const sans: string[] = [];
+            try {
+              const tempGame = new Chess(fenAfter);
+              for (const uci of uciMoves) {
+                const m = tempGame.move({
+                  from: uci.slice(0, 2),
+                  to: uci.slice(2, 4),
+                  promotion: uci[4] ?? "q",
+                });
+                if (!m) break;
+                sans.push(m.san);
+              }
+            } catch {
+              /* empty */
+            }
+            lastLine = { moves: uciMoves, sans };
+          }
         },
       )
       .then(() => {
         const raw = lastEval !== null ? -lastEval : 0;
-        return isBlack ? -raw : raw;
+        return { eval: isBlack ? -raw : raw, line: lastLine };
       });
   }
 
@@ -243,6 +278,7 @@ function createEngineInstance(): EngineInstance {
     getTopMoves,
     getPositionEval,
     getRawMoveEval,
+    getMoveWithLine,
     isReady: () => isReady,
   };
 }
@@ -305,6 +341,8 @@ export function useEnginePool(): EnginePool {
     getPositionEval: (fen, cmd) => activeRef.current!.getPositionEval(fen, cmd),
     getRawMoveEval: (fen, move, cmd) =>
       activeRef.current!.getRawMoveEval(fen, move, cmd),
+    getMoveWithLine: (fen, move, cmd) =>
+      activeRef.current!.getMoveWithLine(fen, move, cmd),
   };
 }
 
@@ -359,5 +397,7 @@ export function createEnginePool() {
       active.getPositionEval(fen, cmd),
     getRawMoveEval: (fen: string, move: string, cmd: string) =>
       active.getRawMoveEval(fen, move, cmd),
+    getMoveWithLine: (fen: string, move: string, cmd: string) =>
+      active.getMoveWithLine(fen, move, cmd),
   };
 }

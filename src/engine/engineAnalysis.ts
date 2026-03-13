@@ -88,9 +88,17 @@ export function createEngineAnalysis({
     const rawBestEval = topMoves![0]?.rawEval ?? 0;
 
     const topMove = topMoves!.find((m) => m.move === uci);
-    const rawMoveEval = topMove
-      ? topMove.rawEval
-      : await pool.getRawMoveEval(lockedFen!, uci, goCommand);
+    let rawMoveEval: number;
+    let line: import("../types").PVLine;
+
+    if (topMove) {
+      rawMoveEval = topMove.rawEval;
+      line = { moves: topMove.line.moves.slice(1), sans: topMove.line.sans.slice(1) };
+    } else {
+      const result = await pool.getMoveWithLine(lockedFen!, uci, goCommand);
+      rawMoveEval = result.eval;
+      line = result.line;
+    }
 
     const category = getMoveCategory(
       positionEval!,
@@ -109,6 +117,7 @@ export function createEngineAnalysis({
       rank: rankIdx === -1 ? null : rankIdx + 1,
       diffBest: rawMoveEval - rawBestEval,
       diffPos: rawMoveEval - positionEval!,
+      line,
     });
   }
 

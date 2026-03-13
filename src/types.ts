@@ -33,6 +33,7 @@ export interface Candidate {
   category?: Category | null;
   isHit?: boolean;
   isMiss?: boolean;
+  line?: PVLine;
 }
 
 export interface AnalysisResult {
@@ -116,6 +117,7 @@ export function makeCandidate(
     category: data.category ?? null,
     isHit: data.isHit,
     isMiss: data.isMiss,
+    line: data.line,
   };
 }
 

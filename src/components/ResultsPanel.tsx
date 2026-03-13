@@ -42,48 +42,58 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
           <tbody>
             {visibleMoves.map((m, i) => {
               const isCandidate = candidateMoves.has(m.move);
+              const rowBase = i === 0 ? "bg-green-50 dark:bg-green-950" : "bg-white dark:bg-gray-900";
+              const rowStyle = {
+                borderLeft: m.category ? `4px solid ${m.category.color}` : undefined,
+              };
+              const line = m.line.sans.slice(0, 5).join(" ");
               return (
-                <tr
-                  key={i}
-                  className={`border-t border-gray-100 dark:border-gray-800 ${i === 0 ? "bg-green-50 dark:bg-green-950" : "bg-white dark:bg-gray-900"} ${isCandidate ? "ring-2 ring-inset ring-blue-400 dark:ring-blue-500" : ""}`}
-                  style={{
-                    borderLeft: m.category
-                      ? `4px solid ${m.category.color}`
-                      : undefined,
-                  }}
-                >
-                  <td className="px-4 py-2.5 text-gray-400">{i + 1}</td>
-                  <td className="px-4 py-2.5 font-bold">
-                    <span className="flex items-center gap-2">
-                      {m.san}
-                      {isCandidate && (
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                          Your pick
+                <React.Fragment key={i}>
+                  <tr
+                    className={`border-t border-gray-100 dark:border-gray-800 ${rowBase} ${isCandidate ? "ring-2 ring-inset ring-blue-400 dark:ring-blue-500" : ""}`}
+                    style={rowStyle}
+                  >
+                    <td className="px-4 pt-2.5 pb-0 text-gray-400">{i + 1}</td>
+                    <td className="px-4 pt-2.5 pb-0 font-bold">
+                      <span className="flex items-center gap-2">
+                        {m.san}
+                        {isCandidate && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                            Your pick
+                          </span>
+                        )}
+                      </span>
+                    </td>
+                    <td
+                      className="px-4 pt-2.5 pb-0 text-sm font-medium"
+                      style={{ color: m.category?.color }}
+                    >
+                      {m.category && (
+                        <span className="flex items-center gap-1">
+                          <span>{m.category.icon}</span>
+                          <span>{m.category.label}</span>
                         </span>
                       )}
-                    </span>
-                  </td>
-                  <td
-                    className="px-4 py-2.5 text-sm font-medium"
-                    style={{ color: m.category?.color }}
-                  >
-                    {m.category && (
-                      <span className="flex items-center gap-1">
-                        <span>{m.category.icon}</span>
-                        <span>{m.category.label}</span>
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-2.5 text-green-600 dark:text-green-400 font-medium">
-                    {formatEval(m.eval)}
-                  </td>
-                  <td className="px-4 py-2.5 text-gray-400">
-                    {formatEval(m.diffBest)}
-                  </td>
-                  <td className="px-4 py-2.5 text-gray-400">
-                    {formatEval(m.diffPos)}
-                  </td>
-                </tr>
+                    </td>
+                    <td className="px-4 pt-2.5 pb-0 text-green-600 dark:text-green-400 font-medium">
+                      {formatEval(m.eval)}
+                    </td>
+                    <td className="px-4 pt-2.5 pb-0 text-gray-400">
+                      {formatEval(m.diffBest)}
+                    </td>
+                    <td className="px-4 pt-2.5 pb-0 text-gray-400">
+                      {formatEval(m.diffPos)}
+                    </td>
+                  </tr>
+                  {line && (
+                    <tr className={`${rowBase}`} style={rowStyle}>
+                      <td />
+                      <td colSpan={5} className="px-4 pt-0.5 pb-2 text-xs font-mono text-gray-400 dark:text-gray-500">
+                        {line}
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               );
             })}
           </tbody>
