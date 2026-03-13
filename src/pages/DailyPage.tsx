@@ -7,8 +7,13 @@ import { createGameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
 import { getDailyPosition } from "../services/positionService";
+import type { Position } from "../types";
 
-function DailyPageContent({ daily }) {
+interface DailyPageContentProps {
+  daily: Position;
+}
+
+function DailyPageContent({ daily }: DailyPageContentProps) {
   const navigate = useNavigate();
   const board = useBoard();
   const engine = useEnginePool();

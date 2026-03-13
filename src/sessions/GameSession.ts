@@ -1,23 +1,43 @@
 import { Chess } from "chess.js";
 import { makeCandidate } from "../types";
+import type { Candidate, GameSnapshot, AnalysisResult } from "../types";
+import type { EngineAnalysis } from "../engine/engineAnalysis";
+import type { Position } from "../types";
 
 const MAX_STRIKES = 3;
 
-export function createGameSession({ analysis, position, targetMoves = 5 }) {
-  let phase = "active";
-  let candidates = [];
+interface GameSessionOptions {
+  analysis: EngineAnalysis;
+  position: Position;
+  targetMoves?: number;
+}
+
+export interface GameSession {
+  getSnapshot: () => GameSnapshot;
+  getResults: () => AnalysisResult;
+  submitMove: (sourceSquare: string, targetSquare: string) => Promise<void>;
+  onChange: ((snap: GameSnapshot) => void) | null;
+}
+
+export function createGameSession({
+  analysis,
+  position,
+  targetMoves = 5,
+}: GameSessionOptions): GameSession {
+  let phase: "active" | "done" = "active";
+  let candidates: Candidate[] = [];
   let strikes = 0;
   let hits = 0;
-  let onChange = null;
+  let onChange: ((snap: GameSnapshot) => void) | null = null;
   let analysisReady = analysis.isReady();
-  let moveQueue = [];
+  let moveQueue: { uci: string; san: string }[] = [];
   let processingQueue = false;
 
-  function notify() {
+  function notify(): void {
     onChange?.(getSnapshot());
   }
 
-  function getSnapshot() {
+  function getSnapshot(): GameSnapshot {
     return {
       phase,
       fen: position.fen,
@@ -42,21 +62,24 @@ export function createGameSession({ analysis, position, targetMoves = 5 }) {
     flushQueue();
   });
 
-  async function flushQueue() {
+  async function flushQueue(): Promise<void> {
     if (processingQueue) return;
     processingQueue = true;
     while (moveQueue.length > 0) {
-      const { uci, san } = moveQueue.shift();
+      const { uci, san } = moveQueue.shift()!;
       await processMove(uci, san);
     }
     processingQueue = false;
   }
 
-  async function processMove(uci, san) {
+  async function processMove(uci: string, san: string): Promise<void> {
     if (strikes >= MAX_STRIKES || hits >= targetMoves) return;
 
     const evaluated = await analysis.evaluateMove(uci, san);
-    const isHit = evaluated.rank !== null && evaluated.rank <= targetMoves;
+    const isHit =
+      evaluated.rank !== null &&
+      evaluated.rank !== undefined &&
+      evaluated.rank <= targetMoves;
 
     if (isHit) hits++;
     else strikes++;
@@ -72,7 +95,10 @@ export function createGameSession({ analysis, position, targetMoves = 5 }) {
     notify();
   }
 
-  async function submitMove(sourceSquare, targetSquare) {
+  async function submitMove(
+    sourceSquare: string,
+    targetSquare: string,
+  ): Promise<void> {
     if (strikes >= MAX_STRIKES || hits >= targetMoves) return;
 
     const game = new Chess(position.fen);
@@ -106,7 +132,7 @@ export function createGameSession({ analysis, position, targetMoves = 5 }) {
     await processMove(uci, move.san);
   }
 
-  function getResults() {
+  function getResults(): AnalysisResult {
     return analysis.buildTopMovesResult(candidates);
   }
 
@@ -114,7 +140,7 @@ export function createGameSession({ analysis, position, targetMoves = 5 }) {
     getSnapshot,
     getResults,
     submitMove,
-    set onChange(cb) {
+    set onChange(cb: ((snap: GameSnapshot) => void) | null) {
       onChange = cb;
     },
   };

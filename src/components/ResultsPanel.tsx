@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import { formatEval } from "../utils/chess";
+import type { AnalysisResult } from "../types";
 
 const DEFAULT_VISIBLE = 5;
 
-export default function ResultsPanel({ results, onReset }) {
+interface ResultsPanelProps {
+  results: AnalysisResult;
+  onReset: () => void;
+}
+
+export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
   const [expanded, setExpanded] = useState(false);
   const { topMoves, positionEval, candidates } = results;
   const candidateMoves = new Set(candidates.map((c) => c.move));
@@ -12,18 +18,15 @@ export default function ResultsPanel({ results, onReset }) {
 
   return (
     <div>
-      {/* Position eval */}
       <div className="mb-4 px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-between">
         <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
           Position Eval
         </span>
         <span className="font-bold text-lg">{formatEval(positionEval)}</span>
       </div>
-
       <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
         Stockfish Top Moves
       </h3>
-
       <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
         <table className="w-full text-sm">
           <thead className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
@@ -42,9 +45,7 @@ export default function ResultsPanel({ results, onReset }) {
               return (
                 <tr
                   key={i}
-                  className={`border-t border-gray-100 dark:border-gray-800
-                    ${i === 0 ? "bg-green-50 dark:bg-green-950" : "bg-white dark:bg-gray-900"}
-                    ${isCandidate ? "ring-2 ring-inset ring-blue-400 dark:ring-blue-500" : ""}`}
+                  className={`border-t border-gray-100 dark:border-gray-800 ${i === 0 ? "bg-green-50 dark:bg-green-950" : "bg-white dark:bg-gray-900"} ${isCandidate ? "ring-2 ring-inset ring-blue-400 dark:ring-blue-500" : ""}`}
                   style={{
                     borderLeft: m.category
                       ? `4px solid ${m.category.color}`
@@ -87,8 +88,6 @@ export default function ResultsPanel({ results, onReset }) {
             })}
           </tbody>
         </table>
-
-        {/* Expander */}
         {hasMore && (
           <button
             onClick={() => setExpanded((e) => !e)}
@@ -100,7 +99,6 @@ export default function ResultsPanel({ results, onReset }) {
           </button>
         )}
       </div>
-
       <button
         onClick={onReset}
         className="mt-4 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"

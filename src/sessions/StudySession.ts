@@ -1,20 +1,40 @@
 import { Chess } from "chess.js";
 import { makeCandidate } from "../types";
+import type { Candidate, AnalysisResult, StudySnapshot } from "../types";
+import type { EngineAnalysis } from "../engine/engineAnalysis";
 
 const MAX_CANDIDATES = 10;
 
-export function createStudySession({ analysis, minCandidates = 3 }) {
-  let phase = "idle";
-  let candidates = [];
-  let results = null;
-  let lockedFen = null;
-  let onChange = null;
+interface StudySessionOptions {
+  analysis: EngineAnalysis;
+  minCandidates?: number;
+}
 
-  function notify() {
+export interface StudySession {
+  getSnapshot: () => StudySnapshot;
+  start: (fen: string) => void;
+  addCandidate: (sourceSquare: string, targetSquare: string) => boolean;
+  removeCandidate: (uci: string) => void;
+  compare: () => Promise<void>;
+  reset: () => void;
+  onChange: ((snap: StudySnapshot) => void) | null;
+}
+
+export function createStudySession({
+  analysis,
+  minCandidates = 3,
+}: StudySessionOptions): StudySession {
+  let phase: "idle" | "active" | "comparing" | "done" = "idle";
+  let candidates: Candidate[] = [];
+  let results: AnalysisResult | null = null;
+  let lockedFen: string | null = null;
+  let onChange: ((snap: StudySnapshot) => void) | null = null;
+
+  function notify(): void {
     onChange?.(getSnapshot());
   }
 
-  function getSnapshot() {
+  function getSnapshot(): StudySnapshot {
     return {
       phase,
       lockedFen,
@@ -26,7 +46,7 @@ export function createStudySession({ analysis, minCandidates = 3 }) {
     };
   }
 
-  function start(fen) {
+  function start(fen: string): void {
     lockedFen = fen;
     candidates = [];
     results = null;
@@ -36,11 +56,11 @@ export function createStudySession({ analysis, minCandidates = 3 }) {
     notify();
   }
 
-  function addCandidate(sourceSquare, targetSquare) {
+  function addCandidate(sourceSquare: string, targetSquare: string): boolean {
     if (phase !== "active") return false;
     if (candidates.length >= MAX_CANDIDATES) return false;
 
-    const game = new Chess(lockedFen);
+    const game = new Chess(lockedFen!);
     let move;
     try {
       move = game.move({
@@ -64,13 +84,13 @@ export function createStudySession({ analysis, minCandidates = 3 }) {
     return true;
   }
 
-  function removeCandidate(uci) {
+  function removeCandidate(uci: string): void {
     if (phase !== "active") return;
     candidates = candidates.filter((c) => c.move !== uci);
     notify();
   }
 
-  async function compare() {
+  async function compare(): Promise<void> {
     if (phase !== "active") return;
     if (candidates.length < minCandidates) return;
     phase = "comparing";
@@ -85,7 +105,7 @@ export function createStudySession({ analysis, minCandidates = 3 }) {
     notify();
   }
 
-  function reset() {
+  function reset(): void {
     phase = "idle";
     candidates = [];
     results = null;
@@ -101,7 +121,7 @@ export function createStudySession({ analysis, minCandidates = 3 }) {
     removeCandidate,
     compare,
     reset,
-    set onChange(cb) {
+    set onChange(cb: ((snap: StudySnapshot) => void) | null) {
       onChange = cb;
     },
   };

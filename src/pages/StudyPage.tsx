@@ -8,6 +8,7 @@ import FenInput from "../components/FenInput";
 import AnalysisSettings from "../components/AnalysisSettings";
 import CandidateList from "../components/CandidateList";
 import ResultsPanel from "../components/ResultsPanel";
+import { Candidate } from "../types";
 
 const MAX_CANDIDATES = 10;
 
@@ -41,11 +42,10 @@ function StudyPageContent() {
     session.start(board.fen);
   }
 
-  function handleDrop(sourceSquare, targetSquare) {
+  function handleDrop(sourceSquare: string, targetSquare: string): boolean {
     if (!sessionRef.current) return false;
     return sessionRef.current.addCandidate(sourceSquare, targetSquare);
   }
-
   function handleReset() {
     sessionRef.current?.reset();
     board.reset();
@@ -55,7 +55,7 @@ function StudyPageContent() {
   const boardSnap = snap
     ? {
         phase: snap.phase,
-        candidates: snap.candidates.map((c) => ({ move: c.move })),
+        candidates: snap.candidates.map((c: Candidate) => ({ move: c.move })),
         results: snap.results,
       }
     : null;
@@ -105,7 +105,9 @@ function StudyPageContent() {
               candidates={snap.candidates}
               results={null}
               candidateLimit={MAX_CANDIDATES}
-              onRemove={(uci) => sessionRef.current.removeCandidate(uci)}
+              onRemove={(uci: string) =>
+                sessionRef.current!.removeCandidate(uci)
+              }
             />
             {isActive && (
               <button

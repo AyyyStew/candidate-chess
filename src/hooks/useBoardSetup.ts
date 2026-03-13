@@ -2,17 +2,24 @@ import { useState } from "react";
 import { Chess } from "chess.js";
 import { STARTING_FEN, isValidFen } from "../utils/chess";
 
+interface MoveHistoryEntry {
+  san: string;
+  fenAfter: string;
+}
+
 export function useBoardSetup({
   initialFen = STARTING_FEN,
-  initialOrientation = "white",
+  initialOrientation = "white" as "white" | "black",
 } = {}) {
   const [fen, setFen] = useState(initialFen);
   const [fenInput, setFenInput] = useState("");
-  const [boardOrientation, setBoardOrientation] = useState(initialOrientation);
-  const [moveHistory, setMoveHistory] = useState([]);
+  const [boardOrientation, setBoardOrientation] = useState<"white" | "black">(
+    initialOrientation,
+  );
+  const [moveHistory, setMoveHistory] = useState<MoveHistoryEntry[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
-  function handleSetPosition() {
+  function handleSetPosition(): void {
     if (!fenInput.trim()) {
       setFen(initialFen);
       setMoveHistory([]);
@@ -28,14 +35,18 @@ export function useBoardSetup({
     setHistoryIndex(-1);
   }
 
-  function handleNavigate(index) {
+  function handleNavigate(index: number): void {
     const clamped = Math.max(-1, Math.min(index, moveHistory.length - 1));
     setHistoryIndex(clamped);
     setFen(clamped === -1 ? initialFen : moveHistory[clamped].fenAfter);
     setFenInput(clamped === -1 ? "" : moveHistory[clamped].fenAfter);
   }
 
-  function handleIdleDrop(sourceSquare, targetSquare, currentFen) {
+  function handleIdleDrop(
+    sourceSquare: string,
+    targetSquare: string,
+    currentFen: string,
+  ): boolean {
     const baseHistory = moveHistory.slice(0, historyIndex + 1);
     const baseFen =
       historyIndex >= 0 ? baseHistory[historyIndex].fenAfter : currentFen;
@@ -62,18 +73,18 @@ export function useBoardSetup({
     return true;
   }
 
-  function flipOrientation() {
+  function flipOrientation(): void {
     setBoardOrientation((o) => (o === "white" ? "black" : "white"));
   }
 
-  function reset() {
+  function reset(): void {
     setFen(initialFen);
     setFenInput("");
     setMoveHistory([]);
     setHistoryIndex(-1);
   }
 
-  function snapToEnd() {
+  function snapToEnd(): void {
     if (moveHistory.length === 0) return;
     const last = moveHistory[moveHistory.length - 1];
     setHistoryIndex(moveHistory.length - 1);
@@ -81,7 +92,10 @@ export function useBoardSetup({
     setFenInput(last.fenAfter);
   }
 
-  function resetTo(fen, orientation = "white") {
+  function resetTo(
+    fen: string,
+    orientation: "white" | "black" = "white",
+  ): void {
     setFen(fen);
     setFenInput(fen);
     setMoveHistory([]);

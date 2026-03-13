@@ -1,8 +1,6 @@
-// src/data/positions.js
-// Raw data only — no logic here.
-// When you add a database, replace this array with a fetch() call in positionService.js
+import type { Position } from "../types";
 
-export const POSITIONS = [
+export const POSITIONS: Position[] = [
   {
     id: 1,
     fen: "r1bq1rk1/pp2bppp/2n1pn2/3p4/2PP4/2NBPN2/PP3PPP/R1BQ1RK1 w - - 0 9",

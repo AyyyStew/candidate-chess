@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { formatEval } from "../utils/chess";
+import type { TopMove, Candidate, Category } from "../types";
 
-function StrikeIndicator({ strikes, maxStrikes }) {
+interface StrikeIndicatorProps {
+  strikes: number;
+  maxStrikes: number;
+}
+
+function StrikeIndicator({ strikes, maxStrikes }: StrikeIndicatorProps) {
   return (
     <div className="flex gap-1.5 items-center">
       {Array.from({ length: maxStrikes }).map((_, i) => {
@@ -24,28 +30,35 @@ function StrikeIndicator({ strikes, maxStrikes }) {
   );
 }
 
-function BoardRow({
+interface RevealedRowProps {
+  rank: number;
+  san: string;
+  evalScore: number;
+  category: Category | null;
+  animate: boolean;
+  wasGuessed: boolean;
+  loading: boolean;
+}
+
+function RevealedRow({
   rank,
   san,
   evalScore,
   category,
   animate,
   wasGuessed,
-  hidden,
   loading,
-}) {
+}: RevealedRowProps) {
   const [flipped, setFlipped] = useState(false);
 
   useEffect(() => {
-    if (!hidden && !loading) {
-      if (animate) {
-        const t = setTimeout(() => setFlipped(true), 50);
-        return () => clearTimeout(t);
-      } else {
-        setFlipped(true);
-      }
+    if (animate) {
+      const t = setTimeout(() => setFlipped(true), 50);
+      return () => clearTimeout(t);
+    } else {
+      setFlipped(true);
     }
-  }, [animate, hidden, loading]);
+  }, [animate]);
 
   if (loading) {
     return (
@@ -58,25 +71,12 @@ function BoardRow({
     );
   }
 
-  if (hidden) {
-    return (
-      <tr className="border-t border-gray-100 dark:border-gray-800 bg-blue-950">
-        <td className="px-4 py-3 text-yellow-400 font-bold w-8">{rank}</td>
-        <td className="px-4 py-3 font-mono text-blue-400 tracking-widest">
-          — — —
-        </td>
-        <td className="px-4 py-3" />
-        <td className="px-4 py-3" />
-      </tr>
-    );
-  }
-
   return (
     <tr
       className="border-t border-gray-100 dark:border-gray-800 transition-all duration-500"
       style={{
         backgroundColor:
-          wasGuessed && flipped ? category?.color + "22" : undefined,
+          wasGuessed && flipped ? (category?.color ?? "") + "22" : undefined,
         borderLeft:
           wasGuessed && flipped
             ? `4px solid ${category?.color}`
@@ -100,7 +100,13 @@ function BoardRow({
   );
 }
 
-function MissRow({ san, evalScore, category }) {
+interface MissRowProps {
+  san: string;
+  evalScore: number;
+  category: Category | null;
+}
+
+function MissRow({ san, evalScore, category }: MissRowProps) {
   return (
     <tr
       style={{ borderTop: "1px solid rgba(185, 28, 28, 0.6)" }}
@@ -121,16 +127,16 @@ function MissRow({ san, evalScore, category }) {
   );
 }
 
-const TABLE_HEAD = (
-  <thead className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-    <tr>
-      <th className="px-4 py-2 text-left font-medium w-8">#</th>
-      <th className="px-4 py-2 text-left font-medium">Move</th>
-      <th className="px-4 py-2 text-left font-medium">Quality</th>
-      <th className="px-4 py-2 text-right font-medium">Eval</th>
-    </tr>
-  </thead>
-);
+interface FamilyFeudBoardProps {
+  topMoves: TopMove[];
+  candidates: Candidate[];
+  targetMoves: number;
+  isDone: boolean;
+  strikes: number;
+  maxStrikes: number;
+  onReset: () => void;
+  resetMessage?: string;
+}
 
 export default function FamilyFeudBoard({
   topMoves,
@@ -141,8 +147,8 @@ export default function FamilyFeudBoard({
   maxStrikes,
   onReset,
   resetMessage,
-}) {
-  const [revealedMoves, setRevealedMoves] = useState(new Set());
+}: FamilyFeudBoardProps) {
+  const [revealedMoves, setRevealedMoves] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     candidates.forEach((c) => {
@@ -155,12 +161,17 @@ export default function FamilyFeudBoard({
   const hitMoves = candidates.filter((c) => !c.pending && c.isHit);
   const missMoves = candidates.filter((c) => !c.pending && c.isMiss);
   const pending = candidates.some((c) => c.pending);
-  const loading = topMoves.length === 0;
+  const isLoading = topMoves.length === 0;
 
-  const slots = topMoves.slice(0, targetMoves).map((m) => {
-    const hit = hitMoves.find((c) => c.move === m.move);
-    return { ...m, hit };
-  });
+  const slots = isLoading
+    ? Array.from({ length: targetMoves }).map((_, i) => ({
+        index: i,
+        loading: true,
+      }))
+    : topMoves.slice(0, targetMoves).map((m) => {
+        const hit = hitMoves.find((c) => c.move === m.move);
+        return { ...m, hit, loading: false };
+      });
 
   return (
     <div className="flex flex-col gap-4">
@@ -173,29 +184,49 @@ export default function FamilyFeudBoard({
 
       <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
         <table className="w-full text-sm">
-          {TABLE_HEAD}
+          <thead className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+            <tr>
+              <th className="px-4 py-2 text-left font-medium w-8">#</th>
+              <th className="px-4 py-2 text-left font-medium">Move</th>
+              <th className="px-4 py-2 text-left font-medium">Quality</th>
+              <th className="px-4 py-2 text-right font-medium">Eval</th>
+            </tr>
+          </thead>
           <tbody>
-            {loading
-              ? Array.from({ length: targetMoves }).map((_, i) => (
-                  <BoardRow key={i} rank={i + 1} loading />
-                ))
-              : slots.map((m, i) => {
-                  const isRevealed = !!m.hit || isDone;
-                  const isNew = !!m.hit && revealedMoves.has(m.hit?.move);
-                  const category = m.hit?.category ?? m.category ?? null;
-                  return (
-                    <BoardRow
-                      key={m.move}
-                      rank={i + 1}
-                      san={m.san}
-                      evalScore={m.eval}
-                      category={category}
-                      animate={isNew}
-                      wasGuessed={m.hit}
-                      hidden={!isRevealed}
-                    />
-                  );
-                })}
+            {slots.map((slot, i) => {
+              if ((slot as any).loading) {
+                return (
+                  <tr
+                    key={i}
+                    className="border-t border-gray-100 dark:border-gray-800 bg-blue-950"
+                  >
+                    <td className="px-4 py-3 text-yellow-400 font-bold w-8">
+                      {i + 1}
+                    </td>
+                    <td className="px-4 py-3" colSpan={3}>
+                      <div className="h-4 w-24 rounded bg-gray-700 animate-pulse" />
+                    </td>
+                  </tr>
+                );
+              }
+              const m = slot as TopMove & { hit?: Candidate };
+              const isRevealed = !!m.hit || isDone;
+              const isNew = !!m.hit && revealedMoves.has(m.hit.move);
+              const category = m.hit?.category ?? m.category ?? null;
+
+              return (
+                <RevealedRow
+                  key={m.move}
+                  rank={i + 1}
+                  san={m.san}
+                  evalScore={m.eval}
+                  category={category}
+                  animate={isNew}
+                  wasGuessed={!!m.hit}
+                  loading={!isRevealed}
+                />
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -212,8 +243,8 @@ export default function FamilyFeudBoard({
                   <MissRow
                     key={c.move}
                     san={c.san}
-                    evalScore={c.eval}
-                    category={c.category}
+                    evalScore={c.eval ?? 0}
+                    category={c.category ?? null}
                   />
                 ))}
               </tbody>
