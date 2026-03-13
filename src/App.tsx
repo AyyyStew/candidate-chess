@@ -4,8 +4,9 @@ import { useDarkMode } from "./hooks/useDarkMode";
 import { EngineProvider } from "./contexts/EngineContext";
 import Header from "./components/Header";
 import DailyPage from "./pages/DailyPage";
-import GamePage from "./pages/GamePage";
+import GamePage from "./pages/RandomPage";
 import StudyPage from "./pages/StudyPage";
+import PracticePage from "./pages/PracticePage";
 
 export default function App() {
   const { dark, toggleDark } = useDarkMode();
@@ -16,7 +17,8 @@ export default function App() {
       <EngineProvider>
         <Routes>
           <Route path="/" element={<DailyPage />} />
-          <Route path="/game" element={<GamePage />} />
+          <Route path="/random" element={<GamePage />} />
+          <Route path="/practice" element={<PracticePage />} />
           <Route path="/study" element={<StudyPage />} />
         </Routes>
       </EngineProvider>

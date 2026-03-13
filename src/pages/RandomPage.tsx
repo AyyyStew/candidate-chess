@@ -5,7 +5,7 @@ import { createGameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
 
-function GamePageContent() {
+function RandomPageContent() {
   const board = useBoard();
   const { ready, coordinatorRef } = useGameCoordinator();
   const sessionRef = useRef(null);
@@ -32,7 +32,9 @@ function GamePageContent() {
   if (!snap) {
     return (
       <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-center underline mb-6">Game</h1>
+        <h1 className="text-3xl font-bold text-center underline mb-6">
+          Random Game
+        </h1>
         <div className="flex items-center justify-center h-64">
           <p className="text-gray-400 animate-pulse text-lg">
             Loading position...
@@ -44,7 +46,9 @@ function GamePageContent() {
 
   return (
     <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold text-center underline mb-6">Game</h1>
+      <h1 className="text-3xl font-bold text-center underline mb-6">
+        Random Game
+      </h1>
       <div className="flex gap-8">
         <BoardPanel
           snap={snap}
@@ -75,10 +79,10 @@ function GamePageContent() {
   );
 }
 
-export default function GamePage() {
+export default function RandomPage() {
   return (
     <BoardProvider>
-      <GamePageContent />
+      <RandomPageContent />
     </BoardProvider>
   );
 }

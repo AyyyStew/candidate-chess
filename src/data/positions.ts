@@ -161,4 +161,12 @@ export const POSITIONS: Position[] = [
     moveNumber: 12,
     orientation: "black",
   },
+  {
+    id: 21,
+    fen: "r1b2rk1/pp2ppbp/3p1np1/1NpP4/1qP1P3/1P1n1N2/P2B1PPP/R2QK2R w KQ - 0 12",
+    label: "mgarciaher vs AyyyStew",
+    event: "chess.com",
+    moveNumber: 11,
+    orientation: "white",
+  },
 ];
