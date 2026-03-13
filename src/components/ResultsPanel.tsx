@@ -18,15 +18,15 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
 
   return (
     <div>
-      <div className="mb-4 px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-between">
-        <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+      <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+        Stockfish Top Moves
+      </h3>
+      <div className="border-l-4 border-gray-800 border-gray-95 mb-4 px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-900 flex items-center justify-between">
+        <span className="text-sm dark:text-gray-400 font-medium">
           Position Eval
         </span>
         <span className="font-bold text-lg">{formatEval(positionEval)}</span>
       </div>
-      <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-        Stockfish Top Moves
-      </h3>
       <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
         <table className="w-full text-sm">
           <thead className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
@@ -42,28 +42,26 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
           <tbody>
             {visibleMoves.map((m, i) => {
               const isCandidate = candidateMoves.has(m.move);
-              const rowBase = i === 0 ? "bg-green-50 dark:bg-green-950" : "bg-white dark:bg-gray-900";
               const rowStyle = {
-                borderLeft: m.category ? `4px solid ${m.category.color}` : undefined,
+                borderLeft:
+                  isCandidate && m.category
+                    ? `4px solid ${m.category.color}`
+                    : `4px solid transparent`,
+                backgroundColor:
+                  isCandidate && m.category?.color
+                    ? `${m.category.color}22`
+                    : undefined,
               };
+              const rowBase = isCandidate ? "" : "bg-white dark:bg-gray-900";
               const line = m.line.sans.slice(0, 5).join(" ");
               return (
                 <React.Fragment key={i}>
                   <tr
-                    className={`border-t border-gray-100 dark:border-gray-800 ${rowBase} ${isCandidate ? "ring-2 ring-inset ring-blue-400 dark:ring-blue-500" : ""}`}
+                    className={`border-t border-gray-100 dark:border-gray-800 ${rowBase}`}
                     style={rowStyle}
                   >
                     <td className="px-4 pt-2.5 pb-0 text-gray-400">{i + 1}</td>
-                    <td className="px-4 pt-2.5 pb-0 font-bold">
-                      <span className="flex items-center gap-2">
-                        {m.san}
-                        {isCandidate && (
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                            Your pick
-                          </span>
-                        )}
-                      </span>
-                    </td>
+                    <td className="px-4 pt-2.5 pb-0 font-bold">{m.san}</td>
                     <td
                       className="px-4 pt-2.5 pb-0 text-sm font-medium"
                       style={{ color: m.category?.color }}
@@ -88,7 +86,13 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
                   {line && (
                     <tr className={`${rowBase}`} style={rowStyle}>
                       <td />
-                      <td colSpan={5} className="px-4 pt-0.5 pb-2 text-xs font-mono text-gray-400 dark:text-gray-500">
+                      <td
+                        colSpan={5}
+                        className="px-4 pt-0.5 pb-2 text-xs font-mono text-gray-400 dark:text-gray-500"
+                      >
+                        <span className="text-gray-300 dark:text-gray-600 mr-1">
+                          line:
+                        </span>
                         {line}
                       </td>
                     </tr>
