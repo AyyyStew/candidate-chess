@@ -13,7 +13,9 @@ function DailyPageContent({ daily }) {
   const board = useBoard();
   const engine = useEnginePool();
   const sessionRef = useRef(null);
-  const [snap, setSnap] = useState(null);
+  const [snap, setSnap] = useState(
+    /** @type {import('../types').GameSnapshot|null} */ null,
+  );
   const hasStartedRef = useRef(false);
 
   const goCommand = "go depth 15";

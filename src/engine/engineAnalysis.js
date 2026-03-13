@@ -1,4 +1,5 @@
 import { getMoveCategory } from "../utils/chess";
+import { makeTopMove, makeCandidate, makeAnalysisResult } from "../types";
 
 export function createEngineAnalysis({ pool, goCommand, topMoveCount = 5 }) {
   let topMoves = null;
@@ -69,29 +70,28 @@ export function createEngineAnalysis({ pool, goCommand, topMoveCount = 5 }) {
     );
     const rankIdx = topMoves.findIndex((m) => m.move === uci);
 
-    return {
+    return makeCandidate({
       move: uci,
       san,
+      pending: false,
       eval: rawMoveEval,
       category,
       rank: rankIdx === -1 ? null : rankIdx + 1,
       diffBest: rawMoveEval - rawBestEval,
       diffPos: rawMoveEval - positionEval,
-    };
+    });
   }
 
-  function buildTopMovesResult() {
+  function buildTopMovesResult(candidates = []) {
     const rawBestEval = topMoves?.[0]?.rawEval ?? 0;
     const isBlack = lockedFen?.includes(" b ") ?? false;
-    const sliced = (topMoves ?? []).slice(0, topMoveCount);
 
-    return {
-      fen: lockedFen,
-      positionEval,
-      bestEval: rawBestEval,
-      topMoves: sliced.map((m) => ({
-        ...m,
-        eval: m.rawEval,
+    const builtTopMoves = (topMoves ?? []).slice(0, topMoveCount).map((m) =>
+      makeTopMove({
+        move: m.move,
+        san: m.san,
+        rawEval: m.rawEval,
+        bestEval: rawBestEval,
         diffBest: m.rawEval - rawBestEval,
         diffPos: m.rawEval - positionEval,
         category: getMoveCategory(
@@ -100,8 +100,17 @@ export function createEngineAnalysis({ pool, goCommand, topMoveCount = 5 }) {
           isBlack,
           rawBestEval,
         ),
-      })),
-    };
+        line: m.line ?? { moves: [], sans: [] },
+      }),
+    );
+
+    return makeAnalysisResult({
+      fen: lockedFen,
+      positionEval,
+      bestEval: rawBestEval,
+      topMoves: builtTopMoves,
+      candidates,
+    });
   }
 
   function reset() {

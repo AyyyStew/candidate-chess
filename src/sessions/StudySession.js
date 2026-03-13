@@ -1,4 +1,5 @@
 import { Chess } from "chess.js";
+import { makeCandidate } from "../types";
 
 const MAX_CANDIDATES = 10;
 
@@ -55,7 +56,10 @@ export function createStudySession({ analysis, minCandidates = 3 }) {
     const uci = `${sourceSquare}${targetSquare}`;
     if (candidates.some((c) => c.move === uci)) return false;
 
-    candidates = [...candidates, { move: uci, san: move.san }];
+    candidates = [
+      ...candidates,
+      makeCandidate({ move: uci, san: move.san, pending: false }),
+    ];
     notify();
     return true;
   }
@@ -76,8 +80,7 @@ export function createStudySession({ analysis, minCandidates = 3 }) {
       candidates.map((c) => analysis.evaluateMove(c.move, c.san)),
     );
 
-    const base = analysis.buildTopMovesResult();
-    results = { ...base, candidates: evaluated };
+    results = analysis.buildTopMovesResult(evaluated);
     phase = "done";
     notify();
   }
