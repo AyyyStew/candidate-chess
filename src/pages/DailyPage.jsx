@@ -6,7 +6,7 @@ import { createEngineAnalysis } from "../engine/engineAnalysis";
 import { createGameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
-import { getDailyPosition } from "../services/dailyService";
+import { getDailyPosition } from "../services/positionService";
 
 function DailyPageContent({ daily }) {
   const navigate = useNavigate();
