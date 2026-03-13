@@ -22,12 +22,13 @@ export interface GameSession {
 export function createGameSession({
   analysis,
   position,
-  targetMoves = 5,
+  targetMoves: initialTargetMoves = 5,
 }: GameSessionOptions): GameSession {
   let phase: "active" | "done" = "active";
   let candidates: Candidate[] = [];
   let strikes = 0;
   let hits = 0;
+  let targetMoves = initialTargetMoves;
   let onChange: ((snap: GameSnapshot) => void) | null = null;
   let analysisReady = analysis.isReady();
   let moveQueue: { uci: string; san: string }[] = [];
@@ -66,6 +67,10 @@ export function createGameSession({
   analysis.waitForAnalysis().then(() => {
     console.log("[GameSession] analysis ready, onChange is:", onChange);
     analysisReady = true;
+    const topCount = analysis.buildTopMovesResult().topMoves.length;
+    if (topCount > 0 && topCount < targetMoves) {
+      targetMoves = topCount;
+    }
     notify();
     flushQueue();
   });

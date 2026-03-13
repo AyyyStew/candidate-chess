@@ -6,6 +6,8 @@ interface FenInputProps {
   onSet: () => void;
   onSetPgn: (pgn: string) => void;
   disabled: boolean;
+  defaultMode?: "fen" | "pgn";
+  defaultPgn?: string;
 }
 
 export default function FenInput({
@@ -14,9 +16,11 @@ export default function FenInput({
   onSet,
   onSetPgn,
   disabled,
+  defaultMode,
+  defaultPgn,
 }: FenInputProps) {
-  const [mode, setMode] = useState<"fen" | "pgn">("fen");
-  const [pgnValue, setPgnValue] = useState("");
+  const [mode, setMode] = useState<"fen" | "pgn">(defaultMode ?? "fen");
+  const [pgnValue, setPgnValue] = useState(defaultPgn ?? "");
 
   const tabClass = (active: boolean) =>
     `px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${

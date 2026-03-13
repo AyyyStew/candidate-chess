@@ -8,7 +8,8 @@ interface HeaderProps {
 
 const navLinks = [
   { to: "/", label: "Daily" },
-  { to: "/game", label: "Game" },
+  { to: "/random", label: "Random" },
+  { to: "/practice", label: "Practice" },
   { to: "/study", label: "Study" },
 ];
 
