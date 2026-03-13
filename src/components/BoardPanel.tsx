@@ -36,6 +36,7 @@ export default function BoardPanel({
     moveHistory,
     historyIndex,
     handleNavigate,
+    isPreviewing,
   } = board;
 
   const isIdle = !snap;
@@ -44,7 +45,7 @@ export default function BoardPanel({
   const candidates = snap?.candidates ?? [];
   const results = snap?.results ?? null;
 
-  const candidateArrows: [Square, Square, string][] = showArrows
+  const candidateArrows: [Square, Square, string][] = showArrows && !isPreviewing
     ? [
         ...candidates.map((c): [Square, Square, string] => [
           c.move.slice(0, 2) as Square,
