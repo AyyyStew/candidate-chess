@@ -1,32 +1,23 @@
-import { useEffect, useRef, useState } from "react";
-import { createEngineCoordinator } from "../engine/engineCoordinator";
+import { useState, useEffect } from "react";
+import { useRef } from "react";
+import { useSharedCoordinator } from "../contexts/EngineContext";
 import type { EngineCoordinator } from "../engine/engineCoordinator";
 
 export function useGameCoordinator() {
-  const coordinatorRef = useRef<EngineCoordinator | null>(null);
-  const [ready, setReady] = useState(false);
+  const coordinator = useSharedCoordinator();
+  const coordinatorRef = useRef<EngineCoordinator>(coordinator);
+  const [ready, setReady] = useState(coordinator.ready);
+
+  // Keep ref in sync (coordinator is stable, but ref pattern matches GamePage's usage)
+  coordinatorRef.current = coordinator;
 
   useEffect(() => {
-    const coordinator = createEngineCoordinator();
-    coordinatorRef.current = coordinator;
-
-    coordinator.onReady(() => {
+    if (coordinator.ready) {
       setReady(true);
-      coordinator.preloadNext();
-    });
-
-    const timeout = setTimeout(() => {
-      if (!coordinatorRef.current?.ready) {
-        console.warn("[useGameCoordinator] ready timeout — forcing start");
-        setReady(true);
-      }
-    }, 10_000);
-
-    return () => {
-      clearTimeout(timeout);
-      coordinator.destroy();
-    };
-  }, []);
+      return;
+    }
+    coordinator.onReady(() => setReady(true));
+  }, [coordinator]);
 
   return { coordinatorRef, ready };
 }
