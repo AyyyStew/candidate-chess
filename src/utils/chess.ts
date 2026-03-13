@@ -13,6 +13,30 @@ export function isValidFen(fen: string): boolean {
   }
 }
 
+export function parsePgn(
+  pgn: string,
+): { moves: { san: string; fenAfter: string }[]; initialFen: string } | null {
+  try {
+    const game = new Chess();
+    game.loadPgn(pgn);
+    const sanMoves = game.history();
+    if (sanMoves.length === 0) return null;
+
+    const fenMatch = pgn.match(/\[FEN "([^"]+)"\]/i);
+    const replay = fenMatch ? new Chess(fenMatch[1]) : new Chess();
+    const initialFen = replay.fen();
+
+    const moves: { san: string; fenAfter: string }[] = [];
+    for (const san of sanMoves) {
+      replay.move(san);
+      moves.push({ san, fenAfter: replay.fen() });
+    }
+    return { moves, initialFen };
+  } catch {
+    return null;
+  }
+}
+
 export function formatEval(value: number | undefined | null): string {
   if (value === undefined || value === null) return "-";
   return (value > 0 ? "+" : "") + value.toFixed(2);
