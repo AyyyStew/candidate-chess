@@ -106,6 +106,7 @@ function PracticePageContent() {
           snap={snap}
           onDrop={(from, to) => sessionRef.current!.submitMove(from, to)}
           locked={true}
+          onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
         />
         <div className="flex-1 flex flex-col gap-5">
           <GamePanel
@@ -116,7 +117,6 @@ function PracticePageContent() {
                 : null
             }
             onNext={handleReset}
-            onStudy={(fen) => navigate("/study", { state: { fen } })}
             resetMessage="Play Again"
           />
         </div>

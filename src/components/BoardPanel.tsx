@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Chessboard } from "react-chessboard";
 import MoveHistory from "./MoveHistory";
 import { useBoard } from "../contexts/BoardContext";
+import StudyFromPositionButton from "./StudyFromPositionButton";
 import type { GameSnapshot } from "../types";
 import type { Square } from "chess.js";
 
@@ -19,6 +20,7 @@ interface BoardPanelProps {
   locked?: boolean;
   gameInfo?: React.ReactNode;
   onReset?: () => void;
+  onStudyFromPosition?: () => void;
 }
 
 export default function BoardPanel({
@@ -27,6 +29,7 @@ export default function BoardPanel({
   locked = false,
   gameInfo,
   onReset,
+  onStudyFromPosition,
 }: BoardPanelProps) {
   const [showArrows, setShowArrows] = useState(true);
   const board = useBoard();
@@ -119,6 +122,9 @@ export default function BoardPanel({
         arePiecesDraggable={isIdle || isActive}
         customArrows={candidateArrows}
       />
+      {onStudyFromPosition && (
+        <StudyFromPositionButton onStudy={onStudyFromPosition} />
+      )}
       {!locked && (
         <>
           <MoveHistory

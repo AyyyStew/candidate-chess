@@ -63,6 +63,7 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
           snap={snap}
           onDrop={(from, to) => sessionRef.current.submitMove(from, to)}
           locked={true}
+          onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
           gameInfo={
             <div className="text-right">
               <div className="font-semibold text-blue-700 dark:text-blue-200">
@@ -81,7 +82,6 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
               snap.phase === "done" ? sessionRef.current.getResults() : null
             }
             onNext={() => navigate("/game")}
-            onStudy={(fen) => navigate("/study", { state: { fen } })}
           />
         </div>
       </div>

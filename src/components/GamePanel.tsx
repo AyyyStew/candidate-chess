@@ -6,11 +6,10 @@ interface GamePanelProps {
   snap: GameSnapshot;
   results: AnalysisResult | null;
   onNext: () => void;
-  onStudy?: (fen: string) => void;
   resetMessage?: string;
 }
 
-export default function GamePanel({ snap, results, onNext, onStudy, resetMessage }: GamePanelProps) {
+export default function GamePanel({ snap, results, onNext, resetMessage }: GamePanelProps) {
   const isDone = snap.phase === "done";
   const topMoves = isDone
     ? (results?.topMoves ?? [])
@@ -35,7 +34,6 @@ export default function GamePanel({ snap, results, onNext, onStudy, resetMessage
       strikes={snap.strikes}
       maxStrikes={snap.maxStrikes}
       onReset={onNext}
-      onStudy={onStudy}
       resetMessage={resetMessage ?? "Next Position"}
     />
   );
