@@ -3,7 +3,13 @@ import { Chessboard } from "react-chessboard";
 import MoveHistory from "./MoveHistory";
 import { useBoard } from "../contexts/BoardContext";
 
-export default function BoardPanel({ snap, onDrop, locked = false, gameInfo }) {
+export default function BoardPanel({
+  snap,
+  onDrop,
+  locked = false,
+  gameInfo,
+  onReset,
+}) {
   const [showArrows, setShowArrows] = useState(true);
   const board = useBoard();
   const {
@@ -99,7 +105,11 @@ export default function BoardPanel({ snap, onDrop, locked = false, gameInfo }) {
           />
           <button
             onClick={() => {
-              board.reset();
+              if (onReset) {
+                onReset();
+              } else {
+                board.reset();
+              }
             }}
             className="mt-2 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-red-500 dark:hover:bg-red-700 hover:text-white transition-colors"
           >

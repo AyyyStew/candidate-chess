@@ -95,14 +95,14 @@ export default function AnalysisSettings({
       <div className="flex flex-col gap-1">
         <div className="flex justify-between text-sm">
           <label className="text-gray-600 dark:text-gray-300 font-medium">
-            Top Moves Shown
+            Top Moves Generated
           </label>
           <span className="font-bold">{topMoves}</span>
         </div>
         <input
           type="range"
           min={3}
-          max={10}
+          max={20}
           value={topMoves}
           onChange={(e) => onTopMovesChange(Number(e.target.value))}
           className="w-full accent-blue-600"
@@ -117,7 +117,7 @@ export default function AnalysisSettings({
       <div className="flex flex-col gap-1">
         <div className="flex justify-between text-sm">
           <label className="text-gray-600 dark:text-gray-300 font-medium">
-            Candidate Limit
+            Minimum Candidates Required
           </label>
           <span className="font-bold">{candidateLimit}</span>
         </div>

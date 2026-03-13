@@ -1,6 +1,6 @@
 import { getMoveCategory } from "../utils/chess";
 
-export function createEngineAnalysis({ pool, goCommand }) {
+export function createEngineAnalysis({ pool, goCommand, topMoveCount = 5 }) {
   let topMoves = null;
   let positionEval = null;
   let lockedFen = null;
@@ -83,11 +83,13 @@ export function createEngineAnalysis({ pool, goCommand }) {
   function buildTopMovesResult() {
     const rawBestEval = topMoves?.[0]?.rawEval ?? 0;
     const isBlack = lockedFen?.includes(" b ") ?? false;
+    const sliced = (topMoves ?? []).slice(0, topMoveCount);
+
     return {
       fen: lockedFen,
       positionEval,
       bestEval: rawBestEval,
-      topMoves: (topMoves ?? []).map((m) => ({
+      topMoves: sliced.map((m) => ({
         ...m,
         eval: m.rawEval,
         diffBest: m.rawEval - rawBestEval,
