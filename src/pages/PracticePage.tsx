@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
@@ -20,6 +21,7 @@ function extractPgnMeta(pgn: string): { label: string; event: string } {
 }
 
 function PracticePageContent() {
+  const navigate = useNavigate();
   const board = useBoard();
   const engine = useEnginePool();
   const sessionRef = useRef<ReturnType<typeof createGameSession> | null>(null);
@@ -114,6 +116,7 @@ function PracticePageContent() {
                 : null
             }
             onNext={handleReset}
+            onStudy={(fen) => navigate("/study", { state: { fen } })}
             resetMessage="Play Again"
           />
         </div>

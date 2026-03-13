@@ -81,6 +81,7 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
               snap.phase === "done" ? sessionRef.current.getResults() : null
             }
             onNext={() => navigate("/game")}
+            onStudy={(fen) => navigate("/study", { state: { fen } })}
           />
         </div>
       </div>

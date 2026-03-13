@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
@@ -8,6 +9,7 @@ import FenInput from "../components/FenInput";
 import AnalysisSettings from "../components/AnalysisSettings";
 import CandidateList from "../components/CandidateList";
 import ResultsPanel from "../components/ResultsPanel";
+import StudyFromPositionButton from "../components/StudyFromPositionButton";
 import { Candidate } from "../types";
 
 const MAX_CANDIDATES = 10;
@@ -157,14 +159,7 @@ function StudyPageContent() {
               onRemove={null}
             />
             <ResultsPanel results={snap.results} onReset={handleReset} />
-            {board.isPreviewing && (
-              <button
-                onClick={handleStudyFromPreview}
-                className="w-full py-2.5 rounded-xl font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
-              >
-                Study this position →
-              </button>
-            )}
+            <StudyFromPositionButton onStudy={handleStudyFromPreview} />
           </>
         )}
       </div>
@@ -173,8 +168,10 @@ function StudyPageContent() {
 }
 
 export default function StudyPage() {
+  const location = useLocation();
+  const initialFen = (location.state as { fen?: string } | null)?.fen;
   return (
-    <BoardProvider>
+    <BoardProvider initialFen={initialFen}>
       <StudyPageContent />
     </BoardProvider>
   );
