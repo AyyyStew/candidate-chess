@@ -47,6 +47,11 @@ export function createStudySession({
   }
 
   function start(fen: string): void {
+    const game = new Chess(fen);
+    const legalMoveCount = game.moves().length;
+    // Cap minCandidates to legal move count so compare is always reachable
+    minCandidates = Math.min(minCandidates, legalMoveCount);
+
     lockedFen = fen;
     candidates = [];
     results = null;
