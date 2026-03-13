@@ -14,6 +14,15 @@ export default function GamePanel({ snap, results, onNext }: GamePanelProps) {
     ? (results?.topMoves ?? [])
     : (snap.liveTopMoves ?? []);
 
+  console.log(
+    "[GamePanel] isDone:",
+    isDone,
+    "topMoves:",
+    topMoves.length,
+    "liveTopMoves:",
+    snap.liveTopMoves?.length,
+  );
+
   return (
     <FamilyFeudBoard
       topMoves={topMoves}

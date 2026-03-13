@@ -38,7 +38,7 @@ export function createGameSession({
   }
 
   function getSnapshot(): GameSnapshot {
-    return {
+    const snap = {
       phase,
       fen: position.fen,
       orientation: position.orientation,
@@ -54,9 +54,17 @@ export function createGameSession({
         : [],
       analysisReady,
     };
+    console.log(
+      "[GameSession] getSnapshot liveTopMoves:",
+      snap.liveTopMoves.length,
+      "analysisReady:",
+      snap.analysisReady,
+    );
+    return snap;
   }
 
   analysis.waitForAnalysis().then(() => {
+    console.log("[GameSession] analysis ready, onChange is:", onChange);
     analysisReady = true;
     notify();
     flushQueue();
