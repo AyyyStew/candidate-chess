@@ -1,11 +1,9 @@
-// FILE: src/hooks/useEnginePool.js
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Chess } from "chess.js";
 
 function createEngineInstance() {
   function makeWorker(multiPV) {
     const worker = new Worker("/stockfish.js");
-    // Use addEventListener so multiple handlers can coexist
     worker.postMessage("uci");
     worker.postMessage(`setoption name MultiPV value ${multiPV}`);
     worker.postMessage("isready");
@@ -16,7 +14,6 @@ function createEngineInstance() {
   const evaluateWorker = makeWorker(1);
   const positionWorker = makeWorker(1);
 
-  // --- Ready handshake ---
   let readyCount = 0;
   let readyResolve = null;
   let isReady = false;
@@ -26,7 +23,6 @@ function createEngineInstance() {
 
   function onReady(event) {
     if (typeof event.data !== "string") return;
-
     if (event.data.trim() === "readyok") {
       readyCount += 1;
       if (readyCount >= 3) {
@@ -39,9 +35,6 @@ function createEngineInstance() {
   evaluateWorker.addEventListener("message", onReady);
   positionWorker.addEventListener("message", onReady);
 
-  // --- Per-worker serial job queues ---
-  // Each worker processes one job at a time; jobs are queued and dispatched
-  // in order. This prevents onmessage stomping entirely.
   function makeQueue(worker) {
     let running = false;
     const queue = [];
@@ -60,7 +53,7 @@ function createEngineInstance() {
           running = false;
           queue.shift();
           onDone();
-          dispatch(); // next job
+          dispatch();
         }
       };
 
@@ -75,11 +68,7 @@ function createEngineInstance() {
       });
     }
 
-    function stop() {
-      worker.postMessage("stop");
-    }
-
-    return { enqueue, stop };
+    return { enqueue };
   }
 
   const analyzeQueue = makeQueue(analyzeWorker);
@@ -107,33 +96,50 @@ function createEngineInstance() {
 
     return analyzeQueue
       .enqueue(commands, (line) => {
-        if (line.startsWith("info") && line.includes("multipv")) {
-          const pvMatch = line.match(/multipv (\d+).*pv (\S+)/);
-          const scoreMatch = line.match(/score cp (-?\d+)/);
-          const infoDepth = line.match(/depth (\d+)/);
-          const depthOk = targetDepth
-            ? parseInt(infoDepth?.[1]) === targetDepth
-            : true;
-          if (pvMatch && scoreMatch && depthOk) {
-            const uciMove = pvMatch[2];
-            const tempGame = new Chess(fen);
-            let san = uciMove;
-            try {
-              const m = tempGame.move({
-                from: uciMove.slice(0, 2),
-                to: uciMove.slice(2, 4),
-                promotion: "q",
-              });
-              san = m.san;
-            } catch {}
-            const rawScore = parseInt(scoreMatch[1]) / 100;
-            results[pvMatch[1]] = {
-              move: uciMove,
-              san,
-              rawEval: isBlack ? -rawScore : rawScore,
-            };
+        if (!line.startsWith("info") || !line.includes("multipv")) return;
+
+        const pvMatch = line.match(/multipv (\d+)/);
+        const scoreMatch = line.match(/score cp (-?\d+)/);
+        const depthInfo = line.match(/depth (\d+)/);
+        const pvMovesMatch = line.match(/ pv (.+)$/);
+
+        if (!pvMatch || !scoreMatch) return;
+        if (targetDepth && parseInt(depthInfo?.[1]) !== targetDepth) return;
+
+        const pvIndex = pvMatch[1];
+        const uciMoves = pvMovesMatch ? pvMovesMatch[1].trim().split(" ") : [];
+        const uciMove = uciMoves[0];
+        if (!uciMove) return;
+
+        // Convert full PV to SAN
+        const sans = [];
+        try {
+          const tempGame = new Chess(fen);
+          for (const uci of uciMoves) {
+            const m = tempGame.move({
+              from: uci.slice(0, 2),
+              to: uci.slice(2, 4),
+              promotion: uci[4] ?? "q",
+            });
+            if (!m) break;
+            sans.push(m.san);
           }
+        } catch {
+          /* empty */
         }
+
+        const firstSan = sans[0] ?? uciMove;
+        const rawScore = parseInt(scoreMatch[1]) / 100;
+
+        results[pvIndex] = {
+          move: uciMove,
+          san: firstSan,
+          rawEval: isBlack ? -rawScore : rawScore,
+          line: {
+            moves: uciMoves,
+            sans,
+          },
+        };
       })
       .then(() => Object.values(results).slice(0, topMovesCount));
   }
@@ -142,14 +148,11 @@ function createEngineInstance() {
     const isBlack = fen.includes(" b ");
     let lastEval = null;
 
-    const commands = ["stop", `position fen ${fen}`, goCommand];
-
     return positionQueue
-      .enqueue(commands, (line) => {
-        if (line.startsWith("info") && line.includes("score cp")) {
-          const scoreMatch = line.match(/score cp (-?\d+)/);
-          if (scoreMatch) lastEval = parseInt(scoreMatch[1]) / 100;
-        }
+      .enqueue(["stop", `position fen ${fen}`, goCommand], (line) => {
+        if (!line.startsWith("info") || !line.includes("score cp")) return;
+        const m = line.match(/score cp (-?\d+)/);
+        if (m) lastEval = parseInt(m[1]) / 100;
       })
       .then(() => (lastEval !== null ? (isBlack ? -lastEval : lastEval) : 0));
   }
@@ -160,19 +163,16 @@ function createEngineInstance() {
     game.move({
       from: move.slice(0, 2),
       to: move.slice(2, 4),
-      promotion: "q",
+      promotion: move[4] ?? "q",
     });
     const fenAfter = game.fen();
     let lastEval = null;
 
-    const commands = ["stop", `position fen ${fenAfter}`, goCommand];
-
     return evaluateQueue
-      .enqueue(commands, (line) => {
-        if (line.startsWith("info") && line.includes("score cp")) {
-          const scoreMatch = line.match(/score cp (-?\d+)/);
-          if (scoreMatch) lastEval = parseInt(scoreMatch[1]) / 100;
-        }
+      .enqueue(["stop", `position fen ${fenAfter}`, goCommand], (line) => {
+        if (!line.startsWith("info") || !line.includes("score cp")) return;
+        const m = line.match(/score cp (-?\d+)/);
+        if (m) lastEval = parseInt(m[1]) / 100;
       })
       .then(() => {
         const raw = lastEval !== null ? -lastEval : 0;
@@ -224,10 +224,10 @@ export function useEnginePool() {
     }
     spawnStandby();
   }, []);
+
   function preloadAnalysis(fen, topMovesCount, goCommand) {
     const standby = standbyRef.current;
     if (!standby) return Promise.resolve(null);
-
     return standby.readyPromise.then(() =>
       Promise.all([
         standby.getTopMoves(fen, topMovesCount, goCommand),
@@ -236,24 +236,13 @@ export function useEnginePool() {
     );
   }
 
-  function getTopMoves(fen, topMovesCount, goCommand) {
-    return activeRef.current.getTopMoves(fen, topMovesCount, goCommand);
-  }
-
-  function getPositionEval(fen, goCommand) {
-    return activeRef.current.getPositionEval(fen, goCommand);
-  }
-
-  function getRawMoveEval(fen, move, goCommand) {
-    return activeRef.current.getRawMoveEval(fen, move, goCommand);
-  }
-
   return {
     ready,
     rotate,
     preloadAnalysis,
-    getTopMoves,
-    getPositionEval,
-    getRawMoveEval,
+    getTopMoves: (fen, n, cmd) => activeRef.current.getTopMoves(fen, n, cmd),
+    getPositionEval: (fen, cmd) => activeRef.current.getPositionEval(fen, cmd),
+    getRawMoveEval: (fen, move, cmd) =>
+      activeRef.current.getRawMoveEval(fen, move, cmd),
   };
 }

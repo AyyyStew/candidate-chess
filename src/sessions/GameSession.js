@@ -1,4 +1,5 @@
 import { Chess } from "chess.js";
+import { makeCandidate } from "../types";
 
 const MAX_STRIKES = 3;
 
@@ -35,7 +36,6 @@ export function createGameSession({ analysis, position, targetMoves = 5 }) {
     };
   }
 
-  // When analysis becomes ready, flush any queued moves
   analysis.waitForAnalysis().then(() => {
     analysisReady = true;
     notify();
@@ -63,7 +63,7 @@ export function createGameSession({ analysis, position, targetMoves = 5 }) {
 
     candidates = candidates.map((c) =>
       c.move === uci
-        ? { ...evaluated, pending: false, isHit, isMiss: !isHit }
+        ? makeCandidate({ ...evaluated, pending: false, isHit, isMiss: !isHit })
         : c,
     );
 
@@ -89,17 +89,16 @@ export function createGameSession({ analysis, position, targetMoves = 5 }) {
     if (!move) return;
 
     const uci = `${sourceSquare}${targetSquare}`;
-
-    // Block duplicates including queued moves
     const alreadyQueued = moveQueue.some((m) => m.uci === uci);
     if (candidates.some((c) => c.move === uci) || alreadyQueued) return;
 
-    // Always show as pending immediately
-    candidates = [...candidates, { move: uci, san: move.san, pending: true }];
+    candidates = [
+      ...candidates,
+      makeCandidate({ move: uci, san: move.san, pending: true }),
+    ];
     notify();
 
     if (!analysisReady) {
-      // Queue it — will be processed when engine is ready
       moveQueue.push({ uci, san: move.san });
       return;
     }
@@ -108,10 +107,7 @@ export function createGameSession({ analysis, position, targetMoves = 5 }) {
   }
 
   function getResults() {
-    return {
-      ...analysis.buildTopMovesResult(),
-      candidates,
-    };
+    return analysis.buildTopMovesResult(candidates);
   }
 
   return {
