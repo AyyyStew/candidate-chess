@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { BoardProvider } from "../contexts/BoardContext";
+import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
 import { createGameSession } from "../sessions/GameSession";
@@ -10,6 +10,7 @@ import { getDailyPosition } from "../services/positionService";
 
 function DailyPageContent({ daily }) {
   const navigate = useNavigate();
+  const board = useBoard();
   const engine = useEnginePool();
   const sessionRef = useRef(null);
   const [snap, setSnap] = useState(
