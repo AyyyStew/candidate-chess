@@ -78,7 +78,7 @@ export default function CandidateList({
                       {formatEval(c.eval)}
                     </span>
                     <span className="text-gray-400 text-xs">
-                      {formatEval(c.diffBest)} vs best
+                      {formatEval(c.diffBest)} ΔBest
                     </span>
                   </span>
                 )}
@@ -93,6 +93,9 @@ export default function CandidateList({
               </div>
               {isDone && c.line && c.line.sans.length > 0 && (
                 <span className="mt-1 pl-7 text-xs font-mono text-gray-400 dark:text-gray-500">
+                  <span className="text-gray-300 dark:text-gray-600 mr-1">
+                    line:
+                  </span>
                   {c.line.sans.slice(0, 5).join(" ")}
                 </span>
               )}
