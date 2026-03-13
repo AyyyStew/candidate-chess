@@ -1,31 +1,57 @@
 import { getMoveCategory } from "../utils/chess";
 import { makeTopMove, makeCandidate, makeAnalysisResult } from "../types";
+import type { TopMove, Candidate, AnalysisResult } from "../types";
+import type { EnginePool } from "./enginePool";
 
-export function createEngineAnalysis({ pool, goCommand, topMoveCount = 5 }) {
-  let topMoves = null;
-  let positionEval = null;
-  let lockedFen = null;
-  let readyResolve = null;
+interface EngineAnalysisOptions {
+  pool: EnginePool;
+  goCommand: string;
+  topMoveCount?: number;
+}
 
-  function isAnalysisReady() {
-    return topMoves?.length > 0 && positionEval !== null;
+export interface EngineAnalysis {
+  startAnalysis: (fen: string) => void;
+  loadPrecomputed: (
+    fen: string,
+    topMoves: TopMove[],
+    positionEval: number,
+  ) => void;
+  evaluateMove: (uci: string, san: string) => Promise<Candidate>;
+  buildTopMovesResult: (candidates?: Candidate[]) => AnalysisResult;
+  reset: () => void;
+  waitForAnalysis: () => Promise<void>;
+  isReady: () => boolean;
+}
+
+export function createEngineAnalysis({
+  pool,
+  goCommand,
+  topMoveCount = 5,
+}: EngineAnalysisOptions): EngineAnalysis {
+  let topMoves: TopMove[] | null = null;
+  let positionEval: number | null = null;
+  let lockedFen: string | null = null;
+  let readyResolve: (() => void) | null = null;
+
+  function isAnalysisReady(): boolean {
+    return (topMoves?.length ?? 0) > 0 && positionEval !== null;
   }
 
-  function notifyReady() {
+  function notifyReady(): void {
     if (isAnalysisReady() && readyResolve) {
       readyResolve();
       readyResolve = null;
     }
   }
 
-  function waitForAnalysis() {
+  function waitForAnalysis(): Promise<void> {
     if (isAnalysisReady()) return Promise.resolve();
     return new Promise((resolve) => {
       readyResolve = resolve;
     });
   }
 
-  function startAnalysis(fen) {
+  function startAnalysis(fen: string): void {
     console.log("[engineAnalysis] startAnalysis", fen);
     lockedFen = fen;
     topMoves = null;
@@ -45,30 +71,34 @@ export function createEngineAnalysis({ pool, goCommand, topMoveCount = 5 }) {
     });
   }
 
-  function loadPrecomputed(fen, precomputedTopMoves, precomputedEval) {
+  function loadPrecomputed(
+    fen: string,
+    precomputedTopMoves: TopMove[],
+    precomputedEval: number,
+  ): void {
     lockedFen = fen;
     topMoves = precomputedTopMoves;
     positionEval = precomputedEval;
     readyResolve = null;
   }
 
-  async function evaluateMove(uci, san) {
+  async function evaluateMove(uci: string, san: string): Promise<Candidate> {
     await waitForAnalysis();
-    const isBlack = lockedFen.includes(" b ");
-    const rawBestEval = topMoves[0]?.rawEval ?? 0;
+    const isBlack = lockedFen!.includes(" b ");
+    const rawBestEval = topMoves![0]?.rawEval ?? 0;
 
-    const topMove = topMoves.find((m) => m.move === uci);
+    const topMove = topMoves!.find((m) => m.move === uci);
     const rawMoveEval = topMove
       ? topMove.rawEval
-      : await pool.getRawMoveEval(lockedFen, uci, goCommand);
+      : await pool.getRawMoveEval(lockedFen!, uci, goCommand);
 
     const category = getMoveCategory(
-      positionEval,
+      positionEval!,
       rawMoveEval,
       isBlack,
       rawBestEval,
     );
-    const rankIdx = topMoves.findIndex((m) => m.move === uci);
+    const rankIdx = topMoves!.findIndex((m) => m.move === uci);
 
     return makeCandidate({
       move: uci,
@@ -78,24 +108,24 @@ export function createEngineAnalysis({ pool, goCommand, topMoveCount = 5 }) {
       category,
       rank: rankIdx === -1 ? null : rankIdx + 1,
       diffBest: rawMoveEval - rawBestEval,
-      diffPos: rawMoveEval - positionEval,
+      diffPos: rawMoveEval - positionEval!,
     });
   }
 
-  function buildTopMovesResult(candidates = []) {
+  function buildTopMovesResult(candidates: Candidate[] = []): AnalysisResult {
     const rawBestEval = topMoves?.[0]?.rawEval ?? 0;
     const isBlack = lockedFen?.includes(" b ") ?? false;
+    const safePositionEval = positionEval ?? 0;
 
     const builtTopMoves = (topMoves ?? []).slice(0, topMoveCount).map((m) =>
       makeTopMove({
         move: m.move,
         san: m.san,
         rawEval: m.rawEval,
-        bestEval: rawBestEval,
         diffBest: m.rawEval - rawBestEval,
-        diffPos: m.rawEval - positionEval,
+        diffPos: m.rawEval - safePositionEval,
         category: getMoveCategory(
-          positionEval,
+          safePositionEval,
           m.rawEval,
           isBlack,
           rawBestEval,
@@ -105,15 +135,15 @@ export function createEngineAnalysis({ pool, goCommand, topMoveCount = 5 }) {
     );
 
     return makeAnalysisResult({
-      fen: lockedFen,
-      positionEval,
+      fen: lockedFen ?? "",
+      positionEval: safePositionEval,
       bestEval: rawBestEval,
       topMoves: builtTopMoves,
       candidates,
     });
   }
 
-  function reset() {
+  function reset(): void {
     topMoves = null;
     positionEval = null;
     lockedFen = null;

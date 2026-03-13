@@ -1,6 +1,18 @@
 import React from "react";
 
-export default function FenInput({ value, onChange, onSet, disabled }) {
+interface FenInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSet: () => void;
+  disabled: boolean;
+}
+
+export default function FenInput({
+  value,
+  onChange,
+  onSet,
+  disabled,
+}: FenInputProps) {
   return (
     <div className="flex gap-2">
       <input

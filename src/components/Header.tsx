@@ -1,13 +1,18 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
+interface HeaderProps {
+  dark: boolean;
+  onToggle: () => void;
+}
+
 const navLinks = [
   { to: "/", label: "Daily" },
   { to: "/game", label: "Game" },
   { to: "/study", label: "Study" },
 ];
 
-export default function Header({ dark, onToggle }) {
+export default function Header({ dark, onToggle }: HeaderProps) {
   return (
     <header className="flex items-center justify-between px-8 py-4 border-b border-gray-200 dark:border-gray-800">
       <h1 className="text-xl font-bold tracking-tight">♟ Candidate Chess</h1>

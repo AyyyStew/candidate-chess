@@ -1,10 +1,15 @@
-// FILE: src/components/GamePanel.jsx
 import React from "react";
 import FamilyFeudBoard from "./FamilyFeudBoard";
+import type { GameSnapshot, AnalysisResult } from "../types";
 
-export default function GamePanel({ snap, results, onNext }) {
+interface GamePanelProps {
+  snap: GameSnapshot;
+  results: AnalysisResult | null;
+  onNext: () => void;
+}
+
+export default function GamePanel({ snap, results, onNext }: GamePanelProps) {
   const isDone = snap.phase === "done";
-  // Use results.topMoves when done, live top moves while playing
   const topMoves = isDone
     ? (results?.topMoves ?? [])
     : (snap.liveTopMoves ?? []);

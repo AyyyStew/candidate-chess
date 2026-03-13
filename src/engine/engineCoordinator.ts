@@ -1,16 +1,42 @@
-// FILE: src/engine/engineCoordinator.js
 import { createEnginePool } from "./enginePool";
 import { createEngineAnalysis } from "./engineAnalysis";
+import type { EngineAnalysis } from "./engineAnalysis";
+import type { Position } from "../types";
 import { getRandomPosition } from "../services/positionService";
+
+interface CoordinatorOptions {
+  goCommand?: string;
+  searchMoveCount?: number;
+}
+
+interface AdvanceResult {
+  position: Position;
+  analysis: EngineAnalysis;
+  preloaded: boolean;
+}
+
+interface PreloadedPosition {
+  position: Position;
+  topMoves: any[];
+  positionEval: number;
+}
+
+export interface EngineCoordinator {
+  onReady: (cb: () => void) => void;
+  preloadNext: () => void;
+  advance: () => Promise<AdvanceResult>;
+  destroy: () => void;
+  readonly ready: boolean;
+}
 
 export function createEngineCoordinator({
   goCommand = "go depth 15",
   searchMoveCount = 20,
-} = {}) {
+}: CoordinatorOptions = {}): EngineCoordinator {
   const pool = createEnginePool();
-  let nextPosition = null;
+  let nextPosition: PreloadedPosition | null = null;
   let preloading = false;
-  let readyCallback = null;
+  let readyCallback: (() => void) | null = null;
   let isReady = false;
 
   pool.onReady(() => {
@@ -20,7 +46,7 @@ export function createEngineCoordinator({
     readyCallback?.();
   });
 
-  function preloadNext() {
+  function preloadNext(): void {
     if (preloading) return;
     preloading = true;
     const position = getRandomPosition();
@@ -34,7 +60,7 @@ export function createEngineCoordinator({
       });
   }
 
-  async function advance() {
+  async function advance(): Promise<AdvanceResult> {
     const cached = nextPosition;
     nextPosition = null;
     pool.rotate();
@@ -61,14 +87,13 @@ export function createEngineCoordinator({
     return { position, analysis, preloaded: false };
   }
 
-  function destroy() {
+  function destroy(): void {
     pool.destroy();
   }
 
   return {
-    onReady(cb) {
+    onReady(cb: () => void) {
       readyCallback = cb;
-      // Fire immediately if pool is already ready
       if (isReady) {
         cb();
       } else if (pool.isReady()) {

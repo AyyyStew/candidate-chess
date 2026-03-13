@@ -1,25 +1,20 @@
-// src/data/positionService.js
-// All position fetching goes through here.
-// Swap function bodies for fetch() calls when you have a real backend.
-// The rest of the app never imports from positions.js directly.
-
+import type { Position } from "../types";
 import { POSITIONS } from "../data/positions";
 
-export function getRandomPosition() {
+export function getRandomPosition(): Position {
   const index = Math.floor(Math.random() * POSITIONS.length);
   return POSITIONS[index];
 }
 
-export function getDailyPosition() {
+export function getDailyPosition(): Position {
   const dayIndex =
     Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % POSITIONS.length;
   return POSITIONS[dayIndex];
 }
 
-export function getPositionById(id) {
+export function getPositionById(id: number): Position | null {
   return POSITIONS.find((p) => p.id === id) ?? null;
 }
-
 // Future: swap this for a fetch() call
 // export async function getRandomPosition() {
 //   const res = await fetch("/api/positions/random");
