@@ -22,6 +22,19 @@ export interface TopMove {
   line: PVLine;
 }
 
+// The pure analysis result for a single move — no game state.
+// Sessions use this to assemble a Candidate with their own game fields.
+export interface EvaluatedMove {
+  move: string;
+  san: string;
+  eval: number;
+  rank: number | null;
+  category: Category | null;
+  diffBest: number;
+  diffPos: number;
+  line: PVLine;
+}
+
 export interface Candidate {
   move: string;
   san: string;

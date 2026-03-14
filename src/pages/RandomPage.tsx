@@ -71,9 +71,6 @@ function RandomPageContent() {
         <div className="flex-1 flex flex-col gap-5">
           <GamePanel
             snap={snap}
-            results={
-              snap.phase === "done" ? sessionRef.current.getResults() : null
-            }
             onNext={startNext}
           />
         </div>

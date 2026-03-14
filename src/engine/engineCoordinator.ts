@@ -35,12 +35,11 @@ export function buildFromPvs(
       eval: rawEval,
       diffBest: 0,
       diffPos: 0,
-      category: null,
+      category: null as TopMove["category"],
       line: { moves: uciMoves, sans },
     };
   });
   const positionEval = topMoves[0]?.rawEval ?? 0;
-  console.log("[engineCoordinator] buildFromPvs topMoves count:", topMoves.length, topMoves.map(m => m.move));
   return { topMoves, positionEval };
 }
 

@@ -1,5 +1,5 @@
 import { Chess } from "chess.js";
-import { makeCandidate } from "../types";
+import { makeCandidate, makeAnalysisResult } from "../types";
 import type { Candidate, GameSnapshot, AnalysisResult } from "../types";
 import type { EngineAnalysis } from "../engine/engineAnalysis";
 import type { Position } from "../types";
@@ -24,7 +24,6 @@ export function createGameSession({
   position,
   targetMoves: initialTargetMoves = 5,
 }: GameSessionOptions): GameSession {
-  console.log("[GameSession] init — position.pvs?.length:", position.pvs?.length, "initialTargetMoves:", initialTargetMoves);
   let phase: "active" | "done" = "active";
   let candidates: Candidate[] = [];
   let strikes = 0;
@@ -40,7 +39,7 @@ export function createGameSession({
   }
 
   function getSnapshot(): GameSnapshot {
-    const snap = {
+    return {
       phase,
       fen: position.fen,
       orientation: position.orientation,
@@ -51,24 +50,14 @@ export function createGameSession({
       strikes,
       maxStrikes: MAX_STRIKES,
       targetMoves,
-      liveTopMoves: analysisReady
-        ? analysis.buildTopMovesResult().topMoves
-        : [],
+      liveTopMoves: analysisReady ? analysis.getTopMoves() : [],
       analysisReady,
     };
-    console.log(
-      "[GameSession] getSnapshot liveTopMoves:",
-      snap.liveTopMoves.length,
-      "analysisReady:",
-      snap.analysisReady,
-    );
-    return snap;
   }
 
   analysis.waitForAnalysis().then(() => {
-    console.log("[GameSession] analysis ready, onChange is:", onChange);
     analysisReady = true;
-    const topCount = analysis.buildTopMovesResult().topMoves.length;
+    const topCount = analysis.getTopMoves().length;
     if (topCount > 0 && topCount < targetMoves) {
       targetMoves = topCount;
     }
@@ -90,17 +79,14 @@ export function createGameSession({
     if (strikes >= MAX_STRIKES || hits >= targetMoves) return;
 
     const evaluated = await analysis.evaluateMove(uci, san);
-    const isHit =
-      evaluated.rank !== null &&
-      evaluated.rank !== undefined &&
-      evaluated.rank <= targetMoves;
+    const isHit = evaluated.rank !== null && evaluated.rank <= targetMoves;
 
     if (isHit) hits++;
     else strikes++;
 
     candidates = candidates.map((c) =>
       c.move === uci
-        ? makeCandidate({ ...evaluated, pending: false, isHit, isMiss: !isHit })
+        ? { ...evaluated, pending: false, isHit, isMiss: !isHit }
         : c,
     );
 
@@ -147,7 +133,14 @@ export function createGameSession({
   }
 
   function getResults(): AnalysisResult {
-    return analysis.buildTopMovesResult(candidates);
+    const topMoves = analysis.getTopMoves();
+    return makeAnalysisResult({
+      fen: position.fen,
+      positionEval: analysis.getPositionEval(),
+      bestEval: topMoves[0]?.rawEval ?? 0,
+      topMoves,
+      candidates: [...candidates],
+    });
   }
 
   return {
