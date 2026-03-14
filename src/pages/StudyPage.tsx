@@ -76,15 +76,14 @@ function StudyPageContent() {
 
   return (
     <main className="flex gap-8 p-8 max-w-6xl mx-auto">
-      <div className="sticky top-8 self-start">
-        <BoardPanel
-          snap={boardSnap}
-          onDrop={handleDrop}
-          locked={false}
-          onReset={handleClearBoard}
-          onStudyFromPosition={handleStudyFromPreview}
-        />
-      </div>
+      <BoardPanel
+        snap={boardSnap}
+        onDrop={handleDrop}
+        locked={false}
+        onReset={handleClearBoard}
+        onStudyFromPosition={handleStudyFromPreview}
+      />
+
       <div className="flex-1 flex flex-col gap-5">
         {isIdle && (
           <>
