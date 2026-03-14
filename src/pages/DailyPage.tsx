@@ -63,7 +63,9 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
           snap={snap}
           onDrop={(from, to) => sessionRef.current.submitMove(from, to)}
           locked={true}
-          onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
+          onStudyFromPosition={() =>
+            navigate("/study", { state: { fen: board.fen } })
+          }
           gameInfo={
             <div className="text-right">
               <div className="font-semibold text-blue-700 dark:text-blue-200">
@@ -90,7 +92,21 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
 }
 
 export default function DailyPage() {
-  const daily = useMemo(() => getDailyPosition(), []);
+  const [daily, setDaily] = useState<Position | null>(null);
+
+  useEffect(() => {
+    getDailyPosition().then((pos) => {
+      if (pos) setDaily(pos);
+    });
+  }, []);
+  if (!daily) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-gray-400 animate-pulse text-lg">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <BoardProvider
       initialFen={daily.fen}

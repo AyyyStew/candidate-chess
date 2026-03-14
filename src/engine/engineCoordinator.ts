@@ -23,7 +23,7 @@ interface PreloadedPosition {
 
 export interface EngineCoordinator {
   onReady: (cb: () => void) => void;
-  preloadNext: () => void;
+  preloadNext: () => Promise<void>;
   advance: () => Promise<AdvanceResult>;
   destroy: () => void;
   readonly ready: boolean;
@@ -46,10 +46,10 @@ export function createEngineCoordinator({
     readyCallback?.();
   });
 
-  function preloadNext(): void {
+  async function preloadNext(): Promise<void> {
     if (preloading) return;
     preloading = true;
-    const position = getRandomPosition();
+    const position = await getRandomPosition();
     pool
       .preloadAnalysis(position.fen, searchMoveCount, goCommand)
       .then((result) => {
@@ -82,7 +82,7 @@ export function createEngineCoordinator({
     }
 
     console.log("[coordinator] advance fallback — engine will think");
-    const position = getRandomPosition();
+    const position = await getRandomPosition();
     analysis.startAnalysis(position.fen);
     return { position, analysis, preloaded: false };
   }

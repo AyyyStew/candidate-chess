@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDarkMode } from "./hooks/useDarkMode";
 import { EngineProvider } from "./contexts/EngineContext";
@@ -7,9 +7,14 @@ import DailyPage from "./pages/DailyPage";
 import GamePage from "./pages/RandomPage";
 import StudyPage from "./pages/StudyPage";
 import PracticePage from "./pages/PracticePage";
+import { preload } from "./services/positionService";
 
 export default function App() {
   const { dark, toggleDark } = useDarkMode();
+
+  useEffect(() => {
+    preload().catch(console.error);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
