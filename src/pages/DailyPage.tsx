@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import DailyResultsModal from "../components/DailyResultsModal";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
@@ -30,6 +31,7 @@ function DailyPageContent({ daily, activeDate }: DailyPageContentProps) {
   const engine = useEnginePool();
   const sessionRef = useRef(null);
   const [snap, setSnap] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const hasStartedRef = useRef(false);
 
   useEffect(() => {
@@ -50,7 +52,21 @@ function DailyPageContent({ daily, activeDate }: DailyPageContentProps) {
     setSnap(session.getSnapshot());
   }, [engine.ready]);
 
+  useEffect(() => {
+    if (snap?.phase !== "done") return;
+    const t = setTimeout(() => setShowModal(true), 800);
+    return () => clearTimeout(t);
+  }, [snap?.phase]);
+
   return (
+    <>
+    {showModal && snap && (
+      <DailyResultsModal
+        snap={snap}
+        activeDate={activeDate}
+        onClose={() => setShowModal(false)}
+      />
+    )}
     <main className="max-w-6xl mx-auto px-8 py-8 flex flex-col gap-6">
       {/* Page title */}
       <div className="flex items-baseline justify-between">
@@ -92,6 +108,7 @@ function DailyPageContent({ daily, activeDate }: DailyPageContentProps) {
         </div>
       )}
     </main>
+    </>
   );
 }
 
