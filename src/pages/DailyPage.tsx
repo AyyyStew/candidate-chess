@@ -51,7 +51,7 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
           Daily Game
         </h1>
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-400 animate-pulse text-lg">
+          <p className="text-muted animate-pulse text-lg">
             Engine loading...
           </p>
         </div>
@@ -74,10 +74,10 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
           }
           gameInfo={
             <div className="text-right">
-              <div className="font-semibold text-blue-700 dark:text-blue-200">
+              <div className="font-semibold text-blue-300">
                 {daily.label}
               </div>
-              <div className="text-blue-600 dark:text-blue-300">
+              <div className="text-blue-400">
                 {daily.event} — Move {daily.moveNumber}
               </div>
             </div>
@@ -106,7 +106,7 @@ export default function DailyPage() {
   if (!daily) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400 animate-pulse text-lg">Loading...</p>
+        <p className="text-muted animate-pulse text-lg">Loading...</p>
       </div>
     );
   }

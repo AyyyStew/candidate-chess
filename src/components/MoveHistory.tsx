@@ -29,7 +29,7 @@ export default function MoveHistory({
   }, [currentIndex, onNavigate, disabled]);
 
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3">
+    <div className="rounded-xl border border-edge bg-surface p-3">
       <div className="flex flex-wrap gap-1 mb-3 max-h-24 overflow-y-auto">
         {history.map((move, i) => {
           const moveNum = Math.floor(i / 2) + 1;
@@ -38,15 +38,15 @@ export default function MoveHistory({
           return (
             <span key={i} className="flex items-center gap-0.5">
               {isWhite && (
-                <span className="text-gray-400 text-xs">{moveNum}.</span>
+                <span className="text-muted text-xs">{moveNum}.</span>
               )}
               <button
                 onClick={() => onNavigate(i)}
                 disabled={disabled || currentIndex < 0}
                 className={`px-1.5 py-0.5 rounded text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-blue-600 text-white"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    ? "bg-accent text-white"
+                    : "hover:bg-surface-hi text-label"
                 }`}
               >
                 {move.san}
@@ -82,7 +82,7 @@ export default function MoveHistory({
             key={label}
             onClick={onClick}
             disabled={d}
-            className="flex-1 py-1.5 rounded-lg text-sm bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors"
+            className="flex-1 py-1.5 rounded-lg text-sm bg-surface-hi hover:bg-interactive-hi disabled:opacity-40 transition-colors"
           >
             {label}
           </button>

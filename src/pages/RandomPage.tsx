@@ -38,7 +38,7 @@ function RandomPageContent() {
           Random Game
         </h1>
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-400 animate-pulse text-lg">
+          <p className="text-muted animate-pulse text-lg">
             Loading position...
           </p>
         </div>
@@ -59,10 +59,10 @@ function RandomPageContent() {
           onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
           gameInfo={
             <div className="text-right">
-              <div className="font-semibold text-blue-700 dark:text-blue-200">
+              <div className="font-semibold text-blue-300">
                 {snap.label}
               </div>
-              <div className="text-blue-600 dark:text-blue-300">
+              <div className="text-blue-400">
                 {snap.event} — Move {snap.moveNumber}
               </div>
             </div>

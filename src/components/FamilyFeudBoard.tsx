@@ -81,11 +81,11 @@ function RevealedRow({
   return (
     <React.Fragment>
       <tr
-        className="border-t border-gray-100 dark:border-gray-800 transition-all duration-500"
+        className="border-t border-edge transition-all duration-500"
         style={rowStyle}
       >
         <td className="px-4 py-3 text-yellow-400 font-bold w-8">{rank}</td>
-        <td className="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">
+        <td className="px-4 py-3 font-bold text-text">
           {hidden ? "— — —" : flipped ? san : "— — —"}
         </td>
         <td
@@ -94,7 +94,7 @@ function RevealedRow({
         >
           {isRevealed ? (category?.label ?? "") : ""}
         </td>
-        <td className="px-4 py-3 text-sm text-gray-400 text-right">
+        <td className="px-4 py-3 text-sm text-muted text-right">
           {isRevealed ? formatEval(evalScore) : ""}
         </td>
       </tr>
@@ -103,7 +103,7 @@ function RevealedRow({
           <td />
           <td
             colSpan={3}
-            className="px-4 pt-0.5 pb-2 text-xs font-mono text-gray-400 dark:text-gray-500"
+            className="px-4 pt-0.5 pb-2 text-xs font-mono text-faint"
           >
             <PvLine startFen={startFen} sans={line.sans} />
           </td>
@@ -128,14 +128,14 @@ function MissRow({ san, evalScore, category, line, startFen, isDone }: MissRowPr
     <React.Fragment>
       <tr style={rowStyle} className="bg-red-950 animate-slide-in">
         <td className="px-4 py-3 text-red-500 font-bold text-lg">✗</td>
-        <td className="px-4 py-3 font-bold text-gray-300">{san}</td>
+        <td className="px-4 py-3 font-bold text-label">{san}</td>
         <td
           className="px-4 py-3 text-sm font-medium"
           style={{ color: category?.color }}
         >
           {category?.label}
         </td>
-        <td className="px-4 py-3 text-sm text-gray-400 text-right">
+        <td className="px-4 py-3 text-sm text-muted text-right">
           {formatEval(evalScore)}
         </td>
       </tr>
@@ -144,7 +144,7 @@ function MissRow({ san, evalScore, category, line, startFen, isDone }: MissRowPr
           <td />
           <td
             colSpan={3}
-            className="px-4 pt-0.5 pb-2 text-xs font-mono text-gray-400 dark:text-gray-500"
+            className="px-4 pt-0.5 pb-2 text-xs font-mono text-faint"
           >
             <PvLine startFen={startFen} sans={line.sans} />
           </td>
@@ -219,15 +219,15 @@ export default function FamilyFeudBoard({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+        <h3 className="font-semibold text-sm text-muted uppercase tracking-wide">
           Find the Top {targetMoves} Moves
         </h3>
         <StrikeIndicator strikes={strikes} maxStrikes={maxStrikes} />
       </div>
 
-      <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+      <div className="rounded-xl overflow-hidden border border-edge">
         <table className="w-full text-sm">
-          <thead className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+          <thead className="bg-surface-hi text-muted">
             <tr>
               <th className="px-4 py-2 text-left font-medium w-8">#</th>
               <th className="px-4 py-2 text-left font-medium">Move</th>
@@ -241,7 +241,7 @@ export default function FamilyFeudBoard({
                 return (
                   <tr
                     key={i}
-                    className="border-t border-gray-100 dark:border-gray-800 bg-blue-950"
+                    className="border-t border-edge bg-blue-950"
                   >
                     <td className="px-4 py-3 text-yellow-400 font-bold w-8">
                       {i + 1}
@@ -283,7 +283,7 @@ export default function FamilyFeudBoard({
 
       {missMoves.length > 0 && (
         <div>
-          <h4 className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">
+          <h4 className="text-xs text-muted uppercase tracking-wide font-semibold mb-1">
             Misses
           </h4>
           <div className="rounded-xl overflow-hidden border border-red-900">
@@ -307,20 +307,18 @@ export default function FamilyFeudBoard({
       )}
 
       {pending && (
-        <p className="text-sm text-gray-400 animate-pulse text-center">
+        <p className="text-sm text-muted animate-pulse text-center">
           Evaluating...
         </p>
       )}
 
       {isDone && (
-        <>
-          <button
-            onClick={onReset}
-            className="w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-          >
-            {resetMessage ?? "Start Over"}
-          </button>
-        </>
+        <button
+          onClick={onReset}
+          className="w-full py-2.5 rounded-xl font-semibold bg-interactive hover:bg-interactive-hi transition-colors"
+        >
+          {resetMessage ?? "Start Over"}
+        </button>
       )}
     </div>
   );

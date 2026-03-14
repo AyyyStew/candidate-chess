@@ -1,5 +1,29 @@
 @import "tailwindcss";
-@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Backgrounds */
+  --color-bg: #030712;
+  --color-surface: #111827;
+  --color-surface-hi: #1f2937;
+
+  /* Borders */
+  --color-edge: #1f2937;
+  --color-edge-hi: #374151;
+
+  /* Text */
+  --color-text: #f3f4f6;
+  --color-label: #d1d5db;
+  --color-muted: #9ca3af;
+  --color-faint: #6b7280;
+
+  /* Accent */
+  --color-accent: #2563eb;
+  --color-accent-hi: #1d4ed8;
+
+  /* Interactive elements (buttons, chips) */
+  --color-interactive: #1f2937;
+  --color-interactive-hi: #374151;
+}
 
 @source inline("border-green-500 border-orange-400 border-red-500");
 
