@@ -9,7 +9,12 @@ interface GamePanelProps {
   resetMessage?: string;
 }
 
-export default function GamePanel({ snap, results, onNext, resetMessage }: GamePanelProps) {
+export default function GamePanel({
+  snap,
+  results,
+  onNext,
+  resetMessage,
+}: GamePanelProps) {
   const isDone = snap.phase === "done";
   const topMoves = isDone
     ? (results?.topMoves ?? [])
@@ -34,7 +39,7 @@ export default function GamePanel({ snap, results, onNext, resetMessage }: GameP
       strikes={snap.strikes}
       maxStrikes={snap.maxStrikes}
       onReset={onNext}
-      resetMessage={resetMessage ?? "Next Position"}
+      resetMessage={resetMessage ?? "Play Another Position?"}
     />
   );
 }
