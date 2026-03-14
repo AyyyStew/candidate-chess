@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { GameSnapshot } from "../types";
+import type { DailyRecord } from "../services/dailyStatsService";
+import StreakDisplay from "./StreakDisplay";
 
 interface DailyResultsModalProps {
-  snap: GameSnapshot;
   activeDate: string;
+  participationStreak: number;
+  winStreak: number;
   onClose: () => void;
+  // One of these must be provided
+  snap?: GameSnapshot;
+  record?: DailyRecord;
 }
 
 function formatDate(isoDate: string): string {
@@ -16,28 +22,11 @@ function formatDate(isoDate: string): string {
   });
 }
 
-function getHeadline(hits: number, target: number, strikes: number, maxStrikes: number): string {
-  if (hits === target) return "Perfect game!";
-  if (strikes >= maxStrikes) return "Better luck tomorrow.";
+function getHeadline(hits: number, target: number, won: boolean): string {
+  if (won) return "Perfect game!";
   if (hits >= target * 0.8) return "So close!";
   if (hits >= target * 0.5) return "Solid effort.";
-  return "Keep practicing.";
-}
-
-const RANK_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
-
-function rankEmoji(rank: number | null | undefined): string {
-  if (rank == null || rank < 1 || rank > RANK_EMOJI.length) return "🟩";
-  return RANK_EMOJI[rank - 1];
-}
-
-function buildShareText(snap: GameSnapshot, url: string): string {
-  const hits = snap.candidates.filter((c) => !c.pending && c.isHit).length;
-  const squares = snap.candidates
-    .filter((c) => !c.pending)
-    .map((c) => (c.isHit ? rankEmoji(c.rank) : "🟥"))
-    .join("");
-  return `CandidateChess Daily – ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}\n${hits}/${snap.targetMoves} candidate moves ${squares}\n${url}`;
+  return "Better luck tomorrow.";
 }
 
 function IconClipboard() {
@@ -70,17 +59,37 @@ function IconDice() {
   );
 }
 
-export default function DailyResultsModal({ snap, activeDate, onClose }: DailyResultsModalProps) {
+export default function DailyResultsModal({
+  activeDate,
+  participationStreak,
+  winStreak,
+  onClose,
+  snap,
+  record,
+}: DailyResultsModalProps) {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
-  const hits = snap.candidates.filter((c) => !c.pending && c.isHit).length;
-  const resolved = snap.candidates.filter((c) => !c.pending);
+  const RANK_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+
+  // Derive display data from whichever source is available
+  const hits = record?.hits ?? snap?.candidates.filter((c) => !c.pending && c.isHit).length ?? 0;
+  const target = record?.target ?? snap?.targetMoves ?? 5;
+  const won = record?.won ?? hits === target;
+  const squares: string[] = record?.squares ?? (snap
+    ? snap.candidates.filter((c) => !c.pending).map((c) => {
+        if (!c.isHit) return "🟥";
+        return (c.rank != null && c.rank >= 1 && c.rank <= 5) ? RANK_EMOJI[c.rank - 1] : "🟩";
+      })
+    : []);
+
+  const emptySlots = Math.max(0, target - squares.length);
   const shareUrl = window.location.href;
-  const headline = getHeadline(hits, snap.targetMoves, snap.strikes, snap.maxStrikes);
+  const shareDate = new Date(activeDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const shareText = `CandidateChess Daily – ${shareDate}\n${hits}/${target} candidate moves ${squares.join("")}\n${shareUrl}`;
 
   function handleShare() {
-    navigator.clipboard.writeText(buildShareText(snap, shareUrl)).then(() => {
+    navigator.clipboard.writeText(shareText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -109,26 +118,32 @@ export default function DailyResultsModal({ snap, activeDate, onClose }: DailyRe
         {/* Header */}
         <div className="flex flex-col gap-1">
           <p className="text-xs text-faint uppercase tracking-widest">Daily Challenge · {formatDate(activeDate)}</p>
-          <h2 className="font-black text-2xl text-text">{headline}</h2>
+          <h2 className="font-black text-2xl text-text">{getHeadline(hits, target, won)}</h2>
         </div>
 
         {/* Score + squares */}
         <div className="bg-bg rounded-xl p-4 flex flex-col gap-3">
           <div className="flex items-baseline gap-1.5">
             <span className="text-4xl font-black text-text">{hits}</span>
-            <span className="text-lg text-muted font-medium">/ {snap.targetMoves} moves found</span>
+            <span className="text-lg text-muted font-medium">/ {target} moves found</span>
           </div>
           <div className="flex gap-2 text-2xl">
-            {resolved.map((c, i) => (
-              <span key={i} title={c.isHit ? `Move #${c.rank}` : "Miss"}>
-                {c.isHit ? rankEmoji(c.rank) : "🟥"}
-              </span>
+            {squares.map((s, i) => (
+              <span key={i}>{s}</span>
             ))}
-            {Array.from({ length: Math.max(0, snap.targetMoves - resolved.length) }).map((_, i) => (
-              <span key={`empty-${i}`}>⬜</span>
+            {Array.from({ length: emptySlots }).map((_, i) => (
+              <span key={`e-${i}`}>⬜</span>
             ))}
           </div>
         </div>
+
+        {/* Streaks */}
+        {(participationStreak > 0 || winStreak > 0) && (
+          <div className="flex flex-col gap-1.5">
+            <p className="text-xs text-faint uppercase tracking-widest">Your streaks</p>
+            <StreakDisplay participationStreak={participationStreak} winStreak={winStreak} />
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex flex-col gap-2.5">
