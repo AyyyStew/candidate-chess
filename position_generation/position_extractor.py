@@ -5,36 +5,37 @@ import json
 import random
 import os
 import glob
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import multiprocessing
+from multiprocessing import Process, Queue
 from collections import Counter
+import re
 
 # --- Config ---
 ENGINE_PATH = r"C:\Users\alexs\Desktop\stockfish\stockfish-windows-x86-64-avx2.exe"
 PGN_DIR = "./LichessEliteDatabase"
 OUTPUT_FILE = "training_positions.jsonl"
 PROGRESS_FILE = "progress.json"
+
 TARGET = None
-TARGET_PER_FILE = 100
+TARGET_PER_FILE = 200
+
 DEPTH = 16
 MULTIPV = 5
 SAMPLE_EVERY_N_MIN = 2
 SAMPLE_EVERY_N_MAX = 10
 
-# Number of parallel workers — each gets its own Stockfish instance
-# With 14 threads available, run 7 workers × 2 threads each
 N_WORKERS = 7
 THREADS_PER_WORKER = 2
-HASH_PER_WORKER = 512  # 7 × 512 = 3.5GB total, fits in your 16GB budget
+HASH_PER_WORKER = 512
 
-# --- Viability thresholds (loosened slightly) ---
 THRESHOLDS = {
-    "max_position_cp": 900,  # was 500 — blitz games play on in lost positions
-    "move2_cp": 150,  # was 80
-    "move3_cp": 150,  # was 80
-    "move4_cp": 200,  # was 130
-    "move5_cp": 300,  # was 200
+    "max_position_cp": 900,
+    "move2_cp": 150,
+    "move3_cp": 150,
+    "move4_cp": 200,
+    "move5_cp": 300,
 }
+
+# ── helpers ───────────────────────────────────────────────────────────────────
 
 
 def is_viable(pvs):
@@ -86,13 +87,32 @@ def get_move_number_range(board):
     return 13 <= move_num <= 60 and piece_count >= 7
 
 
-def extract_positions_from_file(pgn_path):
+# ── extraction ────────────────────────────────────────────────────────────────
+
+
+from threading import Thread
+from queue import Queue as ThreadQueue
+import io
+
+
+def extract_positions_from_file(pgn_path, seen_fens, game_sample_rate=0.25):
     positions = []
+
     with open(pgn_path, "r", encoding="utf-8", errors="ignore") as f:
-        while True:
-            game = chess.pgn.read_game(f)
+        content = f.read()
+
+    # Split into individual games on [Event tag — avoids parsing every game
+    raw_games = re.split(r"\n(?=\[Event )", content)
+
+    # Sample before parsing — this is the key speedup
+    k = max(200, int(len(raw_games) * game_sample_rate))
+    sampled = random.sample(raw_games, min(k, len(raw_games)))
+
+    for raw in sampled:
+        try:
+            game = chess.pgn.read_game(io.StringIO(raw))
             if game is None:
-                break
+                continue
             board = game.board()
             move_index = 0
             next_sample = random.randint(SAMPLE_EVERY_N_MIN, SAMPLE_EVERY_N_MAX)
@@ -102,48 +122,68 @@ def extract_positions_from_file(pgn_path):
                 move_index += 1
                 if move_index == next_sample:
                     if get_move_number_range(board):
-                        positions.append(
-                            {
-                                "fen": board.fen(),
-                                "move_number": board.fullmove_number,
-                                "piece_count": bin(int(board.occupied)).count("1"),
-                                "side_to_move": (
-                                    "white" if board.turn == chess.WHITE else "black"
-                                ),
-                                "source_game": {
-                                    "white": game.headers.get("White", "?"),
-                                    "black": game.headers.get("Black", "?"),
-                                    "white_elo": game.headers.get("WhiteElo", "?"),
-                                    "black_elo": game.headers.get("BlackElo", "?"),
-                                    "opening": game.headers.get("Opening", "?"),
-                                    "eco": game.headers.get("ECO", "?"),
-                                    "date": game.headers.get("UTCDate", "?"),
-                                },
-                            }
-                        )
+                        fen = board.fen()
+                        if fen not in seen_fens:
+                            positions.append(
+                                {
+                                    "fen": fen,
+                                    "move_number": board.fullmove_number,
+                                    "piece_count": bin(int(board.occupied)).count("1"),
+                                    "side_to_move": (
+                                        "white"
+                                        if board.turn == chess.WHITE
+                                        else "black"
+                                    ),
+                                    "source_game": {
+                                        "white": game.headers.get("White", "?"),
+                                        "black": game.headers.get("Black", "?"),
+                                        "white_elo": game.headers.get("WhiteElo", "?"),
+                                        "black_elo": game.headers.get("BlackElo", "?"),
+                                        "opening": game.headers.get("Opening", "?"),
+                                        "eco": game.headers.get("ECO", "?"),
+                                        "date": game.headers.get("UTCDate", "?"),
+                                    },
+                                }
+                            )
                     next_sample += random.randint(
                         SAMPLE_EVERY_N_MIN, SAMPLE_EVERY_N_MAX
                     )
+        except Exception:
+            continue
 
     return positions
 
 
-# --- Worker function (runs in its own process) ---
+def extraction_thread(pgn_files, seen_fens, prefetch_queue, game_sample_rate=0.25):
+    """Runs in background, stays 1-2 files ahead of eval workers."""
+    for pgn_path in pgn_files:
+        positions = extract_positions_from_file(pgn_path, seen_fens, game_sample_rate)
+        random.shuffle(positions)
+        prefetch_queue.put((pgn_path, positions))  # blocks if queue is full
+    prefetch_queue.put(None)  # signal done
 
 
-def evaluate_batch(positions_chunk):
+# ── worker — stays alive for entire run ───────────────────────────────────────
+
+STOP_SIGNAL = None
+
+
+def worker(task_queue, result_queue):
     """
-    Each worker gets a chunk of positions, spins up its own
-    Stockfish instance, evaluates, returns keepers.
+    Spins up once, stays alive for the whole run.
+    Pulls positions from task_queue until it sees STOP_SIGNAL.
     """
-    keepers = []
-    stats = {"mate": 0, "spread": 0, "won": 0, "pvs": 0, "ok": 0}
-
     try:
         with chess.engine.SimpleEngine.popen_uci(ENGINE_PATH) as engine:
             engine.configure({"Threads": THREADS_PER_WORKER, "Hash": HASH_PER_WORKER})
 
-            for pos in positions_chunk:
+            while True:
+                pos = task_queue.get()
+
+                if pos is STOP_SIGNAL:
+                    task_queue.put(STOP_SIGNAL)  # pass it on for other workers
+                    break
+
                 try:
                     board = chess.Board(pos["fen"])
                     info = engine.analyse(
@@ -151,28 +191,21 @@ def evaluate_batch(positions_chunk):
                     )
                     pvs = parse_pvs(info)
                     viable, reason = is_viable(pvs)
-                    stats[reason] += 1
 
                     if viable:
                         pos["eval"] = {"depth": DEPTH, "pvs": pvs}
-                        keepers.append(pos)
+                        result_queue.put(("keep", pos, reason))
+                    else:
+                        result_queue.put(("reject", None, reason))
 
-                except Exception:
-                    pass
+                except Exception as e:
+                    result_queue.put(("error", None, str(e)))
 
     except Exception as e:
-        print(f"Worker engine error: {e}")
-
-    return keepers, stats
+        result_queue.put(("error", None, f"Engine failed: {e}"))
 
 
-def chunk_list(lst, n):
-    """Split list into n roughly equal chunks."""
-    k, m = divmod(len(lst), n)
-    return [lst[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n)]
-
-
-# --- Progress tracking ---
+# ── utils ─────────────────────────────────────────────────────────────────────
 
 
 def load_progress():
@@ -194,29 +227,47 @@ def count_existing_output():
         return sum(1 for line in f if line.strip())
 
 
-def get_stats(file=OUTPUT_FILE):
+def load_existing_fens():
+    seen = set()
+    if not os.path.exists(OUTPUT_FILE):
+        return seen
+    with open(OUTPUT_FILE, "r") as f:
+        for line in f:
+            if line.strip():
+                try:
+                    seen.add(json.loads(line)["fen"])
+                except json.JSONDecodeError:
+                    pass
+    print(f"  Loaded {len(seen)} existing FENs")
+    return seen
+
+
+def get_stats():
     with open(OUTPUT_FILE) as f:
         positions = [json.loads(l) for l in f]
 
     moves = [p["move_number"] for p in positions]
     sides = Counter(p["side_to_move"] for p in positions)
     pieces = [p["piece_count"] for p in positions]
+    ecos = Counter(p["source_game"]["eco"] for p in positions)
 
-    print(f"Total: {len(positions)}")
-    print(f"Avg move number: {sum(moves)/len(moves):.1f}")
-    print(f"Move range: {min(moves)}-{max(moves)}")
+    print(f"\n── Dataset Stats ──")
+    print(f"Total:        {len(positions)}")
+    print(f"Avg move:     {sum(moves)/len(moves):.1f}")
+    print(f"Move range:   {min(moves)}-{max(moves)}")
     print(f"Side to move: {dict(sides)}")
-    print(f"Avg piece count: {sum(pieces)/len(pieces):.1f}")
+    print(f"Avg pieces:   {sum(pieces)/len(pieces):.1f}")
+    print(f"Top 10 ECOs:  {ecos.most_common(10)}")
 
 
-# --- Main ---
+# ── main ──────────────────────────────────────────────────────────────────────
 
 
 def run():
     progress = load_progress()
     progress["total_kept"] = count_existing_output()
+    seen_fens = load_existing_fens()
 
-    # Only check target if one is set
     if TARGET and progress["total_kept"] >= TARGET:
         print(f"Already have {progress['total_kept']} positions. Done!")
         return
@@ -226,71 +277,101 @@ def run():
         f for f in pgn_files if os.path.basename(f) not in progress["completed_files"]
     ]
 
-    print(
-        f"Target: {'all' if TARGET is None else TARGET} | Already kept: {progress['total_kept']}"
-    )
+    print(f"Target:          {'all' if TARGET is None else TARGET}")
+    print(f"Per file cap:    {TARGET_PER_FILE}")
+    print(f"Already kept:    {progress['total_kept']}")
     print(f"Files remaining: {len(remaining)} / {len(pgn_files)}")
-    print(f"Workers: {N_WORKERS} × {THREADS_PER_WORKER} threads each\n")
+    print(f"Workers:         {N_WORKERS} × {THREADS_PER_WORKER} threads each\n")
 
-    for pgn_path in remaining:
-        if TARGET:
-            needed = TARGET - progress["total_kept"]
-            if needed <= 0:
+    # Spin up workers ONCE for the entire run
+    task_queue = Queue()
+    result_queue = Queue()
+
+    workers = []
+    for _ in range(N_WORKERS):
+        p = Process(target=worker, args=(task_queue, result_queue))
+        p.start()
+        workers.append(p)
+
+    print(f"Workers started. Processing files...\n")
+
+    prefetch_queue = ThreadQueue(maxsize=2)
+
+    extractor = Thread(
+        target=extraction_thread,
+        args=(remaining, seen_fens, prefetch_queue, 0.25),
+        daemon=True,
+    )
+    extractor.start()
+
+    try:
+        while True:
+            item = prefetch_queue.get()
+            if item is None:
                 break
-        else:
-            needed = float("inf")
 
-        # Cap per file if TARGET_PER_FILE is set
-        if TARGET_PER_FILE:
-            needed = min(needed, TARGET_PER_FILE)
+            pgn_path, positions = item
+            filename = os.path.basename(pgn_path)
+            print(f"── {filename} ({len(positions)} candidates) ──")
 
-        filename = os.path.basename(pgn_path)
-        print(f"── {filename} ──")
+            if not positions:
+                progress["completed_files"].append(filename)
+                save_progress(progress)
+                continue
 
-        positions = extract_positions_from_file(pgn_path)
-        print(
-            f"  Extracted {len(positions)} candidates → splitting across {N_WORKERS} workers"
-        )
+            # rest of your existing file processing loop unchanged
+            for pos in positions:
+                task_queue.put(pos)
 
-        if not positions:
-            progress["completed_files"].append(filename)
-            save_progress(progress)
-            continue
-
-        chunks = chunk_list(positions, N_WORKERS)
-        file_kept = 0
-        file_stats = {"mate": 0, "spread": 0, "won": 0, "pvs": 0, "ok": 0}
-
-        with ProcessPoolExecutor(max_workers=N_WORKERS) as executor:
-            futures = [executor.submit(evaluate_batch, chunk) for chunk in chunks]
+            file_kept = 0
+            file_stats = {"mate": 0, "spread": 0, "won": 0, "pvs": 0, "error": 0}
+            total_results = 0
 
             with open(OUTPUT_FILE, "a") as out:
-                for future in as_completed(futures):
-                    keepers, stats = future.result()
-                    for k in file_stats:
-                        file_stats[k] += stats.get(k, 0)
+                while total_results < len(positions):
+                    status, pos, reason = result_queue.get()
+                    total_results += 1
+                    if status == "keep":
+                        if pos["fen"] not in seen_fens:
+                            out.write(json.dumps(pos) + "\n")
+                            out.flush()
+                            seen_fens.add(pos["fen"])
+                            file_kept += 1
+                            print(
+                                f"  ✓ {file_kept} kept | {total_results}/{len(positions)} evaluated",
+                                end="\r",
+                            )
+                    elif status == "error":
+                        file_stats["error"] += 1
+                    else:
+                        file_stats[reason] = file_stats.get(reason, 0) + 1
 
-                    # If no target, write everything
-                    still_needed = needed - file_kept
-                    to_write = (
-                        keepers if needed == float("inf") else keepers[:still_needed]
-                    )
-                    for pos in to_write:
-                        out.write(json.dumps(pos) + "\n")
-                    out.flush()
-                    file_kept += len(to_write)
+                    if TARGET_PER_FILE and file_kept >= TARGET_PER_FILE:
+                        print(
+                            f"\n  Hit TARGET_PER_FILE ({TARGET_PER_FILE}), moving to next file"
+                        )
+                        # Drain remaining items from queue so workers
+                        # don't keep processing positions from this file
+                        while not task_queue.empty():
+                            try:
+                                task_queue.get_nowait()
+                            except Exception:
+                                break
+                        break
 
-        progress["total_kept"] += file_kept
-        progress["completed_files"].append(filename)
-        save_progress(progress)
+            progress["total_kept"] += file_kept
+            progress["completed_files"].append(filename)
+            save_progress(progress)
 
-        print(f"  Kept: {file_kept} | Total: {progress['total_kept']}")
-        print(
-            f"  Rejections → mate:{file_stats['mate']} "
-            f"spread:{file_stats['spread']} "
-            f"won:{file_stats['won']} "
-            f"pvs:{file_stats['pvs']}\n"
-        )
+            if TARGET and progress["total_kept"] >= TARGET:
+                break
+
+    finally:
+        task_queue.put(STOP_SIGNAL)
+        for p in workers:
+            p.join(timeout=5)
+            if p.is_alive():
+                p.terminate()
 
     print(f"Done. {count_existing_output()} positions saved to {OUTPUT_FILE}")
     get_stats()

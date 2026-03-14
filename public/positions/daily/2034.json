@@ -1,0 +1,4102 @@
+[
+  {
+    "fen": "2rq1rk1/1b2bppp/p2ppn2/1p6/2nNP3/P1N2B1P/1PP1QPP1/R1B1R1K1 b - - 12 15",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 145,
+          "line": "f6d7 e1d1 e7f6 a3a4 b5b4 c3b1",
+          "best_move": "f6d7"
+        },
+        {
+          "cp": 137,
+          "line": "c4e5 c1f4 f6d7 d4b3 c8c7 b3a5",
+          "best_move": "c4e5"
+        },
+        {
+          "cp": 132,
+          "line": "d8b6 e1d1 f8e8 e2e1 d6d5 e4d5",
+          "best_move": "d8b6"
+        },
+        {
+          "cp": 123,
+          "line": "d8c7 e1d1 h7h6 e2e1 c4e5 c1f4",
+          "best_move": "d8c7"
+        },
+        {
+          "cp": 115,
+          "line": "d8d7 g2g3 e7d8 e1d1 d8b6 f3g2",
+          "best_move": "d8d7"
+        }
+      ]
+    },
+    "game": {
+      "white": "Masali007",
+      "black": "malavan",
+      "white_elo": "2232",
+      "black_elo": "2469",
+      "date": "2016.07.05"
+    },
+    "daily_date": "2034-01-01"
+  },
+  {
+    "fen": "2kr4/pp3pb1/2pp4/3Nn1P1/4PBq1/8/PPQ2PP1/2KR4 w - - 0 21",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 209,
+          "line": "f2f3 g4e6 c1b1 f7f6 g5f6 g7f6",
+          "best_move": "f2f3"
+        },
+        {
+          "cp": 180,
+          "line": "f4e3 g4g2 d5e7 c8d7 e7f5 g7f8",
+          "best_move": "f4e3"
+        },
+        {
+          "cp": 162,
+          "line": "g2g3 g4e6 c1b1 e5f3 d5e3 g7f8",
+          "best_move": "g2g3"
+        },
+        {
+          "cp": 149,
+          "line": "c1b1 g4g2 d5e7 c8c7 e7f5 g7f8",
+          "best_move": "c1b1"
+        },
+        {
+          "cp": 126,
+          "line": "f4d2 c8b8 d5e7 g7f8 e7f5 g4g2",
+          "best_move": "f4d2"
+        }
+      ]
+    },
+    "game": {
+      "white": "purzelbaumer",
+      "black": "tannuk",
+      "white_elo": "2502",
+      "black_elo": "2278",
+      "date": "2016.06.05"
+    },
+    "daily_date": "2034-01-02"
+  },
+  {
+    "fen": "r4rk1/p1q1ppbp/1np3p1/8/2P5/1PN1BQ2/P4PPP/2R2RK1 w - - 2 16",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 69,
+          "line": "f1d1 b6d7 c3a4 f8d8 g2g3 e7e5",
+          "best_move": "f1d1"
+        },
+        {
+          "cp": 64,
+          "line": "c3e4 b6d7 c1d1 f8d8 e4c5 d7c5",
+          "best_move": "c3e4"
+        },
+        {
+          "cp": 55,
+          "line": "g2g3 f7f5 c4c5 b6d7 f1d1 a8d8",
+          "best_move": "g2g3"
+        },
+        {
+          "cp": 53,
+          "line": "f3e2 f8d8 g2g3 h7h5 c3e4 b6d7",
+          "best_move": "f3e2"
+        },
+        {
+          "cp": 52,
+          "line": "f1e1 b6d7 e1d1 f8d8 h2h3 d7f8",
+          "best_move": "f1e1"
+        }
+      ]
+    },
+    "game": {
+      "white": "indolive",
+      "black": "vlaja13",
+      "white_elo": "2547",
+      "black_elo": "2255",
+      "date": "2016.07.24"
+    },
+    "daily_date": "2034-01-03"
+  },
+  {
+    "fen": "r3r1k1/pp2qpp1/2p2n1p/5b2/3PP3/2N1P3/PPQN2PP/R4RK1 b - - 0 16",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 1,
+          "line": "f5e4 d2e4 f6e4 c3e4 e7e4 c2e4",
+          "best_move": "f5e4"
+        },
+        {
+          "cp": -96,
+          "line": "f5h7 c2b3 f6e4 c3e4 h7e4 d2e4",
+          "best_move": "f5h7"
+        },
+        {
+          "cp": -101,
+          "line": "f5g6 c2b3 f6e4 c3e4 g6e4 d2e4",
+          "best_move": "f5g6"
+        },
+        {
+          "cp": -158,
+          "line": "f5g4 e4e5 f6d5 a1e1 e8f8 d2c4",
+          "best_move": "f5g4"
+        },
+        {
+          "cp": -163,
+          "line": "f5e6 e4e5 f6d7 d2e4 e8f8 c2f2",
+          "best_move": "f5e6"
+        }
+      ]
+    },
+    "game": {
+      "white": "mch21",
+      "black": "biagiobiagin92",
+      "white_elo": "2466",
+      "black_elo": "2302",
+      "date": "2016.07.29"
+    },
+    "daily_date": "2034-01-04"
+  },
+  {
+    "fen": "r3r1k1/pbpnq1bp/1p1p2p1/3n1p2/Q2Pp3/2P1P1PP/PP1NBPNB/R3R1K1 b - - 1 15",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 94,
+          "line": "h7h5 g2f4 g8h7 e2a6 d5f4 g3f4",
+          "best_move": "h7h5"
+        },
+        {
+          "cp": 88,
+          "line": "e8f8 g3g4 f5g4 h3g4 g8h8 a4d1",
+          "best_move": "e8f8"
+        },
+        {
+          "cp": 84,
+          "line": "g8h8 g3g4 g7h6 c3c4 d5f6 a1c1",
+          "best_move": "g8h8"
+        },
+        {
+          "cp": 75,
+          "line": "g7h6 f2f4 e4f3 e2f3 a8b8 g3g4",
+          "best_move": "g7h6"
+        },
+        {
+          "cp": 74,
+          "line": "d7f8 a4b3 g8h8 a2a4 a7a5 f2f4",
+          "best_move": "d7f8"
+        }
+      ]
+    },
+    "game": {
+      "white": "norba94",
+      "black": "Skiller2",
+      "white_elo": "2441",
+      "black_elo": "2391",
+      "date": "2016.07.18"
+    },
+    "daily_date": "2034-01-05"
+  },
+  {
+    "fen": "r1bq1rk1/pp3p2/1n2p1pB/3n4/8/1B3N2/P1Q2PPP/3R1RK1 w - - 0 18",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 320,
+          "line": "f1e1 a7a5 h6f8 d8f8 h2h4 c8d7",
+          "best_move": "f1e1"
+        },
+        {
+          "cp": 299,
+          "line": "h6f8 d8f8 f3e5 f8b4 h2h3 b4c3",
+          "best_move": "h6f8"
+        },
+        {
+          "cp": 299,
+          "line": "f3e5 d8c7 c2b2 c7c3 b2e2 c3b4",
+          "best_move": "f3e5"
+        },
+        {
+          "cp": 277,
+          "line": "d1d4 c8d7 h6f8 d8f8 c2d2 f8g7",
+          "best_move": "d1d4"
+        },
+        {
+          "cp": 263,
+          "line": "b3d5 b6d5 h6f8 d8f8 d1d4 b7b6",
+          "best_move": "b3d5"
+        }
+      ]
+    },
+    "game": {
+      "white": "purzelbaumer",
+      "black": "onlygod",
+      "white_elo": "2459",
+      "black_elo": "2438",
+      "date": "2016.06.25"
+    },
+    "daily_date": "2034-01-06"
+  },
+  {
+    "fen": "2r2rk1/p3q1pp/Pp6/2ppPb2/4pP2/2Q3P1/1P2P1BP/R4RK1 b - f3 0 19",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 142,
+          "line": "e4f3 f1f3 d5d4 c3c4 e7e6 b2b3",
+          "best_move": "e4f3"
+        },
+        {
+          "cp": 120,
+          "line": "h7h5 e2e3 f8d8 c3b3 g7g6 f1d1",
+          "best_move": "h7h5"
+        },
+        {
+          "cp": 108,
+          "line": "g7g6 a1d1 d5d4 c3c2 e4e3 g2e4",
+          "best_move": "g7g6"
+        },
+        {
+          "cp": 105,
+          "line": "c8d8 e2e3 d5d4 c3c4 g8h8 a1d1",
+          "best_move": "c8d8"
+        },
+        {
+          "cp": 99,
+          "line": "e7e6 c3b3 f8d8 a1d1 h7h5 h2h3",
+          "best_move": "e7e6"
+        }
+      ]
+    },
+    "game": {
+      "white": "fortresspieces",
+      "black": "condansator3",
+      "white_elo": "2625",
+      "black_elo": "2657",
+      "date": "2016.06.09"
+    },
+    "daily_date": "2034-01-07"
+  },
+  {
+    "fen": "r4rk1/pp2qpbp/4bnp1/1PpNn3/P1P5/BQ4P1/5PBP/1R2NRK1 b - - 1 17",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -19,
+          "line": "f6d5 c4d5 e6f5 b1d1 f8e8 d5d6",
+          "best_move": "f6d5"
+        },
+        {
+          "cp": -85,
+          "line": "e7d6 d5e3 d6c7 a3b2 e5g4 e3d5",
+          "best_move": "e7d6"
+        },
+        {
+          "cp": -88,
+          "line": "e7d7 d5e3 d7c7 a3b2 e5g4 e3d5",
+          "best_move": "e7d7"
+        },
+        {
+          "cp": -88,
+          "line": "e6d5 c4d5 a8c8 b1d1 f8d8 e1c2",
+          "best_move": "e6d5"
+        },
+        {
+          "cp": -90,
+          "line": "e7d8 d5e3 d8c7 a3b2 e5g4 e3d5",
+          "best_move": "e7d8"
+        }
+      ]
+    },
+    "game": {
+      "white": "Grzesiek1123",
+      "black": "Agnewfan",
+      "white_elo": "2327",
+      "black_elo": "2510",
+      "date": "2016.07.02"
+    },
+    "daily_date": "2034-01-08"
+  },
+  {
+    "fen": "4rrk1/pp3p1p/6pQ/2pqn3/3p2P1/3P2NP/PPP2P2/R4RK1 b - - 5 21",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 354,
+          "line": "e5f3 g1h1 d5c6 f1g1 e8e6 h6f4",
+          "best_move": "e5f3"
+        },
+        {
+          "cp": 303,
+          "line": "f7f6 a2a4 e5f3 g1h1 e8e5 f1g1",
+          "best_move": "f7f6"
+        },
+        {
+          "cp": 301,
+          "line": "f7f5 g4f5 e5f3 g1h1 f3h4 f2f3",
+          "best_move": "f7f5"
+        },
+        {
+          "cp": 298,
+          "line": "e8e6 f1e1 e5f3 g1f1 f3e1 a1e1",
+          "best_move": "e8e6"
+        },
+        {
+          "cp": 99,
+          "line": "d5f3 g3e4 f7f6 a1e1 g6g5 e4g3",
+          "best_move": "d5f3"
+        }
+      ]
+    },
+    "game": {
+      "white": "girafik",
+      "black": "f_ariza",
+      "white_elo": "2502",
+      "black_elo": "2475",
+      "date": "2016.04.07"
+    },
+    "daily_date": "2034-01-09"
+  },
+  {
+    "fen": "r2q1rn1/pp3pkp/2n1b1p1/2p1p3/3pP1P1/3P1NNP/PPP2P2/R1Q1KB1R w KQ - 2 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -98,
+          "line": "c1d2 f7f6 f3h4 b7b5 a2a4 b5a4",
+          "best_move": "c1d2"
+        },
+        {
+          "cp": -102,
+          "line": "f1e2 f7f6 c1d2 e6d7 h3h4 a7a5",
+          "best_move": "f1e2"
+        },
+        {
+          "cp": -107,
+          "line": "a2a4 a8c8 b2b3 f7f6 f1g2 c8c7",
+          "best_move": "a2a4"
+        },
+        {
+          "cp": -108,
+          "line": "a2a3 f7f6 f1e2 g8h6 f3h4 h6f7",
+          "best_move": "a2a3"
+        },
+        {
+          "cp": -109,
+          "line": "f1g2 f7f6 b2b3 d8c7 f3h2 c7a5",
+          "best_move": "f1g2"
+        }
+      ]
+    },
+    "game": {
+      "white": "teddyhh",
+      "black": "antimammalian",
+      "white_elo": "2384",
+      "black_elo": "2434",
+      "date": "2016.06.22"
+    },
+    "daily_date": "2034-01-10"
+  },
+  {
+    "fen": "5r2/1p1rqpk1/2p1bnp1/P7/4Pp1p/3BQ2P/1PP1N1P1/R4RK1 w - - 0 24",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 189,
+          "line": "e2f4 f6h7 e4e5 f8e8 f4e6 e7e6",
+          "best_move": "e2f4"
+        },
+        {
+          "cp": 131,
+          "line": "f1f4 f6h5 f4f2 f8e8 e2d4 e8d8",
+          "best_move": "f1f4"
+        },
+        {
+          "cp": 116,
+          "line": "e3f4 f6h5 f4e3 c6c5 d3b5 d7d8",
+          "best_move": "e3f4"
+        },
+        {
+          "cp": 38,
+          "line": "e3b6 g6g5 a5a6 b7a6 e2d4 c6c5",
+          "best_move": "e3b6"
+        },
+        {
+          "cp": 8,
+          "line": "e3f2 g6g5 e2d4 c6c5 d4e6 f7e6",
+          "best_move": "e3f2"
+        }
+      ]
+    },
+    "game": {
+      "white": "JaffaCakes",
+      "black": "Bolder13",
+      "white_elo": "2384",
+      "black_elo": "2426",
+      "date": "2016.07.28"
+    },
+    "daily_date": "2034-01-11"
+  },
+  {
+    "fen": "2r2rk1/1p2qppp/p1n1pn2/2Np3b/3P1N2/1Q1BPP2/PP4PP/2R2RK1 b - - 2 15",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -35,
+          "line": "c8c7 b3a3 f8b8 c1c3 h5g6 f1c1",
+          "best_move": "c8c7"
+        },
+        {
+          "cp": -42,
+          "line": "e6e5 d3f5 c8c7 f4d5 f6d5 b3d5",
+          "best_move": "e6e5"
+        },
+        {
+          "cp": -52,
+          "line": "c8b8 f1e1 h5g6 d3f1 f8d8 b3a3",
+          "best_move": "c8b8"
+        },
+        {
+          "cp": -82,
+          "line": "c6d8 c1c3 h5g6 d3e2 c8c6 f1c1",
+          "best_move": "c6d8"
+        },
+        {
+          "cp": -179,
+          "line": "h5g6 b3b7 c8c7 b7b3 e6e5 f4g6",
+          "best_move": "h5g6"
+        }
+      ]
+    },
+    "game": {
+      "white": "papasi",
+      "black": "Mohikanac",
+      "white_elo": "2507",
+      "black_elo": "2464",
+      "date": "2016.05.02"
+    },
+    "daily_date": "2034-01-12"
+  },
+  {
+    "fen": "2rq1rk1/pb3p2/1p2pPpp/4P3/3pP3/3BbNP1/PP4PK/R2Q1R2 b - - 3 20",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 145,
+          "line": "d8d7 a2a4 c8c5 b2b4 c5c3 a4a5",
+          "best_move": "d8d7"
+        },
+        {
+          "cp": 136,
+          "line": "c8c5 f1e1 d8c7 e1e3 d4e3 d1e1",
+          "best_move": "c8c5"
+        },
+        {
+          "cp": 123,
+          "line": "g8h7 f1e1 d8d7 e1e2 c8c5 d1e1",
+          "best_move": "g8h7"
+        },
+        {
+          "cp": 112,
+          "line": "c8c7 f1e1 g8h7 e1e2 c7c5 e2c2",
+          "best_move": "c8c7"
+        },
+        {
+          "cp": 103,
+          "line": "c8c6 f1e1 d8c7 e1e3 d4e3 d1e2",
+          "best_move": "c8c6"
+        }
+      ]
+    },
+    "game": {
+      "white": "fischerz",
+      "black": "rafi22",
+      "white_elo": "2450",
+      "black_elo": "2420",
+      "date": "2016.07.29"
+    },
+    "daily_date": "2034-01-13"
+  },
+  {
+    "fen": "2r1kb1r/ppq1pp1p/2n1b1p1/1B2N3/Q2P4/2P1B3/P4PPP/R3K2R w KQk - 3 13",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 279,
+          "line": "e3f4 c7d8 e5c6 b7c6 b5a6 g6g5",
+          "best_move": "e3f4"
+        },
+        {
+          "cp": 232,
+          "line": "e1g1 a7a6 b5c6 b7c6 e3f4 g6g5",
+          "best_move": "e1g1"
+        },
+        {
+          "cp": 170,
+          "line": "a1d1 f8g7 e3f4 e6d7 e5g6 e7e5",
+          "best_move": "a1d1"
+        },
+        {
+          "cp": 134,
+          "line": "a4a7 f8g7 e5c6 e6d7 a7c5 b7c6",
+          "best_move": "a4a7"
+        },
+        {
+          "cp": 110,
+          "line": "a1b1 a7a6 b5c6 b7c6 a4a6 f8g7",
+          "best_move": "a1b1"
+        }
+      ]
+    },
+    "game": {
+      "white": "paulovskj",
+      "black": "CaptainPlanet",
+      "white_elo": "2520",
+      "black_elo": "2369",
+      "date": "2016.07.05"
+    },
+    "daily_date": "2034-01-14"
+  },
+  {
+    "fen": "r4rk1/1p3p1p/p1nPp1p1/3p4/8/1P2qB1P/P5P1/2RQ1R1K b - - 1 19",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 444,
+          "line": "a8d8 f3e2 d8d6 e2d3 e3e5 d3a6",
+          "best_move": "a8d8"
+        },
+        {
+          "cp": 422,
+          "line": "f8d8 f3e2 d8d6 f1f3 e3g5 e2a6",
+          "best_move": "f8d8"
+        },
+        {
+          "cp": 417,
+          "line": "e3e5 d1d2 e5d6 h3h4 a8d8 h4h5",
+          "best_move": "e3e5"
+        },
+        {
+          "cp": 405,
+          "line": "a6a5 f1e1 e3f4 f3d5 e6d5 d1d5",
+          "best_move": "a6a5"
+        },
+        {
+          "cp": 404,
+          "line": "e3g5 d6d7 g5e7 f3d5 e6d5 d1d5",
+          "best_move": "e3g5"
+        }
+      ]
+    },
+    "game": {
+      "white": "StoofBuzze",
+      "black": "Goran_Krastev",
+      "white_elo": "2418",
+      "black_elo": "2252",
+      "date": "2015.02.27"
+    },
+    "daily_date": "2034-01-15"
+  },
+  {
+    "fen": "2r2r1k/p4pp1/1pn1P2p/3p2qQ/8/1P4P1/PB3PBP/3R2K1 w - - 1 24",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 24,
+          "line": "h5g5 h6g5 d1d5 f7e6 d5g5 f8f7",
+          "best_move": "h5g5"
+        },
+        {
+          "cp": 0,
+          "line": "d1d5 g5h5 d5h5 f7f6 h5d5 f8e8",
+          "best_move": "d1d5"
+        },
+        {
+          "cp": -118,
+          "line": "h5h3 c6e7 g2f1 e7g6 g1h1 f7e6",
+          "best_move": "h5h3"
+        },
+        {
+          "cp": -120,
+          "line": "h5e2 f7e6 e2e6 f8e8 e6d7 c6e5",
+          "best_move": "h5e2"
+        },
+        {
+          "cp": -240,
+          "line": "h5f3 f7e6 f3e2 g5g6 g2h3 c8d8",
+          "best_move": "h5f3"
+        }
+      ]
+    },
+    "game": {
+      "white": "mch21",
+      "black": "geodev",
+      "white_elo": "2461",
+      "black_elo": "2248",
+      "date": "2016.07.11"
+    },
+    "daily_date": "2034-01-16"
+  },
+  {
+    "fen": "r3k2r/pbqpbp1p/4pp2/2n5/PpPQ4/1P3NP1/3NPPBP/3R1RK1 b kq - 0 13",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 23,
+          "line": "e8c8 f3e1 b7g2 g1g2 c7c6 g2g1",
+          "best_move": "e8c8"
+        },
+        {
+          "cp": 12,
+          "line": "h7h5 f3e1 b7g2 g1g2 c7c6 f2f3",
+          "best_move": "h7h5"
+        },
+        {
+          "cp": 0,
+          "line": "a8d8 f3e1 c7e5 d4e5 f6e5 e1d3",
+          "best_move": "a8d8"
+        },
+        {
+          "cp": 0,
+          "line": "a8b8 d4g4 e8f8 g4h5 f8g7 f3e1",
+          "best_move": "a8b8"
+        },
+        {
+          "cp": -15,
+          "line": "a8c8 f3e1 c7e5 d4e5 f6e5 e1d3",
+          "best_move": "a8c8"
+        }
+      ]
+    },
+    "game": {
+      "white": "CaptainPlanet",
+      "black": "RosiChess",
+      "white_elo": "2426",
+      "black_elo": "2493",
+      "date": "2016.07.29"
+    },
+    "daily_date": "2034-01-17"
+  },
+  {
+    "fen": "2r1r1k1/pbq1bpp1/1p2pn1p/2p1P3/1P6/P1P2NP1/3N1PBP/2RQR1K1 b - - 0 16",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 87,
+          "line": "f6d7 b4b5 c5c4 d1e2 b7d5 f3d4",
+          "best_move": "f6d7"
+        },
+        {
+          "cp": 10,
+          "line": "f6d5 c3c4 d5b4 a3b4 c5b4 f3d4",
+          "best_move": "f6d5"
+        },
+        {
+          "cp": 6,
+          "line": "f6h7 b4b5 e8d8 d1e2 c5c4 a3a4",
+          "best_move": "f6h7"
+        },
+        {
+          "cp": -4,
+          "line": "b7f3 d2f3 e8d8 d1e2 f6d5 b4b5",
+          "best_move": "b7f3"
+        },
+        {
+          "cp": -90,
+          "line": "f6h5 b4b5 g7g6 d2c4 h5g7 f3d2",
+          "best_move": "f6h5"
+        }
+      ]
+    },
+    "game": {
+      "white": "Mettigel",
+      "black": "nelegyelbuta",
+      "white_elo": "2441",
+      "black_elo": "2277",
+      "date": "2016.07.22"
+    },
+    "daily_date": "2034-01-18"
+  },
+  {
+    "fen": "r5k1/2p1rpbp/1p4p1/p3N3/P1N1nP2/1P4P1/7P/2R2BK1 b - - 0 22",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 431,
+          "line": "e4c5 e5c6 e7e6 c4e5 c5b3 c1d1",
+          "best_move": "e4c5"
+        },
+        {
+          "cp": 423,
+          "line": "a8e8 e5c6 e7e6 c4e5 e4d2 f1b5",
+          "best_move": "a8e8"
+        },
+        {
+          "cp": 399,
+          "line": "a8f8 c1c2 g7e5 c4e5 g8g7 c2c1",
+          "best_move": "a8f8"
+        },
+        {
+          "cp": 393,
+          "line": "g7e5 c4e5 a8f8 f1c4 e4c5 c1d1",
+          "best_move": "g7e5"
+        },
+        {
+          "cp": 347,
+          "line": "f7f6 e5c6 e7d7 c4e3 g7f8 f1c4",
+          "best_move": "f7f6"
+        }
+      ]
+    },
+    "game": {
+      "white": "YOLANDA27",
+      "black": "DevilFish",
+      "white_elo": "2444",
+      "black_elo": "2742",
+      "date": "2016.06.21"
+    },
+    "daily_date": "2034-01-19"
+  },
+  {
+    "fen": "r1b2rk1/p4ppp/2pb1q2/3p4/8/2NB1Q2/PPP2PPP/R4RK1 w - - 0 13",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 1,
+          "line": "f3f6 g7f6 c3e2 a7a5 e2d4 d6c5",
+          "best_move": "f3f6"
+        },
+        {
+          "cp": -126,
+          "line": "a1b1 f6f3 g2f3 a8b8 a2a3 f8e8",
+          "best_move": "a1b1"
+        },
+        {
+          "cp": -146,
+          "line": "a2a3 f6f3 g2f3 a7a5 a1b1 g7g6",
+          "best_move": "a2a3"
+        },
+        {
+          "cp": -156,
+          "line": "c3e2 f6b2 c2c3 g7g6 a1b1 b2a3",
+          "best_move": "c3e2"
+        },
+        {
+          "cp": -158,
+          "line": "f1d1 f6f3 g2f3 a8b8 a1b1 b8b4",
+          "best_move": "f1d1"
+        }
+      ]
+    },
+    "game": {
+      "white": "Thomaster22",
+      "black": "Jodeldiplom",
+      "white_elo": "2211",
+      "black_elo": "2435",
+      "date": "2016.07.10"
+    },
+    "daily_date": "2034-01-20"
+  },
+  {
+    "fen": "r3rb1k/1b3q1p/p1n2n1p/1p1PpP2/2p4N/P1PP3B/1P2Q1N1/R1B2RK1 b - - 0 24",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 296,
+          "line": "c4d3 e2d3 c6e7 d5d6 e7d5 h4g6",
+          "best_move": "c4d3"
+        },
+        {
+          "cp": 296,
+          "line": "c6e7 d3c4 b5c4 g2e3 e7d5 e3d5",
+          "best_move": "c6e7"
+        },
+        {
+          "cp": 250,
+          "line": "c6a5 d3c4 a5b3 a1b1 b3c1 b1c1",
+          "best_move": "c6a5"
+        },
+        {
+          "cp": 222,
+          "line": "f7d5 d3c4 b5c4 e2f2 f8e7 c1h6",
+          "best_move": "f7d5"
+        },
+        {
+          "cp": 205,
+          "line": "f6d5 d3c4 d5f6 c4b5 c6a5 c1e3",
+          "best_move": "f6d5"
+        }
+      ]
+    },
+    "game": {
+      "white": "Schtroumpf83",
+      "black": "italian5",
+      "white_elo": "2446",
+      "black_elo": "2431",
+      "date": "2016.06.07"
+    },
+    "daily_date": "2034-01-21"
+  },
+  {
+    "fen": "r2qk2r/pb1p2pp/1p1P2n1/2p2p2/4n3/B2Q1NP1/PP2PPBP/R3K2R b KQkq - 2 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 34,
+          "line": "a8c8 a1c1 a7a5 h2h4 d8f6 f3g5",
+          "best_move": "a8c8"
+        },
+        {
+          "cp": 32,
+          "line": "a7a5 f3d2 g6e5 d3e3 d8f6 d2e4",
+          "best_move": "a7a5"
+        },
+        {
+          "cp": 16,
+          "line": "d8f6 e1g1 a7a5 d3b3 f6d6 f3g5",
+          "best_move": "d8f6"
+        },
+        {
+          "cp": 0,
+          "line": "b6b5 d3b5 b7c6 b5b3 a8b8 b3c2",
+          "best_move": "b6b5"
+        },
+        {
+          "cp": -5,
+          "line": "e8g8 b2b4 a8c8 a1c1 c5b4 d3b3",
+          "best_move": "e8g8"
+        }
+      ]
+    },
+    "game": {
+      "white": "MadMerkel",
+      "black": "EckhardSchmittdiel",
+      "white_elo": "2420",
+      "black_elo": "2446",
+      "date": "2016.06.19"
+    },
+    "daily_date": "2034-01-22"
+  },
+  {
+    "fen": "r5k1/1p1n1pbp/p2p1P2/3P2B1/2p1B3/8/PP3qPP/R2Q3K b - - 0 22",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 257,
+          "line": "d7f6 g5f6 g7f6 d1g4 g8f8 a1b1",
+          "best_move": "d7f6"
+        },
+        {
+          "cp": 207,
+          "line": "a8e8 d1e1 f2e1 a1e1 g7f6 g5d2",
+          "best_move": "a8e8"
+        },
+        {
+          "cp": 145,
+          "line": "g7f6 d1h5 d7f8 g5f6 f2f6 h5e2",
+          "best_move": "g7f6"
+        },
+        {
+          "cp": 84,
+          "line": "h7h6 f6g7 h6g5 d1g4 d7f6 g4g5",
+          "best_move": "h7h6"
+        },
+        {
+          "cp": 35,
+          "line": "f2b2 f6g7 b2e5 e4h7 g8g7 h2h4",
+          "best_move": "f2b2"
+        }
+      ]
+    },
+    "game": {
+      "white": "dfsal",
+      "black": "Savickas",
+      "white_elo": "2448",
+      "black_elo": "2491",
+      "date": "2016.06.12"
+    },
+    "daily_date": "2034-01-23"
+  },
+  {
+    "fen": "1b1r1r1k/pb1n2pp/1pn1pq2/2pp4/5PP1/2NP2BN/PPPQ2BP/R4R1K b - - 8 16",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -4,
+          "line": "f6g6 f4f5 e6f5 g4f5 g6g4 g3b8",
+          "best_move": "f6g6"
+        },
+        {
+          "cp": -9,
+          "line": "h7h5 g4g5 f6f5 a1e1 f5g4 d2f2",
+          "best_move": "h7h5"
+        },
+        {
+          "cp": -25,
+          "line": "d8e8 a1e1 c6d8 a2a3 b7c6 b2b4",
+          "best_move": "d8e8"
+        },
+        {
+          "cp": -32,
+          "line": "g7g6 a1e1 d8e8 c3d1 f6g7 g4g5",
+          "best_move": "g7g6"
+        },
+        {
+          "cp": -37,
+          "line": "f6e7 a1e1 d7f6 g4g5 f6h5 c3d5",
+          "best_move": "f6e7"
+        }
+      ]
+    },
+    "game": {
+      "white": "shozolosa",
+      "black": "MrZor",
+      "white_elo": "2276",
+      "black_elo": "2423",
+      "date": "2016.04.23"
+    },
+    "daily_date": "2034-01-24"
+  },
+  {
+    "fen": "3rr1k1/1p1qnp1p/p5pb/3p4/3P1Nb1/BP4P1/P2Q1PBP/R3R1K1 w - - 10 19",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 138,
+          "line": "a3e7 e8e7 e1e7 d7e7 f4g6 h6d2",
+          "best_move": "a3e7"
+        },
+        {
+          "cp": 138,
+          "line": "e1e7 e8e7 a3e7 d7e7 f4g6 h6d2",
+          "best_move": "e1e7"
+        },
+        {
+          "cp": 57,
+          "line": "e1e5 g4e6 a3e7 e8e7 a1e1 d8e8",
+          "best_move": "e1e5"
+        },
+        {
+          "cp": 17,
+          "line": "h2h3 g4e6 a3c5 e7c6 a2a4 h6f4",
+          "best_move": "h2h3"
+        },
+        {
+          "cp": 6,
+          "line": "a3c5 e7c6 a2a4 a6a5 h2h4 g4f5",
+          "best_move": "a3c5"
+        }
+      ]
+    },
+    "game": {
+      "white": "schnappi",
+      "black": "Schtroumpf83",
+      "white_elo": "2384",
+      "black_elo": "2410",
+      "date": "2016.06.17"
+    },
+    "daily_date": "2034-01-25"
+  },
+  {
+    "fen": "r2qr3/1bp4k/p2p2pp/3P1p2/PpP1n3/3B1N1P/1b1N1PP1/1R1Q1RK1 b - - 1 22",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 282,
+          "line": "e4c3 d1b3 c3b1 b3b2 b1d2 b2d2",
+          "best_move": "e4c3"
+        },
+        {
+          "cp": 246,
+          "line": "b2c3 d2b3 c7c5 d5c6 b7c6 b3d4",
+          "best_move": "b2c3"
+        },
+        {
+          "cp": 215,
+          "line": "e4d2 b1b2 d2f1 b2b4 f1e3 f2e3",
+          "best_move": "e4d2"
+        },
+        {
+          "cp": 157,
+          "line": "d8f6 d2e4 f5e4 d3e4 e8e4 d1c2",
+          "best_move": "d8f6"
+        },
+        {
+          "cp": 121,
+          "line": "b2g7 b1b4 b7c8 d3e4 f5e4 f3h2",
+          "best_move": "b2g7"
+        }
+      ]
+    },
+    "game": {
+      "white": "mecker",
+      "black": "meduzka",
+      "white_elo": "2408",
+      "black_elo": "2402",
+      "date": "2016.07.26"
+    },
+    "daily_date": "2034-01-26"
+  },
+  {
+    "fen": "r2q1rk1/1p2ppbp/3pbnp1/8/p1P1P3/2N1BP2/PP1QB1PP/2R2RK1 b - - 0 13",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -22,
+          "line": "d8a5 c1c2 f8c8 f1c1 f6d7 h2h3",
+          "best_move": "d8a5"
+        },
+        {
+          "cp": -33,
+          "line": "f6d7 c3d5 f8e8 f3f4 d7c5 d2c2",
+          "best_move": "f6d7"
+        },
+        {
+          "cp": -62,
+          "line": "d8b8 f3f4 e6d7 e2f3 d7g4 g1h1",
+          "best_move": "d8b8"
+        },
+        {
+          "cp": -62,
+          "line": "f8e8 c3b5 d8b8 f1d1 e8c8 g1h1",
+          "best_move": "f8e8"
+        },
+        {
+          "cp": -66,
+          "line": "g7h8 h2h3 h8g7 f1d1 f6d7 f3f4",
+          "best_move": "g7h8"
+        }
+      ]
+    },
+    "game": {
+      "white": "Davigator",
+      "black": "tati1375",
+      "white_elo": "2431",
+      "black_elo": "2488",
+      "date": "2016.07.12"
+    },
+    "daily_date": "2034-01-27"
+  },
+  {
+    "fen": "2rr2k1/5ppp/pqPp1b2/1pn5/5BP1/1P5P/P1PQ2B1/4RR1K w - - 3 23",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 389,
+          "line": "g4g5 f6b2 b3b4 c5e6 c2c3 b2a3",
+          "best_move": "g4g5"
+        },
+        {
+          "cp": 315,
+          "line": "d2e3 a6a5 g4g5 f6e5 f4e5 d6e5",
+          "best_move": "d2e3"
+        },
+        {
+          "cp": 260,
+          "line": "d2d5 c5e6 f4d6 e6d4 f1f6 g7f6",
+          "best_move": "d2d5"
+        },
+        {
+          "cp": 253,
+          "line": "f4e3 b6c7 g2d5 c5e6 f1f6 g7f6",
+          "best_move": "f4e3"
+        },
+        {
+          "cp": 252,
+          "line": "g2d5 c5e6 f4e3 b6b8 f1f6 g7f6",
+          "best_move": "g2d5"
+        }
+      ]
+    },
+    "game": {
+      "white": "Mirdad",
+      "black": "emmanueljimenez",
+      "white_elo": "2416",
+      "black_elo": "2454",
+      "date": "2016.07.09"
+    },
+    "daily_date": "2034-01-28"
+  },
+  {
+    "fen": "r1b2rk1/p3npbp/1p2p1p1/2qpP2P/1n3B2/2N2N2/PPP1BPP1/R2Q1RK1 w - - 0 13",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 244,
+          "line": "a2a3 b4c6 h5h6 g7h8 c3b5 e7f5",
+          "best_move": "a2a3"
+        },
+        {
+          "cp": 241,
+          "line": "h5h6 g7h8 a2a3 b4c6 c3b5 c6d8",
+          "best_move": "h5h6"
+        },
+        {
+          "cp": 148,
+          "line": "d1d2 d5d4 f3d4 f8d8 a1d1 e7f5",
+          "best_move": "d1d2"
+        },
+        {
+          "cp": 142,
+          "line": "f1e1 g6h5 a2a3 b4c6 f4e3 d5d4",
+          "best_move": "f1e1"
+        },
+        {
+          "cp": 118,
+          "line": "f4e3 c5c7 c3b5 c7b8 e3g5 b4c6",
+          "best_move": "f4e3"
+        }
+      ]
+    },
+    "game": {
+      "white": "cheenko",
+      "black": "LaBoite",
+      "white_elo": "2411",
+      "black_elo": "2510",
+      "date": "2016.07.05"
+    },
+    "daily_date": "2034-01-29"
+  },
+  {
+    "fen": "r1bq1rk1/pp3p1p/4p1p1/2pPb3/4PP2/2P5/P2QB1PP/1RB1K2R b K - 0 13",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -22,
+          "line": "e5c7 e1g1 e6d5 e4d5 c7a5 c1a3",
+          "best_move": "e5c7"
+        },
+        {
+          "cp": -26,
+          "line": "e5g7 d5d6 e6e5 e1g1 e5f4 d2f4",
+          "best_move": "e5g7"
+        },
+        {
+          "cp": -91,
+          "line": "e5b8 d5e6 c8e6 b1b7 b8c7 d2d8",
+          "best_move": "e5b8"
+        },
+        {
+          "cp": -91,
+          "line": "e5h8 d5d6 e6e5 e1g1 e5f4 d2f4",
+          "best_move": "e5h8"
+        },
+        {
+          "cp": -107,
+          "line": "e5f6 d5d6 e6e5 e1g1 e5f4 d2f4",
+          "best_move": "e5f6"
+        }
+      ]
+    },
+    "game": {
+      "white": "TheMagnet",
+      "black": "HappyCruncher",
+      "white_elo": "2412",
+      "black_elo": "2245",
+      "date": "2015.07.30"
+    },
+    "daily_date": "2034-01-30"
+  },
+  {
+    "fen": "r2q1r2/pp4bk/3p2pp/2pN3n/2PnPP2/4B2P/PP3QB1/R4RK1 b - - 0 18",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 29,
+          "line": "d8d7 a1d1 a8e8 d1d2 g6g5 f4f5",
+          "best_move": "d8d7"
+        },
+        {
+          "cp": 23,
+          "line": "g6g5 f4f5 h5g3 f1e1 g7e5 a1d1",
+          "best_move": "g6g5"
+        },
+        {
+          "cp": 18,
+          "line": "a8b8 a1d1 h5f4 d5f4 g6g5 e4e5",
+          "best_move": "a8b8"
+        },
+        {
+          "cp": 14,
+          "line": "h5f4 d5f4 g6g5 e4e5 g5f4 e3d4",
+          "best_move": "h5f4"
+        },
+        {
+          "cp": 11,
+          "line": "a8c8 a1d1 g6g5 f4f5 g7e5 g2f3",
+          "best_move": "a8c8"
+        }
+      ]
+    },
+    "game": {
+      "white": "norba94",
+      "black": "Elnur_Mehtiyev",
+      "white_elo": "2487",
+      "black_elo": "2371",
+      "date": "2016.06.21"
+    },
+    "daily_date": "2034-01-31"
+  },
+  {
+    "fen": "3r1rk1/pbp1qpb1/1pnn2pp/4p3/1P2N3/1BPP1N2/P2BQPPP/3RR1K1 b - - 2 20",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 19,
+          "line": "d8e8 a2a4 g8h7 d2c1 c6d8 a4a5",
+          "best_move": "d8e8"
+        },
+        {
+          "cp": 19,
+          "line": "g8h7 a2a4 d8e8 d2c1 c6d8 a4a5",
+          "best_move": "g8h7"
+        },
+        {
+          "cp": -9,
+          "line": "a7a6 e4d6 e7d6 d2c1 g8h7 h2h4",
+          "best_move": "a7a6"
+        },
+        {
+          "cp": -11,
+          "line": "f8e8 h2h4 g8h8 h4h5 g6g5 d3d4",
+          "best_move": "f8e8"
+        },
+        {
+          "cp": -19,
+          "line": "b7c8 d2c1 c8e6 b3a4 e6d7 b4b5",
+          "best_move": "b7c8"
+        }
+      ]
+    },
+    "game": {
+      "white": "NonSens",
+      "black": "Berthe",
+      "white_elo": "2461",
+      "black_elo": "2436",
+      "date": "2015.03.25"
+    },
+    "daily_date": "2034-02-01"
+  },
+  {
+    "fen": "2rqkb1r/5p2/1p1pb3/p2Nnp1p/2P1p2P/2N1P1P1/PP2BP2/R2QK2R w KQk - 2 18",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 136,
+          "line": "d1a4 e5d7 c3b5 e6d5 c4d5 f8e7",
+          "best_move": "d1a4"
+        },
+        {
+          "cp": 125,
+          "line": "a1c1 f8g7 b2b3 e6d5 d1d5 h8h6",
+          "best_move": "a1c1"
+        },
+        {
+          "cp": 121,
+          "line": "b2b3 f8g7 a1c1 e6d5 c3d5 e5c6",
+          "best_move": "b2b3"
+        },
+        {
+          "cp": 105,
+          "line": "a1b1 f8g7 b2b3 e5c6 d1d2 e6d5",
+          "best_move": "a1b1"
+        },
+        {
+          "cp": 103,
+          "line": "d1b3 f8g7 a1d1 e8f8 e1f1 e5g6",
+          "best_move": "d1b3"
+        }
+      ]
+    },
+    "game": {
+      "white": "Riplus",
+      "black": "Peaudepailles",
+      "white_elo": "2660",
+      "black_elo": "2746",
+      "date": "2016.06.01"
+    },
+    "daily_date": "2034-02-02"
+  },
+  {
+    "fen": "2kr1b1r/pb1n1p2/1q2pP2/1pp3B1/2pP4/2N3P1/PP3PBP/R2Q1RK1 w - - 0 15",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 114,
+          "line": "d4d5 b5b4 c3a4 b6b5 f1e1 e6d5",
+          "best_move": "d4d5"
+        },
+        {
+          "cp": 69,
+          "line": "d4c5 d7c5 d1e2 b7g2 g1g2 f8h6",
+          "best_move": "d4c5"
+        },
+        {
+          "cp": 7,
+          "line": "g2b7 b6b7 d1g4 c5d4 g4d4 d7c5",
+          "best_move": "g2b7"
+        },
+        {
+          "cp": -81,
+          "line": "c3e4 c5d4 a2a4 d7c5 d1g4 b5b4",
+          "best_move": "c3e4"
+        },
+        {
+          "cp": -89,
+          "line": "c3e2 b7g2 g1g2 b6c6 f2f3 d7b6",
+          "best_move": "c3e2"
+        }
+      ]
+    },
+    "game": {
+      "white": "dantesakk",
+      "black": "Voat",
+      "white_elo": "2548",
+      "black_elo": "2703",
+      "date": "2016.06.19"
+    },
+    "daily_date": "2034-02-03"
+  },
+  {
+    "fen": "r5k1/1b1n2qp/p5p1/1p1pp3/3P3Q/3BP3/PP2N1PP/5RK1 w - - 0 21",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 93,
+          "line": "f1c1 d7b6 h4g3 a8e8 h2h4 b6c4",
+          "best_move": "f1c1"
+        },
+        {
+          "cp": 87,
+          "line": "h4g5 a8e8 h2h4 d7f8 h4h5 e5d4",
+          "best_move": "h4g5"
+        },
+        {
+          "cp": 83,
+          "line": "h4g3 a8e8 h2h4 e5d4 e3d4 d7f6",
+          "best_move": "h4g3"
+        },
+        {
+          "cp": 81,
+          "line": "h4g4 a8e8 h2h4 e5d4 e3d4 d7f6",
+          "best_move": "h4g4"
+        },
+        {
+          "cp": 75,
+          "line": "h2h3 a8e8 h4g3 e5d4 e3d4 d7f6",
+          "best_move": "h2h3"
+        }
+      ]
+    },
+    "game": {
+      "white": "ElCigala",
+      "black": "reitzo",
+      "white_elo": "2419",
+      "black_elo": "2200",
+      "date": "2016.07.06"
+    },
+    "daily_date": "2034-02-04"
+  },
+  {
+    "fen": "r1b2rk1/5ppp/p1p2n2/1pq1p3/4P3/2NQ4/PPP1BPPP/4RRK1 w - - 2 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -29,
+          "line": "e1d1 c8e6 a2a3 a6a5 d3d6 f6d7",
+          "best_move": "e1d1"
+        },
+        {
+          "cp": -33,
+          "line": "a2a3 a8a7 e1d1 a7d7 d3g3 d7d4",
+          "best_move": "a2a3"
+        },
+        {
+          "cp": -40,
+          "line": "h2h3 c8e6 e1d1 c5b4 b2b3 b4c5",
+          "best_move": "h2h3"
+        },
+        {
+          "cp": -41,
+          "line": "e1b1 c8e6 f1d1 a6a5 a2a3 f8c8",
+          "best_move": "e1b1"
+        },
+        {
+          "cp": -41,
+          "line": "e1c1 a8a7 a2a3 a7d7 d3f3 f8d8",
+          "best_move": "e1c1"
+        }
+      ]
+    },
+    "game": {
+      "white": "pacal56",
+      "black": "zsoltik",
+      "white_elo": "2232",
+      "black_elo": "2419",
+      "date": "2014.09.27"
+    },
+    "daily_date": "2034-02-05"
+  },
+  {
+    "fen": "1r2kb1r/1p3ppp/p2pb1q1/3Np3/3nP3/2NQ4/PPP2PPP/R3KB1R b KQk - 5 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -22,
+          "line": "b8c8 d5e3 f7f5 e4f5 d4f5 e1c1",
+          "best_move": "b8c8"
+        },
+        {
+          "cp": -74,
+          "line": "f8e7 f2f4 g6h6 e1c1 e7d8 c1b1",
+          "best_move": "f8e7"
+        },
+        {
+          "cp": -118,
+          "line": "b7b5 d5c7 e8d8 c3d5 b8b7 c7e6",
+          "best_move": "b7b5"
+        },
+        {
+          "cp": -124,
+          "line": "g6h6 d5c7 e8d8 c3d5 b8c8 c7e6",
+          "best_move": "g6h6"
+        },
+        {
+          "cp": -135,
+          "line": "g6h5 d5c7 e8d7 c3d5 f8e7 c2c3",
+          "best_move": "g6h5"
+        }
+      ]
+    },
+    "game": {
+      "white": "UpToMasterChess",
+      "black": "GeorgeMan",
+      "white_elo": "2264",
+      "black_elo": "2453",
+      "date": "2015.01.12"
+    },
+    "daily_date": "2034-02-06"
+  },
+  {
+    "fen": "5rk1/pp3pp1/1r2pq1p/8/8/4Q3/PPPR1PPP/1K1R4 w - - 2 22",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 80,
+          "line": "b2b3 f8c8 g2g3 b6a6 f2f4 a6a5",
+          "best_move": "b2b3"
+        },
+        {
+          "cp": 44,
+          "line": "d2d4 b6c6 d1d2 f8c8 e3e4 b7b5",
+          "best_move": "d2d4"
+        },
+        {
+          "cp": 31,
+          "line": "e3d4 f6g6 g2g3 f8c8 d1c1 g6f5",
+          "best_move": "e3d4"
+        },
+        {
+          "cp": 13,
+          "line": "e3a3 f8c8 f2f3 a7a6 d2d4 e6e5",
+          "best_move": "e3a3"
+        },
+        {
+          "cp": -37,
+          "line": "c2c4 f6g6 b1a1 g6g2 f2f4 g2g6",
+          "best_move": "c2c4"
+        }
+      ]
+    },
+    "game": {
+      "white": "pipo2016",
+      "black": "norba94",
+      "white_elo": "2522",
+      "black_elo": "2344",
+      "date": "2016.07.26"
+    },
+    "daily_date": "2034-02-07"
+  },
+  {
+    "fen": "r1r3k1/4q1pp/np2p3/p2pNp2/3Pb3/P2BP3/1PQ2PPP/1K1RR3 w - - 2 18",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 193,
+          "line": "c2b3 a6c7 b3b6 c8b8 b6c5 e7c5",
+          "best_move": "c2b3"
+        },
+        {
+          "cp": 155,
+          "line": "c2a4 a6c7 a4d7 e7e8 b1a2 e4d3",
+          "best_move": "c2a4"
+        },
+        {
+          "cp": 103,
+          "line": "c2e2 a6c7 d3e4 d5e4 d1c1 c7d5",
+          "best_move": "c2e2"
+        },
+        {
+          "cp": 57,
+          "line": "c2d2 a6b8 f2f3 e4d3 e5d3 b8d7",
+          "best_move": "c2d2"
+        },
+        {
+          "cp": -27,
+          "line": "d3e4 c8c2 e4c2 a6c7 c2d3 c7e8",
+          "best_move": "d3e4"
+        }
+      ]
+    },
+    "game": {
+      "white": "ElCapullo",
+      "black": "AGMVandad",
+      "white_elo": "2515",
+      "black_elo": "2277",
+      "date": "2016.06.23"
+    },
+    "daily_date": "2034-02-08"
+  },
+  {
+    "fen": "r3r1k1/2qnbppp/pp1ppn2/8/2PNP3/1PNQ2P1/PB3PKP/2RR4 b - - 4 15",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -14,
+          "line": "e7f8 d3e2 c7b7 f2f3 a8c8 d1e1",
+          "best_move": "e7f8"
+        },
+        {
+          "cp": -18,
+          "line": "c7b7 d3e2 e7f8 f2f3 e8c8 h2h3",
+          "best_move": "c7b7"
+        },
+        {
+          "cp": -28,
+          "line": "d7c5 d3e2 c7b7 f2f3 a8c8 d1d2",
+          "best_move": "d7c5"
+        },
+        {
+          "cp": -28,
+          "line": "h7h6 d3e2 c7b7 h2h3 d7c5 d1e1",
+          "best_move": "h7h6"
+        },
+        {
+          "cp": -28,
+          "line": "a8c8 f2f4 d7c5 d3f3 c7b7 d1e1",
+          "best_move": "a8c8"
+        }
+      ]
+    },
+    "game": {
+      "white": "DarkApollyon",
+      "black": "tamik",
+      "white_elo": "2500",
+      "black_elo": "2434",
+      "date": "2016.07.20"
+    },
+    "daily_date": "2034-02-09"
+  },
+  {
+    "fen": "q4rk1/2rnbppp/pp1pp3/2p5/2PPb3/1P2PN1P/PB2BPP1/Q2RR1K1 b - - 1 16",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -18,
+          "line": "d7f6 a2a4 a8b7 d4d5 e6d5 f3d2",
+          "best_move": "d7f6"
+        },
+        {
+          "cp": -28,
+          "line": "c5d4 e3d4 d6d5 f3d2 e4g6 a2a4",
+          "best_move": "c5d4"
+        },
+        {
+          "cp": -44,
+          "line": "e7f6 d4c5 d6c5 d1d6 f6b2 a1b2",
+          "best_move": "e7f6"
+        },
+        {
+          "cp": -50,
+          "line": "f7f6 a2a4 a6a5 d4d5 e6e5 f3d2",
+          "best_move": "f7f6"
+        },
+        {
+          "cp": -58,
+          "line": "g7g6 a2a4 a6a5 a1c1 f8e8 d4d5",
+          "best_move": "g7g6"
+        }
+      ]
+    },
+    "game": {
+      "white": "Cofi7",
+      "black": "tamik",
+      "white_elo": "2475",
+      "black_elo": "2566",
+      "date": "2016.06.30"
+    },
+    "daily_date": "2034-02-10"
+  },
+  {
+    "fen": "rn2kb1r/1q1p1p2/pp2p2p/2p1P1pn/8/2N2NB1/PPP2PPP/R2QK2R w KQkq - 0 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -79,
+          "line": "d1e2 b8c6 e1c1 e8c8 f3d2 h5g3",
+          "best_move": "d1e2"
+        },
+        {
+          "cp": -91,
+          "line": "h2h3 h5g3 f2g3 b8c6 d1e2 e8c8",
+          "best_move": "h2h3"
+        },
+        {
+          "cp": -109,
+          "line": "f3d2 b7g2 h1f1 h5f4 g3f4 g5f4",
+          "best_move": "f3d2"
+        },
+        {
+          "cp": -116,
+          "line": "d1d3 b8c6 d3e3 e8c8 e1c1 b7b8",
+          "best_move": "d1d3"
+        },
+        {
+          "cp": -120,
+          "line": "e1g1 b8c6 d1e2 e8c8 a1d1 h5g3",
+          "best_move": "e1g1"
+        }
+      ]
+    },
+    "game": {
+      "white": "pizdez",
+      "black": "Prokofiev",
+      "white_elo": "2448",
+      "black_elo": "2454",
+      "date": "2016.07.31"
+    },
+    "daily_date": "2034-02-11"
+  },
+  {
+    "fen": "rn2r1k1/p1q2pbp/b2p1np1/3P4/1ppNPB2/5N1P/PPB2PP1/R2QR1K1 b - - 7 15",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -32,
+          "line": "b8d7 d4c6 a6b7 c6b4 d7c5 f3d2",
+          "best_move": "b8d7"
+        },
+        {
+          "cp": -128,
+          "line": "c7b6 a1c1 b8d7 d4c6 d7c5 e4e5",
+          "best_move": "c7b6"
+        },
+        {
+          "cp": -128,
+          "line": "c7c5 a1b1 c5b6 b1c1 b6c7 e4e5",
+          "best_move": "c7c5"
+        },
+        {
+          "cp": -135,
+          "line": "f6d7 d1d2 d7e5 d2b4 c7b6 b4b6",
+          "best_move": "f6d7"
+        },
+        {
+          "cp": -142,
+          "line": "f6h5 f4h2 b8d7 c2a4 d7c5 a4c6",
+          "best_move": "f6h5"
+        }
+      ]
+    },
+    "game": {
+      "white": "BosonHiggs",
+      "black": "Macandcheese1",
+      "white_elo": "2386",
+      "black_elo": "2419",
+      "date": "2016.07.01"
+    },
+    "daily_date": "2034-02-12"
+  },
+  {
+    "fen": "2kr3r/p1q2p2/2p1p1p1/1p1nR2p/3P4/P1P2QP1/1PB2PP1/2K1R3 w - - 0 21",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 62,
+          "line": "c1b1 c8b8 c2b3 d5b6 e1h1 d8c8",
+          "best_move": "c1b1"
+        },
+        {
+          "cp": 60,
+          "line": "c2b3 d5b6 c1b1 a7a6 e1c1 c8b7",
+          "best_move": "c2b3"
+        },
+        {
+          "cp": 52,
+          "line": "c2d3 c8b8 c1b1 d8d7 c3c4 b5c4",
+          "best_move": "c2d3"
+        },
+        {
+          "cp": 49,
+          "line": "e5e2 c8b8 c1b1 d8d7 e1c1 d5b6",
+          "best_move": "e5e2"
+        },
+        {
+          "cp": 46,
+          "line": "e1h1 c8b7 c1b1 a7a6 b1a2 b7a7",
+          "best_move": "e1h1"
+        }
+      ]
+    },
+    "game": {
+      "white": "Monzza",
+      "black": "kekss5",
+      "white_elo": "2324",
+      "black_elo": "2401",
+      "date": "2016.06.15"
+    },
+    "daily_date": "2034-02-13"
+  },
+  {
+    "fen": "r2r2k1/1q2bppp/pp1ppn2/8/2PQP3/1PN3P1/PB3P1P/2RR2K1 b - - 0 16",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 47,
+          "line": "b6b5 c4b5 a6b5 b3b4 f6g4 c3d5",
+          "best_move": "b6b5"
+        },
+        {
+          "cp": 12,
+          "line": "h7h5 a2a4 f6d7 h2h4 e7f6 d4d3",
+          "best_move": "h7h5"
+        },
+        {
+          "cp": 5,
+          "line": "h7h6 d4d3 f6d7 a2a4 d7c5 d3c2",
+          "best_move": "h7h6"
+        },
+        {
+          "cp": 4,
+          "line": "f6d7 d4d3 h7h6 a2a4 e7g5 c1b1",
+          "best_move": "f6d7"
+        },
+        {
+          "cp": -1,
+          "line": "a8b8 a2a4 f6d7 d4d3 d7c5 d3c2",
+          "best_move": "a8b8"
+        }
+      ]
+    },
+    "game": {
+      "white": "IvanBorin",
+      "black": "italian5",
+      "white_elo": "2358",
+      "black_elo": "2444",
+      "date": "2016.07.10"
+    },
+    "daily_date": "2034-02-14"
+  },
+  {
+    "fen": "r2q1bk1/1p3p2/3N1ppp/1N1Pr3/2P2P2/P5Q1/1n4PP/R4RK1 b - - 0 23",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -87,
+          "line": "e5e2 g3f3 e2d2 d6e4 b2c4 f3c3",
+          "best_move": "e5e2"
+        },
+        {
+          "cp": -95,
+          "line": "e5e7 g3f2 b2a4 f4f5 g6g5 f2d4",
+          "best_move": "e5e7"
+        },
+        {
+          "cp": -121,
+          "line": "d8b6 g3f2 e5e3 a1e1 f8d6 b5d6",
+          "best_move": "d8b6"
+        },
+        {
+          "cp": -151,
+          "line": "f8d6 f4e5 d6e5 g3b3 b2a4 a1e1",
+          "best_move": "f8d6"
+        },
+        {
+          "cp": -151,
+          "line": "e5h5 c4c5 a8a5 a1b1 a5b5 d6b5",
+          "best_move": "e5h5"
+        }
+      ]
+    },
+    "game": {
+      "white": "BUBULLE",
+      "black": "Aiakos",
+      "white_elo": "2369",
+      "black_elo": "2411",
+      "date": "2015.03.26"
+    },
+    "daily_date": "2034-02-15"
+  },
+  {
+    "fen": "r1b1nrk1/1pq1b1pp/p4p2/P1pPp3/2N1P3/6B1/1PP1B1PP/R2Q1RK1 w - - 0 16",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 208,
+          "line": "c4b6 a8b8 d1d3 c8d7 c2c4 b8d8",
+          "best_move": "c4b6"
+        },
+        {
+          "cp": 204,
+          "line": "d1d3 c8d7 c4b6 a8d8 c2c4 e8d6",
+          "best_move": "d1d3"
+        },
+        {
+          "cp": 191,
+          "line": "d1d2 e8d6 c4b6 a8b8 d2d3 c8d7",
+          "best_move": "d1d2"
+        },
+        {
+          "cp": 180,
+          "line": "b2b3 c8d7 c4b6 a8d8 d1d3 e8d6",
+          "best_move": "b2b3"
+        },
+        {
+          "cp": 180,
+          "line": "h2h3 c8d7 c4b6 a8d8 d1d3 e8d6",
+          "best_move": "h2h3"
+        }
+      ]
+    },
+    "game": {
+      "white": "lovlas",
+      "black": "trailovicmile",
+      "white_elo": "2490",
+      "black_elo": "2281",
+      "date": "2016.06.29"
+    },
+    "daily_date": "2034-02-16"
+  },
+  {
+    "fen": "r2r2k1/ppR2pb1/6pp/3Bn1N1/4P1b1/4B3/P4PPP/4K2R w - - 0 19",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -14,
+          "line": "h2h3 d8d7 c7d7 g4d7 f2f4 h6g5",
+          "best_move": "h2h3"
+        },
+        {
+          "cp": -28,
+          "line": "g5f7 d8d5 f7h6 g7h6 e4d5 h6f8",
+          "best_move": "g5f7"
+        },
+        {
+          "cp": -38,
+          "line": "f2f3 d8d7 c7c2 a8e8 f3g4 h6g5",
+          "best_move": "f2f3"
+        },
+        {
+          "cp": -72,
+          "line": "g5f3 d8d5 e4d5 e5f3 g2f3 g4f3",
+          "best_move": "g5f3"
+        },
+        {
+          "cp": -98,
+          "line": "g5h3 d8c8 c7c8 a8c8 f2f3 g4e6",
+          "best_move": "g5h3"
+        }
+      ]
+    },
+    "game": {
+      "white": "BeWater",
+      "black": "Smokecraft",
+      "white_elo": "2455",
+      "black_elo": "2225",
+      "date": "2015.10.25"
+    },
+    "daily_date": "2034-02-17"
+  },
+  {
+    "fen": "r2q1rk1/pp1nbppb/2p1pn1p/8/5BP1/2NP2NP/PPP2PB1/R2QR1K1 w - - 5 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -27,
+          "line": "d1d2 a7a5 a1d1 f6d5 c3d5 c6d5",
+          "best_move": "d1d2"
+        },
+        {
+          "cp": -33,
+          "line": "a2a3 f8e8 g3e4 f6d5 f4g3 a8c8",
+          "best_move": "a2a3"
+        },
+        {
+          "cp": -40,
+          "line": "f4d2 f6d5 c3d5 c6d5 c2c4 d7c5",
+          "best_move": "f4d2"
+        },
+        {
+          "cp": -43,
+          "line": "g3e4 f6d5 f4h2 e7b4 d1d2 h7e4",
+          "best_move": "g3e4"
+        },
+        {
+          "cp": -43,
+          "line": "d1e2 f8e8 g3e4 f6d5 f4g3 d7f8",
+          "best_move": "d1e2"
+        }
+      ]
+    },
+    "game": {
+      "white": "TotallyLegitimate",
+      "black": "zumpili",
+      "white_elo": "2380",
+      "black_elo": "2410",
+      "date": "2016.07.02"
+    },
+    "daily_date": "2034-02-18"
+  },
+  {
+    "fen": "2r3k1/p4ppp/1p6/8/3B1b2/1PP3PP/5P2/4R1K1 b - - 1 24",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -16,
+          "line": "f4d6 b3b4 f7f6 g1g2 d6e5 d4e5",
+          "best_move": "f4d6"
+        },
+        {
+          "cp": -21,
+          "line": "f4c7 g1g2 g8f8 g2f3 g7g6 e1a1",
+          "best_move": "f4c7"
+        },
+        {
+          "cp": -27,
+          "line": "f4b8 b3b4 b8d6 e1a1 c8c7 g1g2",
+          "best_move": "f4b8"
+        },
+        {
+          "cp": -33,
+          "line": "f4g5 e1a1 g5f6 a1a7 f6d4 c3d4",
+          "best_move": "f4g5"
+        },
+        {
+          "cp": -104,
+          "line": "f4h6 e1a1 c8c7 d4b6 c7c3 a1a7",
+          "best_move": "f4h6"
+        }
+      ]
+    },
+    "game": {
+      "white": "chessstrategy",
+      "black": "KeyzerSoze",
+      "white_elo": "2560",
+      "black_elo": "2486",
+      "date": "2016.07.23"
+    },
+    "daily_date": "2034-02-19"
+  },
+  {
+    "fen": "r4rk1/1p1n2pp/2pb4/3pN3/1p1PbP2/4P3/PP4BP/R1B2RK1 b - - 1 19",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 145,
+          "line": "d7f6 a2a4 e4g2 g1g2 f6e4 f1d1",
+          "best_move": "d7f6"
+        },
+        {
+          "cp": 136,
+          "line": "e4g2 g1g2 d7f6 e5d3 f6e4 g2f3",
+          "best_move": "e4g2"
+        },
+        {
+          "cp": 134,
+          "line": "e4f5 a2a4 b4a3 b2a3 a8a7 f1f2",
+          "best_move": "e4f5"
+        },
+        {
+          "cp": 112,
+          "line": "d6e5 d4e5 b4b3 a2a4 d7c5 a4a5",
+          "best_move": "d6e5"
+        },
+        {
+          "cp": 102,
+          "line": "d7b6 g2e4 d5e4 c1d2 a8a6 a2a3",
+          "best_move": "d7b6"
+        }
+      ]
+    },
+    "game": {
+      "white": "Blitzstream-twitch",
+      "black": "Mettigel",
+      "white_elo": "2417",
+      "black_elo": "2299",
+      "date": "2014.09.26"
+    },
+    "daily_date": "2034-02-20"
+  },
+  {
+    "fen": "r4rk1/2qnbppp/4p1n1/ppppP3/3P1P2/1NP4P/PPB3P1/R1BQ1RK1 w - - 0 16",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 43,
+          "line": "b3d2 g6h4 f1f2 g7g6 g2g3 h4f5",
+          "best_move": "b3d2"
+        },
+        {
+          "cp": 39,
+          "line": "g1h1 b5b4 f4f5 e6f5 c2f5 a5a4",
+          "best_move": "g1h1"
+        },
+        {
+          "cp": 37,
+          "line": "a1b1 a5a4 b3d2 g6h4 f1f2 g7g6",
+          "best_move": "a1b1"
+        },
+        {
+          "cp": 30,
+          "line": "a2a4 c5d4 b3d4 b5a4 c2a4 d7c5",
+          "best_move": "a2a4"
+        },
+        {
+          "cp": 27,
+          "line": "c1e3 a5a4 b3c1 d7b6 c1d3 c5c4",
+          "best_move": "c1e3"
+        }
+      ]
+    },
+    "game": {
+      "white": "Oleg_777",
+      "black": "Powerdonok",
+      "white_elo": "2400",
+      "black_elo": "2397",
+      "date": "2016.06.29"
+    },
+    "daily_date": "2034-02-21"
+  },
+  {
+    "fen": "1r2n1k1/3bqpb1/p2pP1p1/2pP4/Prp2Pp1/2N3BP/RP2R1B1/4Q1K1 b - - 0 23",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 120,
+          "line": "g7c3 e1c3 g4h3 c3e1 f7e6 d5e6",
+          "best_move": "g7c3"
+        },
+        {
+          "cp": 69,
+          "line": "g4h3 e6d7 e7d7 g2f1 e8f6 f4f5",
+          "best_move": "g4h3"
+        },
+        {
+          "cp": 0,
+          "line": "g7d4 g1h2 e8f6 e6d7 e7d7 f4f5",
+          "best_move": "g7d4"
+        },
+        {
+          "cp": -62,
+          "line": "f7e6 d5e6 g7d4 g1h2 d7c8 c3d5",
+          "best_move": "f7e6"
+        },
+        {
+          "cp": -89,
+          "line": "g7f6 h3g4 f6d4 g1f1 e8f6 e6d7",
+          "best_move": "g7f6"
+        }
+      ]
+    },
+    "game": {
+      "white": "Tranquilou",
+      "black": "mosheianina",
+      "white_elo": "2442",
+      "black_elo": "2504",
+      "date": "2016.07.31"
+    },
+    "daily_date": "2034-02-22"
+  },
+  {
+    "fen": "2rq2kr/pp3pb1/4b1p1/n1BpPp1p/3P3P/P2B1N2/1P3PP1/R2Q1RK1 w - - 9 19",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 121,
+          "line": "d1a4 a7a6 a4b4 g7h6 f1b1 g8h7",
+          "best_move": "d1a4"
+        },
+        {
+          "cp": 115,
+          "line": "f1e1 g7h6 d1a4 a7a6 a4b4 g8h7",
+          "best_move": "f1e1"
+        },
+        {
+          "cp": 112,
+          "line": "a1c1 g7h6 c1c2 a7a6 a3a4 g8h7",
+          "best_move": "a1c1"
+        },
+        {
+          "cp": 94,
+          "line": "a1b1 g7h6 d1a4 a7a6 f1d1 g8h7",
+          "best_move": "a1b1"
+        },
+        {
+          "cp": 88,
+          "line": "d3e2 g7h6 d1a4 a7a6 a4b4 g8h7",
+          "best_move": "d3e2"
+        }
+      ]
+    },
+    "game": {
+      "white": "chessplace2",
+      "black": "LaBoite",
+      "white_elo": "2274",
+      "black_elo": "2434",
+      "date": "2016.06.19"
+    },
+    "daily_date": "2034-02-23"
+  },
+  {
+    "fen": "q1r3k1/r3bppp/p3p3/2P5/N1p3n1/P3BPP1/1PQ1P1KP/R2R4 w - - 4 20",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 379,
+          "line": "e3g1 a8c6 c2c4 g4e5 c4f4 e5g6",
+          "best_move": "e3g1"
+        },
+        {
+          "cp": 355,
+          "line": "e3d4 a8c6 a4b6 c8b8 b6c4 a6a5",
+          "best_move": "e3d4"
+        },
+        {
+          "cp": 283,
+          "line": "e3d2 a8c6 c2c4 h7h5 c4e4 c6e4",
+          "best_move": "e3d2"
+        },
+        {
+          "cp": 278,
+          "line": "e3f4 e7c5 a4c5 c8c5 h2h3 g7g5",
+          "best_move": "e3f4"
+        },
+        {
+          "cp": 262,
+          "line": "e3c1 a8c6 h2h3 g4f6 c1e3 h7h5",
+          "best_move": "e3c1"
+        }
+      ]
+    },
+    "game": {
+      "white": "tati1375",
+      "black": "smurf42",
+      "white_elo": "2481",
+      "black_elo": "2550",
+      "date": "2016.06.18"
+    },
+    "daily_date": "2034-02-24"
+  },
+  {
+    "fen": "2brr1k1/qpp2ppp/p2p1n2/1P6/P1P1PP2/2N3PP/3Q2B1/3RR2K w - - 1 21",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 230,
+          "line": "e4e5 f6d7 e5d6 e8e1 d2e1 c7c6",
+          "best_move": "e4e5"
+        },
+        {
+          "cp": 186,
+          "line": "a4a5 f6d7 c3d5 a7c5 d2d4 c7c6",
+          "best_move": "a4a5"
+        },
+        {
+          "cp": 142,
+          "line": "g3g4 a6b5 e4e5 c8g4 c3b5 a7b6",
+          "best_move": "g3g4"
+        },
+        {
+          "cp": 116,
+          "line": "c4c5 a7c5 e4e5 f6d7 c3e4 c5b6",
+          "best_move": "c4c5"
+        },
+        {
+          "cp": 99,
+          "line": "h1h2 d8d7 d2d4 a7d4 d1d4 a6b5",
+          "best_move": "h1h2"
+        }
+      ]
+    },
+    "game": {
+      "white": "BrainySmurf",
+      "black": "Elda64",
+      "white_elo": "2202",
+      "black_elo": "2476",
+      "date": "2015.06.12"
+    },
+    "daily_date": "2034-02-25"
+  },
+  {
+    "fen": "r3r1k1/2pq1p1p/1pNn1bpB/p2P1b2/P7/1Q3N2/1P3PPP/3RR1K1 w - - 2 21",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 141,
+          "line": "f3e5 f6e5 c6e5 d7d8 b3c3 d8f6",
+          "best_move": "f3e5"
+        },
+        {
+          "cp": 105,
+          "line": "c6e5 d7c8 h2h3 b6b5 a4b5 a8b8",
+          "best_move": "c6e5"
+        },
+        {
+          "cp": 68,
+          "line": "h2h3 e8e1 d1e1 a8e8 f3e5 f6e5",
+          "best_move": "h2h3"
+        },
+        {
+          "cp": 0,
+          "line": "h6f4 f5g4 h2h3 g4f3 b3f3 f6b2",
+          "best_move": "h6f4"
+        },
+        {
+          "cp": 0,
+          "line": "e1e8 a8e8 f3d4 g6g5 h2h4 g5h4",
+          "best_move": "e1e8"
+        }
+      ]
+    },
+    "game": {
+      "white": "paulovskj",
+      "black": "shamsi",
+      "white_elo": "2449",
+      "black_elo": "2304",
+      "date": "2016.06.02"
+    },
+    "daily_date": "2034-02-26"
+  },
+  {
+    "fen": "4r1k1/1p1q1pbp/1B1p1np1/Pp1P4/3pP3/1P4PP/3Q1PB1/2R3K1 w - - 0 23",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 358,
+          "line": "c1c7 d7d8 c7b7 d8a8 b7a7 a8c8",
+          "best_move": "c1c7"
+        },
+        {
+          "cp": 257,
+          "line": "d2d3 e8c8 c1c8 d7c8 b6d4 c8c1",
+          "best_move": "d2d3"
+        },
+        {
+          "cp": 243,
+          "line": "d2c2 g7h6 c1d1 d7c8 c2c8 e8c8",
+          "best_move": "d2c2"
+        },
+        {
+          "cp": 238,
+          "line": "c1e1 b5b4 b6d4 d7d8 d2b2 f6h5",
+          "best_move": "c1e1"
+        },
+        {
+          "cp": 231,
+          "line": "f2f3 e8c8 b6d4 c8c1 d2c1 b5b4",
+          "best_move": "f2f3"
+        }
+      ]
+    },
+    "game": {
+      "white": "FraGer68",
+      "black": "mecker",
+      "white_elo": "2533",
+      "black_elo": "2281",
+      "date": "2015.05.07"
+    },
+    "daily_date": "2034-02-27"
+  },
+  {
+    "fen": "1rq2rk1/p2nppbp/1pnp2p1/2p5/P1N1P3/2PPBNP1/1P3PKP/2RQR3 w - - 2 15",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 42,
+          "line": "h2h4 h7h5 d3d4 a7a6 d4d5 d7e5",
+          "best_move": "h2h4"
+        },
+        {
+          "cp": 39,
+          "line": "d3d4 c8b7 d4d5 c6e5 c4e5 d7e5",
+          "best_move": "d3d4"
+        },
+        {
+          "cp": 34,
+          "line": "b2b4 a7a6 b4b5 a6b5 a4b5 c6e5",
+          "best_move": "b2b4"
+        },
+        {
+          "cp": 15,
+          "line": "e3f4 c8a6 h2h4 h7h5 e1e2 d7e5",
+          "best_move": "e3f4"
+        },
+        {
+          "cp": 0,
+          "line": "d1e2 c8a6 h2h4 h7h5 c1a1 d7f6",
+          "best_move": "d1e2"
+        }
+      ]
+    },
+    "game": {
+      "white": "norba94",
+      "black": "RobertFontaine",
+      "white_elo": "2217",
+      "black_elo": "2421",
+      "date": "2015.07.31"
+    },
+    "daily_date": "2034-02-28"
+  },
+  {
+    "fen": "r2q1rk1/ppp2ppp/8/n6b/2BPnB2/4PN1P/P4PP1/2RQ1RK1 b - - 0 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -45,
+          "line": "a5c4 c1c4 d8d5 c4c7 a8c8 d1b3",
+          "best_move": "a5c4"
+        },
+        {
+          "cp": -51,
+          "line": "h5f3 g2f3 e4g5 g1g2 a5c4 c1c4",
+          "best_move": "h5f3"
+        },
+        {
+          "cp": -164,
+          "line": "c7c6 c4d3 e4f6 f1e1 f6d5 f4g3",
+          "best_move": "c7c6"
+        },
+        {
+          "cp": -169,
+          "line": "e4f6 c4e2 c7c6 g2g4 h5g6 f3e5",
+          "best_move": "e4f6"
+        },
+        {
+          "cp": -172,
+          "line": "f8e8 c4d3 c7c6 d3e4 e8e4 g2g4",
+          "best_move": "f8e8"
+        }
+      ]
+    },
+    "game": {
+      "white": "Cortador",
+      "black": "Rappozevich",
+      "white_elo": "2451",
+      "black_elo": "2525",
+      "date": "2016.06.19"
+    },
+    "daily_date": "2034-03-01"
+  },
+  {
+    "fen": "2b2rk1/5ppp/2Q1p1n1/3pP3/1q1B4/b1N2N2/5PPP/4R1K1 b - - 0 18",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 164,
+          "line": "g6h4 e1d1 c8b7 c6b5 h4f5 d1b1",
+          "best_move": "g6h4"
+        },
+        {
+          "cp": 136,
+          "line": "g6e7 c6c7 c8a6 e1b1 b4c4 c7a5",
+          "best_move": "g6e7"
+        },
+        {
+          "cp": 136,
+          "line": "c8b7 c6b5 f8c8 e1b1 b4b5 b1b5",
+          "best_move": "c8b7"
+        },
+        {
+          "cp": 99,
+          "line": "b4b7 c6b7 c8b7 c3b5 a3b4 e1a1",
+          "best_move": "b4b7"
+        },
+        {
+          "cp": 65,
+          "line": "b4e7 e1a1 c8d7 c6b6 f8c8 h2h4",
+          "best_move": "b4e7"
+        }
+      ]
+    },
+    "game": {
+      "white": "Mikefreeman",
+      "black": "stronkalexx",
+      "white_elo": "2426",
+      "black_elo": "2480",
+      "date": "2016.06.19"
+    },
+    "daily_date": "2034-03-02"
+  },
+  {
+    "fen": "1k1r3r/1pp3Qp/p4p2/1q6/3pP3/1N1P4/bPP2PPP/2KR3R b - - 1 22",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 80,
+          "line": "b5b6 b3d2 h8e8 d1e1 e8e6 b2b3",
+          "best_move": "b5b6"
+        },
+        {
+          "cp": 76,
+          "line": "a2b3 c2b3 b5b3 c1b1 b3b6 g2g3",
+          "best_move": "a2b3"
+        },
+        {
+          "cp": 66,
+          "line": "h8e8 g7f6 d8d6 f6f7 e8e6 e4e5",
+          "best_move": "h8e8"
+        },
+        {
+          "cp": 62,
+          "line": "h8g8 g7f6 d8d6 f6f5 b5f5 e4f5",
+          "best_move": "h8g8"
+        },
+        {
+          "cp": 25,
+          "line": "b5e8 f2f4 d8d6 e4e5 h8g8 g7g8",
+          "best_move": "b5e8"
+        }
+      ]
+    },
+    "game": {
+      "white": "ChessCoach1985",
+      "black": "Seppo",
+      "white_elo": "2350",
+      "black_elo": "2463",
+      "date": "2016.03.04"
+    },
+    "daily_date": "2034-03-03"
+  },
+  {
+    "fen": "r2q1rk1/1bp1bppp/pn2pn2/Bp6/3P4/2N2NP1/PP2PPBP/R1Q2RK1 w - - 10 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 4,
+          "line": "b2b3 a8c8 a2a4 d8e8 c1b2 b5a4",
+          "best_move": "b2b3"
+        },
+        {
+          "cp": 0,
+          "line": "a2a3 b6c4 a5b4 e7b4 a3b4 c4b6",
+          "best_move": "a2a3"
+        },
+        {
+          "cp": -31,
+          "line": "c3b1 b6c4 a5c3 a8c8 f1d1 d8e8",
+          "best_move": "c3b1"
+        },
+        {
+          "cp": -31,
+          "line": "a5b6 c7b6 c1d2 b5b4 c3d1 b6b5",
+          "best_move": "a5b6"
+        },
+        {
+          "cp": -53,
+          "line": "a2a4 b6c4 a4b5 a6b5 b2b4 c4a5",
+          "best_move": "a2a4"
+        }
+      ]
+    },
+    "game": {
+      "white": "surovi",
+      "black": "OccasionalBlunder",
+      "white_elo": "2400",
+      "black_elo": "2425",
+      "date": "2016.06.15"
+    },
+    "daily_date": "2034-03-04"
+  },
+  {
+    "fen": "r2q1rk1/pp3pp1/3p2n1/3Rp2p/2P1P2P/4QPPN/PP6/2K4R w - - 1 17",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 61,
+          "line": "c1b1 d8c7 h1c1 g6e7 d5d2 e7c6",
+          "best_move": "c1b1"
+        },
+        {
+          "cp": 59,
+          "line": "e3d3 d8c7 c1b1 g6e7 d5d6 a8d8",
+          "best_move": "e3d3"
+        },
+        {
+          "cp": 37,
+          "line": "e3d2 d8c7 c1b1 c7c4 h1c1 c4a4",
+          "best_move": "e3d2"
+        },
+        {
+          "cp": 31,
+          "line": "e3e2 a8c8 c1b1 d8d7 d5d2 f8d8",
+          "best_move": "e3e2"
+        },
+        {
+          "cp": 18,
+          "line": "b2b3 g6e7 d5d2 b7b5 c4b5 a7a6",
+          "best_move": "b2b3"
+        }
+      ]
+    },
+    "game": {
+      "white": "esmaeili",
+      "black": "mch21",
+      "white_elo": "2343",
+      "black_elo": "2426",
+      "date": "2016.06.27"
+    },
+    "daily_date": "2034-03-05"
+  },
+  {
+    "fen": "2r1r1k1/4ppbp/4b1p1/1pN1n3/6P1/1P2B2P/q3BP2/2RQR1K1 w - - 1 23",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 20,
+          "line": "f2f4 c8c5 c1c5 e6b3 d1b1 e5c4",
+          "best_move": "f2f4"
+        },
+        {
+          "cp": 2,
+          "line": "c1a1 a2b2 c5e6 f7e6 d1b1 b2b1",
+          "best_move": "c1a1"
+        },
+        {
+          "cp": 0,
+          "line": "c5e6 f7e6 c1c8 e8c8 f2f4 c8c3",
+          "best_move": "c5e6"
+        },
+        {
+          "cp": 0,
+          "line": "e2b5 a2a8 c5e6 f7e6 b5e2 a8e4",
+          "best_move": "e2b5"
+        },
+        {
+          "cp": -8,
+          "line": "e3f4 c8d8 d1c2 a2c2 c1c2 d8d5",
+          "best_move": "e3f4"
+        }
+      ]
+    },
+    "game": {
+      "white": "wesh",
+      "black": "ZebraSahista",
+      "white_elo": "2271",
+      "black_elo": "2420",
+      "date": "2016.06.06"
+    },
+    "daily_date": "2034-03-06"
+  },
+  {
+    "fen": "r5k1/Pp1n1pp1/2p1p2p/2Pp1b2/3Pnq2/2N2N1P/4BPP1/R2Q2K1 w - - 3 23",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -20,
+          "line": "c3e4 f5e4 d1b3 f4c7 f3d2 b7b5",
+          "best_move": "c3e4"
+        },
+        {
+          "cp": -21,
+          "line": "d1b3 f4c7 c3e4 f5e4 f3d2 b7b5",
+          "best_move": "d1b3"
+        },
+        {
+          "cp": -57,
+          "line": "d1c2 e4g5 c2b2 g5f3 e2f3 f4c7",
+          "best_move": "d1c2"
+        },
+        {
+          "cp": -64,
+          "line": "d1e1 e4g5 f3g5 h6g5 e1d1 f4c7",
+          "best_move": "d1e1"
+        },
+        {
+          "cp": -142,
+          "line": "c3b1 b7b6 g2g4 f5g6 d1a4 f4c7",
+          "best_move": "c3b1"
+        }
+      ]
+    },
+    "game": {
+      "white": "easytobeat",
+      "black": "rondinellepb",
+      "white_elo": "2678",
+      "black_elo": "2336",
+      "date": "2016.07.22"
+    },
+    "daily_date": "2034-03-07"
+  },
+  {
+    "fen": "r1bq1rk1/npn1ppbp/6pB/p2pP3/3P4/1PN2N1P/P2Q1PP1/R3RBK1 w - - 4 17",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 169,
+          "line": "a1c1 a7c6 h6e3 c7e6 a2a3 g8h8",
+          "best_move": "a1c1"
+        },
+        {
+          "cp": 167,
+          "line": "h6e3 a7c6 a1c1 c7e6 f1b5 c8d7",
+          "best_move": "h6e3"
+        },
+        {
+          "cp": 159,
+          "line": "a1d1 a7c6 h6e3 c8f5 c3a4 f5d7",
+          "best_move": "a1d1"
+        },
+        {
+          "cp": 156,
+          "line": "c3a4 a7c6 a1c1 c7e6 e1d1 g8h8",
+          "best_move": "c3a4"
+        },
+        {
+          "cp": 153,
+          "line": "h6f4 a7c6 a1c1 g8h8 a2a3 c8f5",
+          "best_move": "h6f4"
+        }
+      ]
+    },
+    "game": {
+      "white": "GoKnight123",
+      "black": "gameoverbro",
+      "white_elo": "2396",
+      "black_elo": "2422",
+      "date": "2016.03.14"
+    },
+    "daily_date": "2034-03-08"
+  },
+  {
+    "fen": "r4rk1/pp1b2pp/8/3Ppp1n/2p5/P1Nnq1PP/1PQ1N1BK/1R3R2 b - - 1 21",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 404,
+          "line": "f5f4 g3f4 e5f4 f1f3 e3e7 d5d6",
+          "best_move": "f5f4"
+        },
+        {
+          "cp": 350,
+          "line": "a8c8 b2b3 f5f4 g3f4 e5f4 f1f3",
+          "best_move": "a8c8"
+        },
+        {
+          "cp": 345,
+          "line": "e5e4 b2b3 c4b3 c2b3 b7b6 a3a4",
+          "best_move": "e5e4"
+        },
+        {
+          "cp": 329,
+          "line": "e3h6 b2b3 h5f6 h2g1 b7b5 a3a4",
+          "best_move": "e3h6"
+        },
+        {
+          "cp": 325,
+          "line": "b7b5 b2b3 e5e4 b3c4 b5c4 b1b7",
+          "best_move": "b7b5"
+        }
+      ]
+    },
+    "game": {
+      "white": "LordHaydeN",
+      "black": "Matetricks",
+      "white_elo": "2210",
+      "black_elo": "2629",
+      "date": "2014.02.21"
+    },
+    "daily_date": "2034-03-09"
+  },
+  {
+    "fen": "r1b2r2/2q2pkp/1ppp1np1/p1n1p3/2P1PP2/2NP2PP/PP1QN1B1/R4RK1 b - - 0 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -61,
+          "line": "c8a6 f1f2 c5d7 a1f1 b6b5 c4b5",
+          "best_move": "c8a6"
+        },
+        {
+          "cp": -61,
+          "line": "c5d7 g3g4 h7h6 d3d4 c8a6 b2b3",
+          "best_move": "c5d7"
+        },
+        {
+          "cp": -78,
+          "line": "c7e7 d3d4 c5d7 c3d1 g7g8 g3g4",
+          "best_move": "c7e7"
+        },
+        {
+          "cp": -82,
+          "line": "h7h6 d3d4 c5d7 b2b3 c8a6 a1c1",
+          "best_move": "h7h6"
+        },
+        {
+          "cp": -89,
+          "line": "c8b7 f1f2 h7h6 d3d4 c5d7 b2b3",
+          "best_move": "c8b7"
+        }
+      ]
+    },
+    "game": {
+      "white": "piongu",
+      "black": "Dynngic",
+      "white_elo": "2485",
+      "black_elo": "2449",
+      "date": "2016.06.16"
+    },
+    "daily_date": "2034-03-10"
+  },
+  {
+    "fen": "r4r1k/1np1q1pp/1p1p4/3Qp3/2PP1p2/1NP1P3/5PPP/R4RK1 b - - 1 21",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 49,
+          "line": "a8a1 b3a1 b7a5 d4e5 e7e5 d5e5",
+          "best_move": "a8a1"
+        },
+        {
+          "cp": 13,
+          "line": "b7a5 b3a5 a8a5 a1a5 b6a5 d5a5",
+          "best_move": "b7a5"
+        },
+        {
+          "cp": -45,
+          "line": "c7c6 d5e4 f4e3 e4e3 b7a5 b3d2",
+          "best_move": "c7c6"
+        },
+        {
+          "cp": -86,
+          "line": "a8b8 e3f4 f8f4 f1e1 h7h6 g2g3",
+          "best_move": "a8b8"
+        },
+        {
+          "cp": -131,
+          "line": "c7c5 a1a8 f8a8 e3f4 e5f4 b3d2",
+          "best_move": "c7c5"
+        }
+      ]
+    },
+    "game": {
+      "white": "BLEFOUT",
+      "black": "tamik",
+      "white_elo": "2573",
+      "black_elo": "2498",
+      "date": "2016.07.18"
+    },
+    "daily_date": "2034-03-11"
+  },
+  {
+    "fen": "r1b2rk1/1pq2ppp/3p1n2/2n1p3/p1P1P3/P1B2P1N/1PQ1B1PP/3RK2R w K - 0 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -25,
+          "line": "h3f2 c8e6 f3f4 a8c8 f4f5 e6d7",
+          "best_move": "h3f2"
+        },
+        {
+          "cp": -93,
+          "line": "g2g4 c8e6 h3f2 f6d7 c2d2 a8a6",
+          "best_move": "g2g4"
+        },
+        {
+          "cp": -166,
+          "line": "h3g1 c8e6 c2d2 f8d8 d2e3 c5b3",
+          "best_move": "h3g1"
+        },
+        {
+          "cp": -176,
+          "line": "c2d2 c8h3 g2h3 a8d8 h1g1 c5e6",
+          "best_move": "c2d2"
+        },
+        {
+          "cp": -186,
+          "line": "e1g1 c8h3 g2h3 f6h5 h3h4 h5f4",
+          "best_move": "e1g1"
+        }
+      ]
+    },
+    "game": {
+      "white": "erindreki",
+      "black": "Niper13",
+      "white_elo": "2529",
+      "black_elo": "2644",
+      "date": "2016.07.05"
+    },
+    "daily_date": "2034-03-12"
+  },
+  {
+    "fen": "r1b1k2r/1p2q1b1/5npp/4np2/p1Pp4/P2P2PN/1P3PBP/R1BQR1K1 w kq - 0 16",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 129,
+          "line": "f2f4 f6g4 f4e5 e8g8 h3f4 g8h7",
+          "best_move": "f2f4"
+        },
+        {
+          "cp": 86,
+          "line": "c1d2 e8g8 f2f4 f6g4 f4e5 g7e5",
+          "best_move": "c1d2"
+        },
+        {
+          "cp": 72,
+          "line": "b2b4 a4b3 f2f4 f6g4 f4e5 g6g5",
+          "best_move": "b2b4"
+        },
+        {
+          "cp": 52,
+          "line": "c1f4 f6g4 f4e5 g7e5 h3f4 e8f7",
+          "best_move": "c1f4"
+        },
+        {
+          "cp": 43,
+          "line": "a1b1 e8g8 f2f4 f6g4 f4e5 g7e5",
+          "best_move": "a1b1"
+        }
+      ]
+    },
+    "game": {
+      "white": "Yolo_Gaming",
+      "black": "Powermandik",
+      "white_elo": "2523",
+      "black_elo": "2263",
+      "date": "2016.06.02"
+    },
+    "daily_date": "2034-03-13"
+  },
+  {
+    "fen": "1r1q1rk1/p2bnppp/3b1n2/3p4/1P1Pp3/P1N1P3/3NBPPP/R1BQK2R b KQ - 0 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 45,
+          "line": "e7g6 d2b3 g6h4 e1d2 d8e7 h1g1",
+          "best_move": "e7g6"
+        },
+        {
+          "cp": 40,
+          "line": "e7f5 c1b2 h7h5 g2g3 h5h4 g3g4",
+          "best_move": "e7f5"
+        },
+        {
+          "cp": 32,
+          "line": "d6h2 d2b3 h2d6 c1b2 e7c8 b3c5",
+          "best_move": "d6h2"
+        },
+        {
+          "cp": 20,
+          "line": "h7h5 d2b3 e7g6 b3c5 a7a5 c5d7",
+          "best_move": "h7h5"
+        },
+        {
+          "cp": 9,
+          "line": "a7a5 b4b5 e7f5 g2g3 f5e7 d2b3",
+          "best_move": "a7a5"
+        }
+      ]
+    },
+    "game": {
+      "white": "italian5",
+      "black": "alexzambrano",
+      "white_elo": "2490",
+      "black_elo": "2470",
+      "date": "2016.06.29"
+    },
+    "daily_date": "2034-03-14"
+  },
+  {
+    "fen": "r2r2k1/p4ppp/1b1p2n1/1B6/6b1/B1PR1N2/P4PPP/5RK1 b - - 3 19",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 20,
+          "line": "d6d5 f3d4 g4d7 b5a6 g6e5 d3g3",
+          "best_move": "d6d5"
+        },
+        {
+          "cp": 14,
+          "line": "g6e5 d3d6 e5f3 g2f3 g4f3 f1e1",
+          "best_move": "g6e5"
+        },
+        {
+          "cp": 12,
+          "line": "a7a6 b5c4 g4f3 d3f3 g6e5 f3f4",
+          "best_move": "a7a6"
+        },
+        {
+          "cp": 10,
+          "line": "a8c8 a3d6 g4f5 d3d1 c8c3 d6b4",
+          "best_move": "a8c8"
+        },
+        {
+          "cp": 4,
+          "line": "a8b8 a3d6 b6f2 f1f2 b8b5 f2d2",
+          "best_move": "a8b8"
+        }
+      ]
+    },
+    "game": {
+      "white": "DMOlli99",
+      "black": "Jodeldiplom",
+      "white_elo": "2214",
+      "black_elo": "2420",
+      "date": "2016.07.25"
+    },
+    "daily_date": "2034-03-15"
+  },
+  {
+    "fen": "2rq2k1/4rppp/bpnp4/p1n1p3/2P1P3/1P2BP2/P1NQB1PP/3R1RK1 w - - 0 18",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 157,
+          "line": "f1f2 e7d7 e2f1 c5e6 d2e1 d8c7",
+          "best_move": "f1f2"
+        },
+        {
+          "cp": 147,
+          "line": "f1e1 e7d7 e2f1 c8b8 c2a3 c5e6",
+          "best_move": "f1e1"
+        },
+        {
+          "cp": 146,
+          "line": "e3g5 f7f6 g5e3 g8h8 f1e1 e7d7",
+          "best_move": "e3g5"
+        },
+        {
+          "cp": 143,
+          "line": "d2c1 e7d7 d1d2 c6b4 c2a3 f7f5",
+          "best_move": "d2c1"
+        },
+        {
+          "cp": 140,
+          "line": "c2a3 e7d7 f1e1 c6e7 e3f2 h7h6",
+          "best_move": "c2a3"
+        }
+      ]
+    },
+    "game": {
+      "white": "AtomicAddict",
+      "black": "Raider_R",
+      "white_elo": "2274",
+      "black_elo": "2505",
+      "date": "2016.07.08"
+    },
+    "daily_date": "2034-03-16"
+  },
+  {
+    "fen": "r2qr3/1bpn1pbk/p2p1npp/1p2p3/3PP3/2P1B1NP/PPBQ1PPN/R3R1K1 b - - 5 18",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 18,
+          "line": "d6d5 c2b3 e5d4 c3d4 f6e4 g3e4",
+          "best_move": "d6d5"
+        },
+        {
+          "cp": 9,
+          "line": "d7b6 b2b3 e5d4 e3d4 c7c5 d4f6",
+          "best_move": "d7b6"
+        },
+        {
+          "cp": -9,
+          "line": "e5d4 e3d4 h6h5 h2f3 h7g8 a2a4",
+          "best_move": "e5d4"
+        },
+        {
+          "cp": -56,
+          "line": "a8c8 a1d1 d7b6 d2c1 e5d4 e3d4",
+          "best_move": "a8c8"
+        },
+        {
+          "cp": -66,
+          "line": "d8e7 a1d1 d6d5 e4d5 f6d5 h2g4",
+          "best_move": "d8e7"
+        }
+      ]
+    },
+    "game": {
+      "white": "MattesCooper89",
+      "black": "DonFulgenzio",
+      "white_elo": "2296",
+      "black_elo": "2477",
+      "date": "2016.07.02"
+    },
+    "daily_date": "2034-03-17"
+  },
+  {
+    "fen": "2rq1r2/1p4kp/p1bp1pp1/4p1PP/3QPP2/1PN5/1PP5/1K1R3R w - - 0 22",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 278,
+          "line": "f4e5 f6e5 d4e3 d8e7 e3h3 c6d7",
+          "best_move": "f4e5"
+        },
+        {
+          "cp": 239,
+          "line": "d4d2 e5f4 h5g6 h7g6 h1h6 f8h8",
+          "best_move": "d4d2"
+        },
+        {
+          "cp": 238,
+          "line": "d4d3 f6g5 f4e5 d6e5 d3h3 d8f6",
+          "best_move": "d4d3"
+        },
+        {
+          "cp": 235,
+          "line": "h5h6 g7h8 f4e5 f6e5 d4d2 d8e7",
+          "best_move": "h5h6"
+        },
+        {
+          "cp": 231,
+          "line": "d4b4 a6a5 b4a3 e5f4 d1d6 d8e8",
+          "best_move": "d4b4"
+        }
+      ]
+    },
+    "game": {
+      "white": "AntoineBriet",
+      "black": "pas8x8",
+      "white_elo": "2568",
+      "black_elo": "2309",
+      "date": "2016.07.09"
+    },
+    "daily_date": "2034-03-18"
+  },
+  {
+    "fen": "6kr/Qppb1qp1/5b1p/3prP2/8/2PP2N1/PP4PP/4RRK1 b - - 0 20",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 381,
+          "line": "e5e1 f1e1 d7c6 a7f2 g8h7 d3d4",
+          "best_move": "e5e1"
+        },
+        {
+          "cp": 356,
+          "line": "d7c6 e1e5 f6e5 a7e3 e5f6 g3e2",
+          "best_move": "d7c6"
+        },
+        {
+          "cp": 351,
+          "line": "d7c8 e1e5 f6e5 a7e3 e5f6 e3f3",
+          "best_move": "d7c8"
+        },
+        {
+          "cp": 351,
+          "line": "h6h5 a7b7 h5h4 e1e5 f6e5 g3e2",
+          "best_move": "h6h5"
+        },
+        {
+          "cp": 303,
+          "line": "g8h7 a7b7 h8e8 e1e5 f6e5 b7b3",
+          "best_move": "g8h7"
+        }
+      ]
+    },
+    "game": {
+      "white": "bobancio",
+      "black": "LaTrainee",
+      "white_elo": "2471",
+      "black_elo": "2458",
+      "date": "2016.06.01"
+    },
+    "daily_date": "2034-03-19"
+  },
+  {
+    "fen": "r1bq4/2p3kp/1p1p2p1/p2P1r2/2P2p2/2NQ4/PP4PP/R4RK1 w - - 0 19",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -23,
+          "line": "a1e1 g6g5 g2g3 c8d7 d3d4 g7g8",
+          "best_move": "a1e1"
+        },
+        {
+          "cp": -38,
+          "line": "d3d4 d8f6 d4f6 f5f6 a1e1 g6g5",
+          "best_move": "d3d4"
+        },
+        {
+          "cp": -41,
+          "line": "f1f2 d8e7 c3b5 c8d7 b5c7 a8c8",
+          "best_move": "f1f2"
+        },
+        {
+          "cp": -62,
+          "line": "c3e2 d8f6 d3d2 g6g5 h2h4 h7h6",
+          "best_move": "c3e2"
+        },
+        {
+          "cp": -71,
+          "line": "d3d2 g6g5 g2g3 c8d7 c3e2 d8f6",
+          "best_move": "d3d2"
+        }
+      ]
+    },
+    "game": {
+      "white": "NueveReinas",
+      "black": "Karina_Danova",
+      "white_elo": "2426",
+      "black_elo": "2445",
+      "date": "2016.07.02"
+    },
+    "daily_date": "2034-03-20"
+  },
+  {
+    "fen": "3r1rk1/1ppq1ppp/p1nb2b1/8/1P1P4/P3PB2/1B1N1PPP/2RQ1RK1 w - - 4 18",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 258,
+          "line": "d1e2 f8e8 f1d1 a6a5 b4b5 c6e7",
+          "best_move": "d1e2"
+        },
+        {
+          "cp": 256,
+          "line": "d1b3 g6f5 d4d5 c6e5 b2e5 d6e5",
+          "best_move": "d1b3"
+        },
+        {
+          "cp": 252,
+          "line": "d2e4 f8e8 e4c5 d6c5 c1c5 d7e7",
+          "best_move": "d2e4"
+        },
+        {
+          "cp": 249,
+          "line": "d2b3 f8e8 b3c5 d6c5 c1c5 d7e7",
+          "best_move": "d2b3"
+        },
+        {
+          "cp": 243,
+          "line": "g2g3 f8e8 d2c4 f7f6 d1e2 d6f8",
+          "best_move": "g2g3"
+        }
+      ]
+    },
+    "game": {
+      "white": "PRESA",
+      "black": "Blitzstream-twitch",
+      "white_elo": "2515",
+      "black_elo": "2394",
+      "date": "2014.06.10"
+    },
+    "daily_date": "2034-03-21"
+  },
+  {
+    "fen": "2k1r3/1b2b3/pq3np1/1pppn3/5N2/3P2P1/PPP3B1/R1BQ1RK1 w - - 2 20",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 127,
+          "line": "f4h3 c8b8 a2a4 b5a4 a1a4 b8a7",
+          "best_move": "f4h3"
+        },
+        {
+          "cp": 120,
+          "line": "f1e1 e7d8 d3d4 c5d4 f4d3 f6e4",
+          "best_move": "f1e1"
+        },
+        {
+          "cp": 114,
+          "line": "c2c3 c8b8 a2a4 g6g5 f4h3 g5g4",
+          "best_move": "c2c3"
+        },
+        {
+          "cp": 104,
+          "line": "a2a4 g6g5 a4a5 b6c6 f4h3 g5g4",
+          "best_move": "a2a4"
+        },
+        {
+          "cp": 75,
+          "line": "a2a3 e7d8 f4h3 e5g4 c1g5 g4e3",
+          "best_move": "a2a3"
+        }
+      ]
+    },
+    "game": {
+      "white": "trailovicmile",
+      "black": "ZibbitVideos",
+      "white_elo": "2221",
+      "black_elo": "2476",
+      "date": "2016.07.12"
+    },
+    "daily_date": "2034-03-22"
+  },
+  {
+    "fen": "2rqrbk1/pb3ppp/1pp2n2/2np4/2PN4/1P2PBN1/PB3PPP/2RQ1RK1 w - - 3 17",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 64,
+          "line": "d4f5 b7a6 f3e2 c5e4 d1c2 e4g3",
+          "best_move": "d4f5"
+        },
+        {
+          "cp": 62,
+          "line": "f1e1 g7g6 c4d5 f6d5 d1d2 h7h5",
+          "best_move": "f1e1"
+        },
+        {
+          "cp": 61,
+          "line": "c4d5 c6d5 f1e1 g7g6 g3e2 d8e7",
+          "best_move": "c4d5"
+        },
+        {
+          "cp": 54,
+          "line": "d4e2 d5c4 d1d8 e8d8 b2f6 g7f6",
+          "best_move": "d4e2"
+        },
+        {
+          "cp": 50,
+          "line": "d1c2 g7g6 f1d1 d8e7 h2h3 c5e4",
+          "best_move": "d1c2"
+        }
+      ]
+    },
+    "game": {
+      "white": "self_service",
+      "black": "AntoineBriet",
+      "white_elo": "2428",
+      "black_elo": "2466",
+      "date": "2016.07.11"
+    },
+    "daily_date": "2034-03-23"
+  },
+  {
+    "fen": "r4rk1/pb2n1pp/1p1qp3/2p2p2/3P4/2P1PN2/PP4PP/1BRQR1K1 b - - 0 16",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 9,
+          "line": "e7d5 e3e4 d5f4 d1d2 f5e4 b1e4",
+          "best_move": "e7d5"
+        },
+        {
+          "cp": 7,
+          "line": "e7g6 a2a3 a8d8 c1c2 d6e7 c2d2",
+          "best_move": "e7g6"
+        },
+        {
+          "cp": 1,
+          "line": "a8c8 e3e4 e7g6 d4c5 d6c5 d1d4",
+          "best_move": "a8c8"
+        },
+        {
+          "cp": -2,
+          "line": "a8d8 d1e2 e7g6 c1d1 d6e7 b1c2",
+          "best_move": "a8d8"
+        },
+        {
+          "cp": -6,
+          "line": "a8e8 e3e4 e7g6 d4c5 d6c5 d1d4",
+          "best_move": "a8e8"
+        }
+      ]
+    },
+    "game": {
+      "white": "mirshoja",
+      "black": "Nermid",
+      "white_elo": "2278",
+      "black_elo": "2494",
+      "date": "2016.06.16"
+    },
+    "daily_date": "2034-03-24"
+  },
+  {
+    "fen": "rq3rk1/1p2bpp1/p2ppnn1/7p/4P3/1BN3B1/PP2QPPP/2RR2K1 w - - 0 17",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 28,
+          "line": "f2f4 b7b5 f4f5 e6f5 e4f5 g6e5",
+          "best_move": "f2f4"
+        },
+        {
+          "cp": -52,
+          "line": "h2h3 b7b5 f2f4 b5b4 f4f5 g6e5",
+          "best_move": "h2h3"
+        },
+        {
+          "cp": -87,
+          "line": "e2d3 b8a7 d3e2 a8d8 h2h3 b7b5",
+          "best_move": "e2d3"
+        },
+        {
+          "cp": -89,
+          "line": "e2d2 b8a7 d2e2 f8d8 h2h3 h5h4",
+          "best_move": "e2d2"
+        },
+        {
+          "cp": -117,
+          "line": "f2f3 h5h4 g3f2 b7b5 g2g3 e7d8",
+          "best_move": "f2f3"
+        }
+      ]
+    },
+    "game": {
+      "white": "ilshat2016",
+      "black": "purzelbaumer",
+      "white_elo": "2251",
+      "black_elo": "2459",
+      "date": "2016.06.19"
+    },
+    "daily_date": "2034-03-25"
+  },
+  {
+    "fen": "r1rq2k1/1p3p1p/2bp2p1/p1nNp3/2PQP3/1P3P2/P3B1PP/2R2R1K w - - 0 20",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -26,
+          "line": "d4f2 c6d5 c4d5 d8b6 c1c4 g8g7",
+          "best_move": "d4f2"
+        },
+        {
+          "cp": -29,
+          "line": "d4e3 c6d5 c4d5 c5d7 e2b5 c8c1",
+          "best_move": "d4e3"
+        },
+        {
+          "cp": -33,
+          "line": "d4d2 c6d5 d2d5 c5e6 d5d2 d8b6",
+          "best_move": "d4d2"
+        },
+        {
+          "cp": -34,
+          "line": "d4g1 c6d5 c4d5 c5d7 e2b5 c8c1",
+          "best_move": "d4g1"
+        },
+        {
+          "cp": -37,
+          "line": "d4d1 c6d5 d1d5 c5e6 d5d2 d8b6",
+          "best_move": "d4d1"
+        }
+      ]
+    },
+    "game": {
+      "white": "mecker",
+      "black": "Noonui",
+      "white_elo": "2214",
+      "black_elo": "2451",
+      "date": "2015.05.12"
+    },
+    "daily_date": "2034-03-26"
+  },
+  {
+    "fen": "2r2rk1/1p3pp1/p1n1bq1p/3p4/5B2/QPn1PN1P/P3BPP1/2R1R1K1 b - - 2 19",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 66,
+          "line": "g7g5 f4g3 c3e2 e1e2 e6h3 e2d2",
+          "best_move": "g7g5"
+        },
+        {
+          "cp": 62,
+          "line": "f8d8 a3b2 d5d4 e2f1 c3e4 b2b1",
+          "best_move": "f8d8"
+        },
+        {
+          "cp": 44,
+          "line": "c3e4 c1c2 f8d8 e2d3 e6h3 g2h3",
+          "best_move": "c3e4"
+        },
+        {
+          "cp": 24,
+          "line": "d5d4 e2c4 c3e4 c4e6 f7e6 b3b4",
+          "best_move": "d5d4"
+        },
+        {
+          "cp": 24,
+          "line": "c3e2 e1e2 d5d4 a3b2 e6d5 f3e1",
+          "best_move": "c3e2"
+        }
+      ]
+    },
+    "game": {
+      "white": "Spinaltap",
+      "black": "PRESA",
+      "white_elo": "2395",
+      "black_elo": "2543",
+      "date": "2014.06.27"
+    },
+    "daily_date": "2034-03-27"
+  },
+  {
+    "fen": "r4rk1/pp2bppp/1qp1pn2/4N3/2PP1B2/8/PP3PPP/R2QR1K1 w - - 8 15",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 47,
+          "line": "c4c5 b6a5 a2a3 a5a6 f4g3 f8d8",
+          "best_move": "c4c5"
+        },
+        {
+          "cp": 21,
+          "line": "f4e3 a8d8 e5d3 b6a6 b2b3 a6a5",
+          "best_move": "f4e3"
+        },
+        {
+          "cp": 19,
+          "line": "e1e3 f8d8 e5f3 b6a6 d1c2 b7b5",
+          "best_move": "e1e3"
+        },
+        {
+          "cp": 12,
+          "line": "e5f3 f8e8 d1e2 c6c5 f4e3 e8d8",
+          "best_move": "e5f3"
+        },
+        {
+          "cp": 10,
+          "line": "a2a4 f8d8 c4c5 b6b4 e5f3 b7b6",
+          "best_move": "a2a4"
+        }
+      ]
+    },
+    "game": {
+      "white": "kurton",
+      "black": "pulkownik1",
+      "white_elo": "2415",
+      "black_elo": "2204",
+      "date": "2014.07.29"
+    },
+    "daily_date": "2034-03-28"
+  },
+  {
+    "fen": "1rbqk2r/p1p2ppp/1p2pb2/7Q/3P4/P2B4/1PP2PPP/R1B1K2R w KQk - 0 13",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 25,
+          "line": "c2c3 c8b7 h5h3 b8c8 e1g1 c7c5",
+          "best_move": "c2c3"
+        },
+        {
+          "cp": 17,
+          "line": "c1e3 c8b7 f2f3 d8d5 h5d5 b7d5",
+          "best_move": "c1e3"
+        },
+        {
+          "cp": 12,
+          "line": "c1f4 d8d4 f4c7 b8b7 a1d1 c8d7",
+          "best_move": "c1f4"
+        },
+        {
+          "cp": 4,
+          "line": "h5b5 d8d7 c2c3 c8b7 e1g1 d7b5",
+          "best_move": "h5b5"
+        },
+        {
+          "cp": 3,
+          "line": "d3b5 c8d7 c2c3 e8g8 e1g1 d7b5",
+          "best_move": "d3b5"
+        }
+      ]
+    },
+    "game": {
+      "white": "kunderiano",
+      "black": "Andzke",
+      "white_elo": "2407",
+      "black_elo": "2261",
+      "date": "2016.06.01"
+    },
+    "daily_date": "2034-03-29"
+  },
+  {
+    "fen": "r4rk1/ppq1n1p1/7p/2p2b2/4N2Q/2P2P2/PPB4P/R4RK1 w - - 1 19",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -32,
+          "line": "h4g3 c7b6 a1d1 a8d8 d1d8 f8d8",
+          "best_move": "h4g3"
+        },
+        {
+          "cp": -104,
+          "line": "c2b3 g8h8 h4g3 c7c6 g1h1 f5h7",
+          "best_move": "c2b3"
+        },
+        {
+          "cp": -126,
+          "line": "h4f2 e7g6 g1h1 b7b6 a1d1 g6f4",
+          "best_move": "h4f2"
+        },
+        {
+          "cp": -126,
+          "line": "a1d1 e7g6 h4f2 g6f4 g1h1 b7b6",
+          "best_move": "a1d1"
+        },
+        {
+          "cp": -129,
+          "line": "g1h1 e7g6 h4f2 b7b6 a1d1 g6e5",
+          "best_move": "g1h1"
+        }
+      ]
+    },
+    "game": {
+      "white": "CaptainPlanet",
+      "black": "paulovskj",
+      "white_elo": "2424",
+      "black_elo": "2388",
+      "date": "2016.07.24"
+    },
+    "daily_date": "2034-03-30"
+  },
+  {
+    "fen": "r1r2bk1/1q1n1pp1/pp1pp2p/8/P2P4/1QP1N2P/1P3PPB/R3R1K1 b - - 3 22",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 29,
+          "line": "d6d5 e3g4 b6b5 e1e3 b5b4 h2f4",
+          "best_move": "d6d5"
+        },
+        {
+          "cp": 3,
+          "line": "d7f6 c3c4 b7c6 d4d5 e6d5 c4d5",
+          "best_move": "d7f6"
+        },
+        {
+          "cp": 0,
+          "line": "b6b5 c3c4 a8a7 a4b5 a6b5 a1a7",
+          "best_move": "b6b5"
+        },
+        {
+          "cp": -3,
+          "line": "a8a7 f2f4 d7f6 f4f5 e6f5 e3f5",
+          "best_move": "a8a7"
+        },
+        {
+          "cp": -15,
+          "line": "b7e4 h2g3 c8b8 e3c2 e4b7 c3c4",
+          "best_move": "b7e4"
+        }
+      ]
+    },
+    "game": {
+      "white": "mutdpro",
+      "black": "Spinaltap",
+      "white_elo": "2506",
+      "black_elo": "2546",
+      "date": "2015.04.09"
+    },
+    "daily_date": "2034-03-31"
+  },
+  {
+    "fen": "r2qrbk1/1b3pp1/p4n1p/2pppN2/Pp2P3/2PP4/1PB1QPPP/R1B1R1K1 w - - 0 18",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -12,
+          "line": "a4a5 b4c3 b2c3 b7c6 c3c4 d5d4",
+          "best_move": "a4a5"
+        },
+        {
+          "cp": -45,
+          "line": "e2f3 a6a5 f3g3 g8h7 g3h4 a8a6",
+          "best_move": "e2f3"
+        },
+        {
+          "cp": -54,
+          "line": "c3c4 d5d4 e2f3 g8h7 f3h3 b7c8",
+          "best_move": "c3c4"
+        },
+        {
+          "cp": -54,
+          "line": "e2e3 b7c8 e3g3 c8f5 e4f5 d8d7",
+          "best_move": "e2e3"
+        },
+        {
+          "cp": -55,
+          "line": "c3b4 c5b4 e2f3 a6a5 c2b3 a8a6",
+          "best_move": "c3b4"
+        }
+      ]
+    },
+    "game": {
+      "white": "DonFulgenzio",
+      "black": "Holopainen",
+      "white_elo": "2472",
+      "black_elo": "2487",
+      "date": "2016.07.22"
+    },
+    "daily_date": "2034-04-01"
+  },
+  {
+    "fen": "r3k2r/ppqn1pp1/2pbpnp1/8/2BP1P2/1QN1P1P1/PP1B3P/R3K2R b KQkq - 2 13",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -2,
+          "line": "b7b5 c4d3 a7a6 a2a4 e8g8 e1g1",
+          "best_move": "b7b5"
+        },
+        {
+          "cp": -16,
+          "line": "a7a5 c4d3 c6c5 e3e4 a5a4 b3c2",
+          "best_move": "a7a5"
+        },
+        {
+          "cp": -24,
+          "line": "a7a6 c4e2 c6c5 a1c1 e8g8 e2f3",
+          "best_move": "a7a6"
+        },
+        {
+          "cp": -31,
+          "line": "e8g8 e3e4 c6c5 c3b5 c7c6 b5d6",
+          "best_move": "e8g8"
+        },
+        {
+          "cp": -34,
+          "line": "d6e7 c4e2 e8g8 g3g4 c6c5 g4g5",
+          "best_move": "d6e7"
+        }
+      ]
+    },
+    "game": {
+      "white": "MadMerkel",
+      "black": "sakkpalanta",
+      "white_elo": "2366",
+      "black_elo": "2412",
+      "date": "2016.07.25"
+    },
+    "daily_date": "2034-04-02"
+  },
+  {
+    "fen": "r4b1r/ppp1qk1p/6p1/2pP1bPn/Q1P1P3/2N5/PP5P/R1B2RK1 w - - 0 17",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 320,
+          "line": "e4f5 e7e8 a4c2 f8g7 c1d2 g7d4",
+          "best_move": "e4f5"
+        },
+        {
+          "cp": 298,
+          "line": "c1d2 b7b5 a4b5 a8e8 e4f5 e7d8",
+          "best_move": "c1d2"
+        },
+        {
+          "cp": 197,
+          "line": "a4c2 f8g7 e4f5 g7d4 g1h1 h8f8",
+          "best_move": "a4c2"
+        },
+        {
+          "cp": 141,
+          "line": "a4b3 e7e5 f1f2 f8d6 c1d2 e5d4",
+          "best_move": "a4b3"
+        },
+        {
+          "cp": 128,
+          "line": "a4d1 e7e5 e4f5 f8d6 f1f2 h8f8",
+          "best_move": "a4d1"
+        }
+      ]
+    },
+    "game": {
+      "white": "mazetr",
+      "black": "UPEA",
+      "white_elo": "2443",
+      "black_elo": "2400",
+      "date": "2015.07.05"
+    },
+    "daily_date": "2034-04-03"
+  },
+  {
+    "fen": "r1bq1rk1/1pp3pp/p2p4/3Pp3/1PPb1p2/P2P2P1/4QPBP/1RB2RK1 b - - 2 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 172,
+          "line": "d8g5 g1h1 g5f6 g2e4 f4f3 e2d2",
+          "best_move": "d8g5"
+        },
+        {
+          "cp": 146,
+          "line": "d8f6 g2e4 f4f3 e2d2 h7h6 c1b2",
+          "best_move": "d8f6"
+        },
+        {
+          "cp": 137,
+          "line": "f8f6 c1b2 d8f8 b2d4 f4f3 g2f3",
+          "best_move": "f8f6"
+        },
+        {
+          "cp": 117,
+          "line": "b7b6 c1b2 d4b2 b1b2 d8g5 c4c5",
+          "best_move": "b7b6"
+        },
+        {
+          "cp": 116,
+          "line": "c8f5 c1b2 d4b2 b1b2 d8g5 f1e1",
+          "best_move": "c8f5"
+        }
+      ]
+    },
+    "game": {
+      "white": "asirmatos",
+      "black": "bilbas",
+      "white_elo": "2211",
+      "black_elo": "2558",
+      "date": "2015.12.02"
+    },
+    "daily_date": "2034-04-04"
+  },
+  {
+    "fen": "5rk1/1p1n1pbp/pqr1p1p1/3p4/3P1BP1/N1PQ1P2/PP5P/1R2R1K1 w - - 1 17",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -1,
+          "line": "g1g2 f8c8 a3c2 g7f8 h2h4 b6d8",
+          "best_move": "g1g2"
+        },
+        {
+          "cp": -7,
+          "line": "g1h1 f8c8 a3c2 a6a5 c2e3 b6a6",
+          "best_move": "g1h1"
+        },
+        {
+          "cp": -17,
+          "line": "d3e3 f8c8 a3c2 a6a5 g1g2 b6d8",
+          "best_move": "d3e3"
+        },
+        {
+          "cp": -26,
+          "line": "g1f1 b6a5 b1a1 e6e5 d4e5 c6e6",
+          "best_move": "g1f1"
+        },
+        {
+          "cp": -36,
+          "line": "f4g3 e6e5 a3c2 c6e6 g1g2 f8e8",
+          "best_move": "f4g3"
+        }
+      ]
+    },
+    "game": {
+      "white": "masterhec",
+      "black": "mux77",
+      "white_elo": "2337",
+      "black_elo": "2417",
+      "date": "2016.06.13"
+    },
+    "daily_date": "2034-04-05"
+  },
+  {
+    "fen": "r2qk3/pb1nbp1p/np2p3/1B1pB3/3N4/1P2PN2/P2P1PrP/R2QK2R w KQq - 0 14",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 376,
+          "line": "e5g3 e7f6 e1f1 g2g3 h2g3 e8f8",
+          "best_move": "e5g3"
+        },
+        {
+          "cp": 282,
+          "line": "d1e2 e7f6 e5g3 a6c7 b5c6 f6d4",
+          "best_move": "d1e2"
+        },
+        {
+          "cp": 272,
+          "line": "e5f4 e7a3 f4g3 d8f6 f3e5 a6c5",
+          "best_move": "e5f4"
+        },
+        {
+          "cp": 240,
+          "line": "d1b1 g2g6 h2h4 e7f6 h4h5 g6g7",
+          "best_move": "d1b1"
+        },
+        {
+          "cp": 222,
+          "line": "b3b4 g2g8 a2a3 e8f8 e5f4 e7f6",
+          "best_move": "b3b4"
+        }
+      ]
+    },
+    "game": {
+      "white": "BLEFOUT",
+      "black": "tomodbk",
+      "white_elo": "2556",
+      "black_elo": "2332",
+      "date": "2016.06.07"
+    },
+    "daily_date": "2034-04-06"
+  },
+  {
+    "fen": "3r1rk1/1bp2pp1/p3p2p/q3N1n1/2B5/2P2P2/1P2Q1PP/3RR2K w - - 0 24",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 149,
+          "line": "b2b4 a5a3 d1d8 f8d8 h2h4 g5e4",
+          "best_move": "b2b4"
+        },
+        {
+          "cp": 149,
+          "line": "d1d8 f8d8 b2b4 a5a3 h2h4 g5e4",
+          "best_move": "d1d8"
+        },
+        {
+          "cp": 57,
+          "line": "d1a1 a5b6 b2b4 g5h7 c4a6 h7f6",
+          "best_move": "d1a1"
+        },
+        {
+          "cp": 33,
+          "line": "e1f1 d8d1 f1d1 b7c8 b2b4 a5b6",
+          "best_move": "e1f1"
+        },
+        {
+          "cp": 28,
+          "line": "c4d3 c7c5 f3f4 g5h7 e5d7 f8e8",
+          "best_move": "c4d3"
+        }
+      ]
+    },
+    "game": {
+      "white": "Cosine180",
+      "black": "gegitor",
+      "white_elo": "2230",
+      "black_elo": "2423",
+      "date": "2016.06.08"
+    },
+    "daily_date": "2034-04-07"
+  },
+  {
+    "fen": "r3k2r/1pq2pp1/2n2n1p/p1p1pPbB/3pP3/PP1P2P1/2PBQ2P/1R2RNK1 w kq - 4 22",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": -39,
+          "line": "a3a4 h8g8 h2h4 g5d2 f1d2 c6b4",
+          "best_move": "a3a4"
+        },
+        {
+          "cp": -52,
+          "line": "h2h4 g5d2 f1d2 b7b5 a3a4 c6a7",
+          "best_move": "h2h4"
+        },
+        {
+          "cp": -69,
+          "line": "c2c4 g5d2 f1d2 a5a4 h2h4 e8e7",
+          "best_move": "c2c4"
+        },
+        {
+          "cp": -76,
+          "line": "b1b2 b7b5 h2h4 g5d2 f1d2 e8e7",
+          "best_move": "b1b2"
+        },
+        {
+          "cp": -76,
+          "line": "b1a1 a5a4 e1b1 g5d2 f1d2 a8a6",
+          "best_move": "b1a1"
+        }
+      ]
+    },
+    "game": {
+      "white": "Blitzstream-twitch",
+      "black": "PRESA",
+      "white_elo": "2404",
+      "black_elo": "2532",
+      "date": "2014.06.05"
+    },
+    "daily_date": "2034-04-08"
+  },
+  {
+    "fen": "r1b1r1k1/1p3pbp/p5p1/1nBP4/B2N4/8/P4PPP/2RR2K1 b - - 4 21",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 4,
+          "line": "b5d4 c5d4 b7b5 d4g7 g8g7 a4b3",
+          "best_move": "b5d4"
+        },
+        {
+          "cp": -23,
+          "line": "c8g4 f2f3 g4d7 d4b5 a6b5 a4b3",
+          "best_move": "c8g4"
+        },
+        {
+          "cp": -33,
+          "line": "c8d7 d4b5 a6b5 a4b3 g7h6 c1c3",
+          "best_move": "c8d7"
+        },
+        {
+          "cp": -63,
+          "line": "g7d4 a4b5 a6b5 c5d4 a8a4 f2f3",
+          "best_move": "g7d4"
+        },
+        {
+          "cp": -102,
+          "line": "g7h6 d4b5 a6b5 a4b5 e8d8 c1b1",
+          "best_move": "g7h6"
+        }
+      ]
+    },
+    "game": {
+      "white": "BUBULLE",
+      "black": "Elda64",
+      "white_elo": "2333",
+      "black_elo": "2482",
+      "date": "2015.08.25"
+    },
+    "daily_date": "2034-04-09"
+  },
+  {
+    "fen": "2rr4/1b2q2p/2np2pk/2p1pp2/P1P5/P3PN2/2QRBPPP/3R2K1 w - - 0 22",
+    "tag": "daily",
+    "eval": {
+      "pvs": [
+        {
+          "cp": 53,
+          "line": "h2h4 h6g7 f3g5 e7f6 c2b2 b7a8",
+          "best_move": "h2h4"
+        },
+        {
+          "cp": 8,
+          "line": "c2c3 e5e4 f3e1 c8a8 f2f4 e4f3",
+          "best_move": "c2c3"
+        },
+        {
+          "cp": 6,
+          "line": "f3e1 e5e4 c2c3 c8a8 f2f4 e4f3",
+          "best_move": "f3e1"
+        },
+        {
+          "cp": 0,
+          "line": "d1b1 e5e4 f3e1 c8a8 f2f4 e4f3",
+          "best_move": "d1b1"
+        },
+        {
+          "cp": 0,
+          "line": "g2g3 e5e4 f3e1 c8a8 e1g2 c6e5",
+          "best_move": "g2g3"
+        }
+      ]
+    },
+    "game": {
+      "white": "MadMerkel",
+      "black": "BLEFOUT",
+      "white_elo": "2356",
+      "black_elo": "2466",
+      "date": "2016.07.31"
+    },
+    "daily_date": "2034-04-10"
+  }
+]
