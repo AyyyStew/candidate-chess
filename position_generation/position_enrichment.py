@@ -2,7 +2,7 @@ import json
 import chess
 from collections import Counter
 
-INPUT_FILE = "training_positions.jsonl"
+INPUT_FILE = "training_positions_evaluated.jsonl"
 OUTPUT_FILE = "training_positions_enriched.jsonl"
 
 # ── classifiers ───────────────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ def run():
                     positions.append(enriched)
                 else:
                     skipped += 1
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, Exception):
                 skipped += 1
 
     print(f"Enriched: {len(positions)} | Skipped: {skipped}")

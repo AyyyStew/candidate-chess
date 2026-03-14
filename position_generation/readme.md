@@ -16,10 +16,11 @@ Lichess Elite Database for use in a Family Feud-style chess candidate move train
 ### 1. Position Extraction (`position_extractor.py`)
 
 Streams PGN files and samples positions from each game using a random move interval
-(2-10 moves between samples). Filters to moves 13-60 with at least 7 pieces remaining
-to stay out of opening theory and trivial endgames.
+(2-10 moves between samples). Filters to moves 5-50 with at least 8 pieces remaining
+to stay out of opening theory and trivial endgames. The full PGN of each source game
+is stored alongside the position metadata.
 
-Runs 7 parallel Stockfish 18 workers (AVX2, 2 threads each) that stay alive across
+Runs 7 parallel Stockfish workers (AVX2, 2 threads each) that stay alive across
 files via a shared task queue. A background extraction thread pre-fetches the next
 file while workers evaluate the current one. Progress is saved after each file so
 the run is resumable.
@@ -37,9 +38,21 @@ Output: `training_positions.jsonl`
 
 ---
 
-### 2. Enrichment (`position_enrichment.py`)
+### 2. Deep Evaluation (`position_eval.py`)
 
-Adds metadata to each position:
+Re-analyses each position from the extractor output using Stockfish at depth 16 with
+MultiPV=10, replacing the shallow 5-PV eval with a full 10-PV eval. Runs 7 parallel
+workers (2 threads, 1024MB hash each) with the same task queue pattern as the
+extractor. Positions where fewer than 5 PVs have centipawn scores are dropped.
+
+Output: `training_positions_evaluated.jsonl`
+
+---
+
+### 3. Enrichment (`position_enrichment.py`)
+
+Adds metadata to each evaluated position. No engine required — runs entirely on the
+stored PV data and python-chess board analysis.
 
 **Phase** — based on piece count
 
@@ -55,7 +68,7 @@ Adds metadata to each position:
 - `crushing` — best move >+300cp
 - `defending` — best move <-300cp
 
-**Balance** — evaluation of best move from side to move  
+**Balance** — evaluation of best move from side to move
 `winning / better / equal / worse / losing`
 
 **Position features** — computed via python-chess
@@ -74,7 +87,7 @@ Output: `training_positions_enriched.jsonl`
 
 ---
 
-### 3. Chunking (`chunking.py`)
+### 4. Chunking (`chunking.py`)
 
 Slims each position to fields needed by the React app, shuffles both pools
 (seed=42 for reproducibility), assigns calendar dates to daily positions
@@ -102,23 +115,6 @@ positions/
     ...
 ```
 
----
-
-## Dataset Stats (v1)
-
-|                 | Count  |
-| --------------- | ------ |
-| Total positions | 12,483 |
-| Daily pool      | 3,022  |
-| General pool    | 9,461  |
-| Avg move number | 27.8   |
-| Move range      | 13-60  |
-| White to move   | 6,341  |
-| Black to move   | 6,142  |
-| Avg piece count | 20.7   |
-
----
-
 ## Environment
 
 - Python 3.x
@@ -130,7 +126,7 @@ positions/
 
 ## Notes
 
-- Pipeline is resumable via `progress.json` — tracks completed files and total kept
+- position_extraction is resumable via `progress.json` — tracks completed files and total kept
 - Daily positions are shuffled before date assignment so positions from different
   years are distributed evenly across the calendar
 - Dataset covers ~8 years of daily puzzles (through ~2034)
