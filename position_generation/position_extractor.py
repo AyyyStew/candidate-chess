@@ -35,18 +35,28 @@ THRESHOLDS = {
     "move5_cp": 300,
 }
 
+MATE_CHECK_TOP_N = 3  # reject position if any of the top N moves is mate
+PV_LINE_MOVES = 10  # number of moves stored per PV line
+MIN_MOVE_NUMBER = 5  # earliest fullmove number considered for sampling
+MAX_MOVE_NUMBER = 50  # latest fullmove number considered for sampling
+MIN_PIECE_COUNT = 8  # minimum pieces on board for a position to be sampled
+GAME_SAMPLE_RATE = 0.25  # fraction of games in a PGN file to consider
+MIN_GAMES_TO_SAMPLE = 200  # floor on absolute number of games sampled per file
+PREFETCH_QUEUE_SIZE = 2  # how many files the extraction thread stays ahead
+WORKER_JOIN_TIMEOUT = 5  # seconds to wait for a worker process to exit cleanly
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 
 def is_viable(pvs):
-    if len(pvs) < 5:
+    if len(pvs) < MULTIPV:
         return False, "pvs"
-    if any("mate" in pv for pv in pvs[:3]):
+    if any("mate" in pv for pv in pvs[:MATE_CHECK_TOP_N]):
         return False, "mate"
-    if not all("cp" in pv for pv in pvs[:5]):
+    if not all("cp" in pv for pv in pvs[:MULTIPV]):
         return False, "pvs"
 
-    scores = [pv["cp"] for pv in pvs[:5]]
+    scores = [pv["cp"] for pv in pvs[:MULTIPV]]
     best = scores[0]
 
     if abs(best) > THRESHOLDS["max_position_cp"]:
@@ -75,7 +85,7 @@ def parse_pvs(info):
         else:
             entry["cp"] = score.score()
         if "pv" in pv_info:
-            entry["line"] = " ".join(m.uci() for m in pv_info["pv"][:6])
+            entry["line"] = " ".join(m.uci() for m in pv_info["pv"][:PV_LINE_MOVES])
             entry["best_move"] = pv_info["pv"][0].uci() if pv_info["pv"] else None
         pvs.append(entry)
     return pvs
@@ -84,7 +94,10 @@ def parse_pvs(info):
 def get_move_number_range(board):
     move_num = board.fullmove_number
     piece_count = bin(int(board.occupied)).count("1")
-    return 13 <= move_num <= 60 and piece_count >= 7
+    return (
+        MIN_MOVE_NUMBER <= move_num <= MAX_MOVE_NUMBER
+        and piece_count >= MIN_PIECE_COUNT
+    )
 
 
 # ── extraction ────────────────────────────────────────────────────────────────
@@ -95,7 +108,7 @@ from queue import Queue as ThreadQueue
 import io
 
 
-def extract_positions_from_file(pgn_path, seen_fens, game_sample_rate=0.25):
+def extract_positions_from_file(pgn_path, seen_fens, game_sample_rate=GAME_SAMPLE_RATE):
     positions = []
 
     with open(pgn_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -105,7 +118,7 @@ def extract_positions_from_file(pgn_path, seen_fens, game_sample_rate=0.25):
     raw_games = re.split(r"\n(?=\[Event )", content)
 
     # Sample before parsing — this is the key speedup
-    k = max(200, int(len(raw_games) * game_sample_rate))
+    k = max(MIN_GAMES_TO_SAMPLE, int(len(raw_games) * game_sample_rate))
     sampled = random.sample(raw_games, min(k, len(raw_games)))
 
     for raw in sampled:
@@ -142,6 +155,7 @@ def extract_positions_from_file(pgn_path, seen_fens, game_sample_rate=0.25):
                                         "opening": game.headers.get("Opening", "?"),
                                         "eco": game.headers.get("ECO", "?"),
                                         "date": game.headers.get("UTCDate", "?"),
+                                        "pgn": raw.strip(),
                                     },
                                 }
                             )
@@ -154,7 +168,9 @@ def extract_positions_from_file(pgn_path, seen_fens, game_sample_rate=0.25):
     return positions
 
 
-def extraction_thread(pgn_files, seen_fens, prefetch_queue, game_sample_rate=0.25):
+def extraction_thread(
+    pgn_files, seen_fens, prefetch_queue, game_sample_rate=GAME_SAMPLE_RATE
+):
     """Runs in background, stays 1-2 files ahead of eval workers."""
     for pgn_path in pgn_files:
         positions = extract_positions_from_file(pgn_path, seen_fens, game_sample_rate)
@@ -295,11 +311,11 @@ def run():
 
     print(f"Workers started. Processing files...\n")
 
-    prefetch_queue = ThreadQueue(maxsize=2)
+    prefetch_queue = ThreadQueue(maxsize=PREFETCH_QUEUE_SIZE)
 
     extractor = Thread(
         target=extraction_thread,
-        args=(remaining, seen_fens, prefetch_queue, 0.25),
+        args=(remaining, seen_fens, prefetch_queue, GAME_SAMPLE_RATE),
         daemon=True,
     )
     extractor.start()
@@ -369,7 +385,7 @@ def run():
     finally:
         task_queue.put(STOP_SIGNAL)
         for p in workers:
-            p.join(timeout=5)
+            p.join(timeout=WORKER_JOIN_TIMEOUT)
             if p.is_alive():
                 p.terminate()
 

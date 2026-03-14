@@ -16,7 +16,7 @@ def slim(pos):
         "eval": {
             "pvs": [
                 {k: v for k, v in pv.items() if k in ("best_move", "cp", "line")}
-                for pv in pos["eval"]["pvs"][:5]
+                for pv in pos["eval"]["pvs"]
             ]
         },
         "game": {
@@ -25,6 +25,7 @@ def slim(pos):
             "white_elo": pos["source_game"]["white_elo"],
             "black_elo": pos["source_game"]["black_elo"],
             "date": pos["source_game"]["date"],
+            "pgn": pos["source_game"]["pgn"],
         },
     }
 
