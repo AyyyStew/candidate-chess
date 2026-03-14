@@ -86,9 +86,6 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
         <div className="flex-1 flex flex-col gap-5">
           <GamePanel
             snap={snap}
-            results={
-              snap.phase === "done" ? sessionRef.current.getResults() : null
-            }
             onNext={() => navigate("/random")}
             resetMessage="Play a Random Position"
           />

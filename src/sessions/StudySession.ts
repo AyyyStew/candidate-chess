@@ -105,7 +105,11 @@ export function createStudySession({
       candidates.map((c) => analysis.evaluateMove(c.move, c.san)),
     );
 
-    results = analysis.buildTopMovesResult(evaluated);
+    const evaluatedCandidates: Candidate[] = evaluated.map((e) => ({
+      ...e,
+      pending: false,
+    }));
+    results = analysis.buildTopMovesResult(evaluatedCandidates);
     phase = "done";
     notify();
   }

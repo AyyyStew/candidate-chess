@@ -29,7 +29,6 @@ let positionCounter = 0;
 
 function toPosition(raw: RawPosition): Position {
   const sideToMove = raw.fen.split(" ")[1];
-  console.log("[positionService] toPosition pvs count:", raw.eval.pvs.length, raw.eval.pvs.map(p => p.best_move));
   return makePosition({
     id: positionCounter++,
     fen: raw.fen,
