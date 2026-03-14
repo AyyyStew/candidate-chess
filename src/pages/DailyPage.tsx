@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
+import { buildFromPvs } from "../engine/engineCoordinator";
 import { createGameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
@@ -30,7 +31,12 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
     hasStartedRef.current = true;
 
     const analysis = createEngineAnalysis({ pool: engine, goCommand });
-    analysis.startAnalysis(daily.fen);
+    if (daily.pvs && daily.pvs.length > 0) {
+      const { topMoves, positionEval } = buildFromPvs(daily.fen, daily.pvs);
+      analysis.loadPrecomputed(daily.fen, topMoves, positionEval);
+    } else {
+      analysis.startAnalysis(daily.fen);
+    }
 
     const session = createGameSession({ analysis, position: daily });
     session.onChange = setSnap;
@@ -83,7 +89,8 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
             results={
               snap.phase === "done" ? sessionRef.current.getResults() : null
             }
-            onNext={() => navigate("/game")}
+            onNext={() => navigate("/random")}
+            resetMessage="Play a Random Position"
           />
         </div>
       </div>
