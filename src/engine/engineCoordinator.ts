@@ -40,6 +40,7 @@ export function buildFromPvs(
     };
   });
   const positionEval = topMoves[0]?.rawEval ?? 0;
+  console.log("[engineCoordinator] buildFromPvs topMoves count:", topMoves.length, topMoves.map(m => m.move));
   return { topMoves, positionEval };
 }
 

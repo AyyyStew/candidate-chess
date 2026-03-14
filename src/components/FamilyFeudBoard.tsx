@@ -117,26 +117,40 @@ interface MissRowProps {
   san: string;
   evalScore: number;
   category: Category | null;
+  line?: PVLine;
+  startFen: string;
+  isDone: boolean;
 }
 
-function MissRow({ san, evalScore, category }: MissRowProps) {
+function MissRow({ san, evalScore, category, line, startFen, isDone }: MissRowProps) {
+  const rowStyle = { borderTop: "1px solid rgba(185, 28, 28, 0.6)" };
   return (
-    <tr
-      style={{ borderTop: "1px solid rgba(185, 28, 28, 0.6)" }}
-      className="bg-red-950 animate-slide-in"
-    >
-      <td className="px-4 py-3 text-red-500 font-bold text-lg">✗</td>
-      <td className="px-4 py-3 font-bold text-gray-300">{san}</td>
-      <td
-        className="px-4 py-3 text-sm font-medium"
-        style={{ color: category?.color }}
-      >
-        {category?.label}
-      </td>
-      <td className="px-4 py-3 text-sm text-gray-400 text-right">
-        {formatEval(evalScore)}
-      </td>
-    </tr>
+    <React.Fragment>
+      <tr style={rowStyle} className="bg-red-950 animate-slide-in">
+        <td className="px-4 py-3 text-red-500 font-bold text-lg">✗</td>
+        <td className="px-4 py-3 font-bold text-gray-300">{san}</td>
+        <td
+          className="px-4 py-3 text-sm font-medium"
+          style={{ color: category?.color }}
+        >
+          {category?.label}
+        </td>
+        <td className="px-4 py-3 text-sm text-gray-400 text-right">
+          {formatEval(evalScore)}
+        </td>
+      </tr>
+      {isDone && line && line.sans.length > 0 && (
+        <tr style={rowStyle} className="bg-red-950">
+          <td />
+          <td
+            colSpan={3}
+            className="px-4 pt-0.5 pb-2 text-xs font-mono text-gray-400 dark:text-gray-500"
+          >
+            <PvLine startFen={startFen} sans={line.sans} />
+          </td>
+        </tr>
+      )}
+    </React.Fragment>
   );
 }
 
@@ -281,6 +295,9 @@ export default function FamilyFeudBoard({
                     san={c.san}
                     evalScore={c.eval ?? 0}
                     category={c.category ?? null}
+                    line={c.line}
+                    startFen={fen}
+                    isDone={isDone}
                   />
                 ))}
               </tbody>

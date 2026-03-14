@@ -24,6 +24,7 @@ export function createGameSession({
   position,
   targetMoves: initialTargetMoves = 5,
 }: GameSessionOptions): GameSession {
+  console.log("[GameSession] init — position.pvs?.length:", position.pvs?.length, "initialTargetMoves:", initialTargetMoves);
   let phase: "active" | "done" = "active";
   let candidates: Candidate[] = [];
   let strikes = 0;
