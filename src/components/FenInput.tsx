@@ -25,8 +25,8 @@ export default function FenInput({
   const tabClass = (active: boolean) =>
     `px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
       active
-        ? "bg-blue-600 text-white"
-        : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+        ? "bg-accent text-white"
+        : "bg-surface-hi text-muted hover:bg-interactive-hi"
     }`;
 
   return (
@@ -55,12 +55,12 @@ export default function FenInput({
             onChange={(e) => onChange(e.target.value)}
             placeholder="Paste a FEN, or leave blank for starting position"
             disabled={disabled}
-            className="flex-1 px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="flex-1 px-3 py-2 rounded-xl border border-edge-hi bg-surface text-sm placeholder-muted focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           />
           <button
             onClick={onSet}
             disabled={disabled}
-            className="px-4 py-2 rounded-xl text-sm font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-semibold bg-interactive hover:bg-interactive-hi disabled:opacity-50 transition-colors"
           >
             Set Position
           </button>
@@ -73,12 +73,12 @@ export default function FenInput({
             placeholder="Paste PGN here..."
             disabled={disabled}
             rows={5}
-            className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 resize-none font-mono"
+            className="w-full px-3 py-2 rounded-xl border border-edge-hi bg-surface text-sm placeholder-muted focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 resize-none font-mono"
           />
           <button
             onClick={() => onSetPgn(pgnValue)}
             disabled={disabled || !pgnValue.trim()}
-            className="w-full py-2 rounded-xl text-sm font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            className="w-full py-2 rounded-xl text-sm font-semibold bg-interactive hover:bg-interactive-hi disabled:opacity-50 transition-colors"
           >
             Load PGN
           </button>

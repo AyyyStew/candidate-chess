@@ -32,18 +32,16 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
 
   return (
     <div>
-      <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+      <h3 className="font-semibold text-sm text-muted uppercase tracking-wide mb-3">
         Stockfish Top Moves
       </h3>
-      <div className="border-l-4 border-gray-800 border-gray-95 mb-4 px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-900 flex items-center justify-between">
-        <span className="text-sm dark:text-gray-400 font-medium">
-          Position Eval
-        </span>
+      <div className="border-l-4 border-edge-hi mb-4 px-4 py-3 rounded-xl bg-surface flex items-center justify-between">
+        <span className="text-sm text-muted font-medium">Position Eval</span>
         <span className="font-bold text-lg">{formatEval(positionEval)}</span>
       </div>
-      <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+      <div className="rounded-xl overflow-hidden border border-edge">
         <table className="w-full text-sm">
-          <thead className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+          <thead className="bg-surface-hi text-muted">
             <tr>
               <th className="px-4 py-2 text-left font-medium">#</th>
               <th className="px-4 py-2 text-left font-medium">Move</th>
@@ -66,18 +64,18 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
                     ? `${m.category.color}22`
                     : undefined,
               };
-              const rowBase = isCandidate ? "" : "bg-white dark:bg-gray-900";
+              const rowBase = isCandidate ? "" : "bg-surface";
               const line = m.line.sans.slice(0, 5).join(" ");
               return (
                 <React.Fragment key={i}>
                   <tr
-                    className={`border-t border-gray-100 dark:border-gray-800 ${rowBase}`}
+                    className={`border-t border-edge ${rowBase}`}
                     style={rowStyle}
                   >
-                    <td className="px-4 pt-2.5 pb-0 text-gray-400">{i + 1}</td>
+                    <td className="px-4 pt-2.5 pb-0 text-muted">{i + 1}</td>
                     <td className="px-4 pt-2.5 pb-0 font-bold">
                       <button
-                        className="hover:text-blue-500 transition-colors"
+                        className="hover:text-blue-400 transition-colors"
                         onClick={() => { const f = getFenAfterMove(m.move); if (f) showPreviewFen(f); }}
                       >
                         {m.san}
@@ -94,13 +92,13 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 pt-2.5 pb-0 text-green-600 dark:text-green-400 font-medium">
+                    <td className="px-4 pt-2.5 pb-0 text-green-400 font-medium">
                       {formatEval(m.eval)}
                     </td>
-                    <td className="px-4 pt-2.5 pb-0 text-gray-400">
+                    <td className="px-4 pt-2.5 pb-0 text-muted">
                       {formatEval(m.diffBest)}
                     </td>
-                    <td className="px-4 pt-2.5 pb-0 text-gray-400">
+                    <td className="px-4 pt-2.5 pb-0 text-muted">
                       {formatEval(m.diffPos)}
                     </td>
                   </tr>
@@ -109,7 +107,7 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
                       <td />
                       <td
                         colSpan={5}
-                        className="px-4 pt-0.5 pb-2 text-xs font-mono text-gray-400 dark:text-gray-500"
+                        className="px-4 pt-0.5 pb-2 text-xs font-mono text-faint"
                       >
                         <PvLine startFen={results.fen} sans={m.line.sans} />
                       </td>
@@ -123,7 +121,7 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
         {hasMore && (
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-t border-gray-200 dark:border-gray-700"
+            className="w-full py-2 text-sm text-muted hover:text-label bg-surface-hi hover:bg-interactive-hi transition-colors border-t border-edge-hi"
           >
             {expanded
               ? "▲ Show less"
@@ -133,7 +131,7 @@ export default function ResultsPanel({ results, onReset }: ResultsPanelProps) {
       </div>
       <button
         onClick={onReset}
-        className="mt-4 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+        className="mt-4 w-full py-2.5 rounded-xl font-semibold bg-interactive hover:bg-interactive-hi transition-colors"
       >
         Start Over
       </button>

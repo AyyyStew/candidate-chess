@@ -104,13 +104,13 @@ export default function BoardPanel({
           <div className="flex gap-2">
             <button
               onClick={() => setShowArrows((a) => !a)}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${showArrows ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${showArrows ? "bg-accent text-white hover:bg-accent-hi" : "bg-interactive hover:bg-interactive-hi"}`}
             >
               ↗ Arrows
             </button>
             <button
               onClick={flipOrientation}
-              className="px-3 py-1.5 rounded-lg text-sm bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-sm bg-interactive hover:bg-interactive-hi transition-colors"
             >
               ⇅ Flip Board
             </button>
@@ -139,7 +139,7 @@ export default function BoardPanel({
               onClick={() => {
                 onReset ? onReset() : board.reset();
               }}
-              className="mt-2 w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-red-500 dark:hover:bg-red-700 hover:text-white transition-colors"
+              className="mt-2 w-full py-2.5 rounded-xl font-semibold bg-interactive hover:bg-red-700 hover:text-white transition-colors"
             >
               Reset Game
             </button>

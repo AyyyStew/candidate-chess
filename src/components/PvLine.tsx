@@ -70,9 +70,9 @@ export default function PvLine({ startFen, sans }: PvLineProps) {
   const btnBase =
     "text-xs px-1.5 py-0.5 rounded transition-colors leading-none";
   const btnEnabled =
-    "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700";
+    "bg-surface-hi text-label hover:bg-interactive-hi";
   const btnDisabled =
-    "text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-40";
+    "text-muted cursor-not-allowed opacity-40";
 
   return (
     <div className="inline-flex flex-col gap-0.5 cursor-default">
@@ -85,7 +85,7 @@ export default function PvLine({ startFen, sans }: PvLineProps) {
               className={`px-1 py-0.5 rounded transition-colors leading-none ${
                 step === i
                   ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  : "hover:bg-interactive-hi text-label"
               }`}
             >
               {san}

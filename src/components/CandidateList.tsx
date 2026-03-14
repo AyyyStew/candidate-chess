@@ -29,13 +29,13 @@ export default function CandidateList({
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+        <h3 className="font-semibold text-sm text-muted uppercase tracking-wide">
           Your Candidates
         </h3>
       </div>
       {candidates.length === 0 && (
-        <div className="rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 p-6 text-center">
-          <p className="text-gray-400 text-sm">Drag a piece to try a move</p>
+        <div className="rounded-xl border-2 border-dashed border-edge-hi p-6 text-center">
+          <p className="text-muted text-sm">Drag a piece to try a move</p>
         </div>
       )}
       <div className="flex flex-col gap-2">
@@ -55,7 +55,7 @@ export default function CandidateList({
           return (
             <div
               key={c.move}
-              className={`animate-slide-in flex flex-col px-4 py-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 ${isDone ? "border-l-4" : ""} ${isThinking ? "animate-pulse" : ""}`}
+              className={`animate-slide-in flex flex-col px-4 py-3 rounded-xl bg-surface border border-edge ${isDone ? "border-l-4" : ""} ${isThinking ? "animate-pulse" : ""}`}
               style={{
                 borderLeftColor:
                   isDone && category ? category.color : undefined,
@@ -63,17 +63,17 @@ export default function CandidateList({
               }}
             >
               <div className="flex items-center gap-3">
-                <span className="text-gray-400 text-sm w-4 shrink-0">
+                <span className="text-muted text-sm w-4 shrink-0">
                   {i + 1}
                 </span>
                 <button
-                  className="font-bold text-lg hover:text-blue-500 transition-colors"
+                  className="font-bold text-lg hover:text-blue-400 transition-colors"
                   onClick={() => isDone && fenAfter ? showPreviewFen(fenAfter) : clearPreview()}
                 >
                   {c.san}
                 </button>
                 {rank && (
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-900 text-blue-300">
                     #{rank} SF
                   </span>
                 )}
@@ -94,7 +94,7 @@ export default function CandidateList({
                     >
                       {formatEval(c.eval)}
                     </span>
-                    <span className="text-gray-400 text-xs">
+                    <span className="text-muted text-xs">
                       {formatEval(c.diffBest)} ΔBest
                     </span>
                   </span>
@@ -102,14 +102,14 @@ export default function CandidateList({
                 {!isDone && onRemove && (
                   <button
                     onClick={() => onRemove(c.move)}
-                    className="ml-auto text-gray-300 dark:text-gray-600 hover:text-red-400 dark:hover:text-red-500 transition-colors text-lg leading-none"
+                    className="ml-auto text-faint hover:text-red-400 transition-colors text-lg leading-none"
                   >
                     ×
                   </button>
                 )}
               </div>
               {isDone && fenAfter && c.line && c.line.sans.length > 0 && (
-                <span className="mt-1 pl-7 text-xs font-mono text-gray-400 dark:text-gray-500">
+                <span className="mt-1 pl-7 text-xs font-mono text-faint">
                   <PvLine startFen={fenAfter} sans={c.line.sans} />
                 </span>
               )}

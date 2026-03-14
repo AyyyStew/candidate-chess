@@ -109,7 +109,7 @@ function StudyPageContent() {
             <button
               onClick={handleAnalyze}
               disabled={!engine.ready}
-              className="w-full py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white transition-colors"
+              className="w-full py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-interactive-hi text-white transition-colors"
             >
               {engine.ready ? "Analyze Position" : "Engine loading..."}
             </button>
@@ -129,7 +129,7 @@ function StudyPageContent() {
               <button
                 onClick={() => sessionRef.current.compare()}
                 disabled={!snap.canCompare}
-                className="w-full py-2.5 rounded-xl font-semibold bg-green-600 hover:bg-green-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white transition-colors"
+                className="w-full py-2.5 rounded-xl font-semibold bg-green-600 hover:bg-green-700 disabled:bg-interactive-hi disabled:cursor-not-allowed text-white transition-colors"
               >
                 {!snap.analysisReady
                   ? "Engine thinking..."
@@ -139,13 +139,13 @@ function StudyPageContent() {
               </button>
             )}
             {isComparing && (
-              <p className="text-gray-400 animate-pulse text-center">
+              <p className="text-muted animate-pulse text-center">
                 Evaluating your moves...
               </p>
             )}
             <button
               onClick={handleReset}
-              className="w-full py-2.5 rounded-xl font-semibold bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+              className="w-full py-2.5 rounded-xl font-semibold bg-interactive hover:bg-interactive-hi transition-colors"
             >
               Start Over
             </button>

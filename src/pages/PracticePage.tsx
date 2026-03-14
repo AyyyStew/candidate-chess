@@ -90,7 +90,7 @@ function PracticePageContent() {
           <button
             onClick={handleStart}
             disabled={!engine.ready}
-            className="w-full py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white transition-colors"
+            className="w-full py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-interactive-hi text-white transition-colors"
           >
             {engine.ready ? "Start Game" : "Engine loading..."}
           </button>
