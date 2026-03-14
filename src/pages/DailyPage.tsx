@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
@@ -11,17 +11,20 @@ import PositionBanner from "../components/PositionBanner";
 import { getDailyPosition } from "../services/positionService";
 import type { Position } from "../types";
 
-const dateString = new Date().toLocaleDateString("en-US", {
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-});
+function formatDateString(isoDate: string): string {
+  return new Date(isoDate + "T00:00:00").toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 interface DailyPageContentProps {
   daily: Position;
+  activeDate: string;
 }
 
-function DailyPageContent({ daily }: DailyPageContentProps) {
+function DailyPageContent({ daily, activeDate }: DailyPageContentProps) {
   const navigate = useNavigate();
   const board = useBoard();
   const engine = useEnginePool();
@@ -52,7 +55,7 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
       {/* Page title */}
       <div className="flex items-baseline justify-between">
         <h1 className="font-black text-3xl tracking-tight">Daily Challenge</h1>
-        <span className="text-sm text-muted">{dateString}</span>
+        <span className="text-sm text-muted">{formatDateString(activeDate)}</span>
       </div>
 
       {/* Full-width position banner — spans both columns */}
@@ -92,18 +95,52 @@ function DailyPageContent({ daily }: DailyPageContentProps) {
   );
 }
 
+function isValidDate(date: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) && !isNaN(new Date(date).getTime());
+}
+
 export default function DailyPage() {
   const [daily, setDaily] = useState<Position | null>(null);
+  const [redirectReason, setRedirectReason] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const dateParam = searchParams.get("date");
+  const todayString = new Date().toISOString().split("T")[0];
+  const activeDate = dateParam && isValidDate(dateParam) && dateParam <= todayString
+    ? dateParam
+    : todayString;
 
   useEffect(() => {
-    getDailyPosition().then((pos) => {
-      if (pos) setDaily(pos);
+    if (dateParam) {
+      if (!isValidDate(dateParam)) {
+        setRedirectReason("That date wasn't valid.");
+        navigate(`/?date=${todayString}`, { replace: true });
+        return;
+      }
+      if (dateParam > todayString) {
+        setRedirectReason("No peeking into the future.");
+        navigate(`/?date=${todayString}`, { replace: true });
+        return;
+      }
+    }
+
+    getDailyPosition(activeDate).then((pos) => {
+      if (pos) {
+        setDaily(pos);
+        if (!dateParam) {
+          setSearchParams({ date: todayString }, { replace: true });
+        }
+      }
     });
-  }, []);
+  }, [dateParam]);
 
   if (!daily) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex flex-col items-center justify-center h-64 gap-3">
+        {redirectReason && (
+          <p className="text-sm text-muted">{redirectReason} Showing today's challenge.</p>
+        )}
         <p className="text-muted animate-pulse text-lg">Loading...</p>
       </div>
     );
@@ -111,7 +148,12 @@ export default function DailyPage() {
 
   return (
     <BoardProvider initialFen={daily.fen} initialOrientation={daily.orientation}>
-      <DailyPageContent daily={daily} />
+      {redirectReason && (
+        <div className="max-w-6xl mx-auto px-8 pt-6">
+          <p className="text-sm text-muted">{redirectReason} Showing today's challenge.</p>
+        </div>
+      )}
+      <DailyPageContent daily={daily} activeDate={activeDate} />
     </BoardProvider>
   );
 }
