@@ -1,30 +1,60 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useGameCoordinator } from "../hooks/useGameCoordinator";
 import { createGameSession } from "../sessions/GameSession";
+import { getPositionByIndex } from "../services/positionService";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
 import PositionBanner from "../components/PositionBanner";
 
 function RandomPageContent() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const board = useBoard();
   const { ready, coordinatorRef } = useGameCoordinator();
   const sessionRef = useRef(null);
   const [snap, setSnap] = useState(null);
   const hasStartedRef = useRef(false);
 
+  const posParam = searchParams.get("pos");
+
   useEffect(() => {
-    if (!ready || hasStartedRef.current) return;
-    hasStartedRef.current = true;
-    startNext();
-  }, [ready]);
+    if (!ready) return;
+    if (posParam !== null) {
+      if (!hasStartedRef.current) {
+        hasStartedRef.current = true;
+        loadByIndex(parseInt(posParam, 10));
+      }
+    } else {
+      hasStartedRef.current = true;
+      startNext();
+    }
+  }, [ready, posParam]);
+
+  async function loadByIndex(index: number) {
+    setSnap(null);
+    try {
+      const position = await getPositionByIndex(index);
+      const { analysis } = await coordinatorRef.current!.advanceWithPosition(position);
+      board.resetTo(position.fen, position.orientation);
+      const session = createGameSession({ analysis, position });
+      sessionRef.current = session;
+      session.onChange = setSnap;
+      setSnap(session.getSnapshot());
+    } catch {
+      setSearchParams({}, { replace: true });
+      startNext();
+    }
+  }
 
   async function startNext() {
     setSnap(null);
     const { position, analysis } = await coordinatorRef.current!.advance();
     board.resetTo(position.fen, position.orientation);
+    if (position.sourceIndex !== undefined) {
+      setSearchParams({ pos: String(position.sourceIndex) }, { replace: true });
+    }
 
     const session = createGameSession({ analysis, position });
     sessionRef.current = session;

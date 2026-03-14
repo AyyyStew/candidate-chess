@@ -64,6 +64,7 @@ export interface EngineCoordinator {
   onReady: (cb: () => void) => void;
   preloadNext: () => Promise<void>;
   advance: () => Promise<AdvanceResult>;
+  advanceWithPosition: (position: Position) => Promise<AdvanceResult>;
   destroy: () => void;
   readonly ready: boolean;
 }
@@ -154,6 +155,17 @@ export function createEngineCoordinator({
     pool.destroy();
   }
 
+  async function advanceWithPosition(position: Position): Promise<AdvanceResult> {
+    const analysis = createEngineAnalysis({ pool, goCommand });
+    if (position.pvs && position.pvs.length > 0) {
+      const { topMoves, positionEval } = buildFromPvs(position.fen, position.pvs);
+      analysis.loadPrecomputed(position.fen, topMoves, positionEval);
+      return { position, analysis, preloaded: true };
+    }
+    analysis.startAnalysis(position.fen);
+    return { position, analysis, preloaded: false };
+  }
+
   return {
     onReady(cb: () => void) {
       readyCallback = cb;
@@ -166,6 +178,7 @@ export function createEngineCoordinator({
     },
     preloadNext,
     advance,
+    advanceWithPosition,
     destroy,
     get ready() {
       return isReady;
