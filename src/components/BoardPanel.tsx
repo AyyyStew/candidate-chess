@@ -18,7 +18,6 @@ interface BoardPanelProps {
   snap?: BoardSnap | null;
   onDrop?: (sourceSquare: string, targetSquare: string) => void;
   locked?: boolean;
-  gameInfo?: React.ReactNode;
   onReset?: () => void;
   onStudyFromPosition?: () => void;
 }
@@ -27,7 +26,6 @@ export default function BoardPanel({
   snap,
   onDrop,
   locked = false,
-  gameInfo,
   onReset,
   onStudyFromPosition,
 }: BoardPanelProps) {
@@ -100,22 +98,19 @@ export default function BoardPanel({
   return (
     <div className="sticky top-8 self-start">
       <div className="flex flex-col gap-2 w-120 shrink-0">
-        <div className="flex gap-2 justify-between">
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowArrows((a) => !a)}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${showArrows ? "bg-accent text-white hover:bg-accent-hi" : "bg-interactive hover:bg-interactive-hi"}`}
-            >
-              ↗ Arrows
-            </button>
-            <button
-              onClick={flipOrientation}
-              className="px-3 py-1.5 rounded-lg text-sm bg-interactive hover:bg-interactive-hi transition-colors"
-            >
-              ⇅ Flip Board
-            </button>
-          </div>
-          {gameInfo}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowArrows((a) => !a)}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${showArrows ? "bg-accent text-white hover:bg-accent-hi" : "bg-interactive hover:bg-interactive-hi"}`}
+          >
+            ↗ Arrows
+          </button>
+          <button
+            onClick={flipOrientation}
+            className="px-3 py-1.5 rounded-lg text-sm bg-interactive hover:bg-interactive-hi transition-colors"
+          >
+            ⇅ Flip Board
+          </button>
         </div>
         <Chessboard
           position={board.fen}

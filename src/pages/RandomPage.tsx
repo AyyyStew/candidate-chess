@@ -5,6 +5,7 @@ import { useGameCoordinator } from "../hooks/useGameCoordinator";
 import { createGameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
+import PositionBanner from "../components/PositionBanner";
 
 function RandomPageContent() {
   const navigate = useNavigate();
@@ -33,46 +34,35 @@ function RandomPageContent() {
 
   if (!snap) {
     return (
-      <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-center underline mb-6">
-          Random Game
-        </h1>
-        <div className="flex items-center justify-center h-64">
-          <p className="text-muted animate-pulse text-lg">
-            Loading position...
-          </p>
-        </div>
+      <main className="flex items-center justify-center p-8 h-64">
+        <p className="text-muted animate-pulse text-lg">Loading position...</p>
       </main>
     );
   }
 
   return (
-    <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold text-center underline mb-6">
-        Random Game
-      </h1>
+    <main className="max-w-6xl mx-auto px-8 py-8 flex flex-col gap-6">
+      {/* Page title */}
+      <h1 className="font-black text-3xl tracking-tight">Random Position</h1>
+
+      {/* Full-width position banner */}
+      <PositionBanner
+        label={snap.label}
+        event={snap.event}
+        moveNumber={snap.moveNumber}
+        orientation={snap.orientation}
+      />
+
+      {/* Two-column content */}
       <div className="flex gap-8">
         <BoardPanel
           snap={snap}
           onDrop={(from, to) => sessionRef.current.submitMove(from, to)}
           locked={true}
           onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
-          gameInfo={
-            <div className="text-right">
-              <div className="font-semibold text-blue-300">
-                {snap.label}
-              </div>
-              <div className="text-blue-400">
-                {snap.event} — Move {snap.moveNumber}
-              </div>
-            </div>
-          }
         />
         <div className="flex-1 flex flex-col gap-5">
-          <GamePanel
-            snap={snap}
-            onNext={startNext}
-          />
+          <GamePanel snap={snap} onNext={startNext} showHeader={false} />
         </div>
       </div>
     </main>
