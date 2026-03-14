@@ -37,6 +37,7 @@ function toPosition(raw: RawPosition): Position {
     moveNumber: parseInt(raw.fen.split(" ")[5]) ?? 1,
     orientation: sideToMove === "w" ? "white" : "black",
     moves: raw.eval.pvs.map((pv) => pv.best_move),
+    pvs: raw.eval.pvs,
   });
 }
 

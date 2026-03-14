@@ -44,6 +44,12 @@ export interface AnalysisResult {
   candidates: Candidate[];
 }
 
+export interface PositionPV {
+  best_move: string;
+  cp: number;
+  line: string;
+}
+
 export interface Position {
   id: number;
   fen: string;
@@ -53,6 +59,7 @@ export interface Position {
   orientation: "white" | "black";
   pgn?: string | null;
   moves?: string[];
+  pvs?: PositionPV[];
 }
 
 export interface GameSnapshot {
@@ -148,5 +155,6 @@ export function makePosition(
     orientation: data.orientation ?? "white",
     pgn: data.pgn ?? null,
     moves: data.moves ?? [],
+    pvs: data.pvs,
   };
 }
