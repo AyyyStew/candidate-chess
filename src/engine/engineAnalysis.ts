@@ -76,6 +76,12 @@ export function createEngineAnalysis({
     precomputedTopMoves: TopMove[],
     precomputedEval: number,
   ): void {
+    console.log(
+      "[engineAnalysis] loadPrecomputed topMoves count:",
+      precomputedTopMoves.length,
+      "topMoveCount cap:",
+      topMoveCount,
+    );
     lockedFen = fen;
     topMoves = precomputedTopMoves;
     positionEval = precomputedEval;
@@ -93,11 +99,14 @@ export function createEngineAnalysis({
 
     if (topMove) {
       rawMoveEval = topMove.rawEval;
-      line = { moves: topMove.line.moves.slice(1), sans: topMove.line.sans.slice(1) };
+      line = topMove.line;
     } else {
       const result = await pool.getMoveWithLine(lockedFen!, uci, goCommand);
       rawMoveEval = result.eval;
-      line = result.line;
+      line = {
+        moves: [uci, ...result.line.moves],
+        sans: [san, ...result.line.sans],
+      };
     }
 
     const category = getMoveCategory(
@@ -126,7 +135,13 @@ export function createEngineAnalysis({
     const isBlack = lockedFen?.includes(" b ") ?? false;
     const safePositionEval = positionEval ?? 0;
 
-    const builtTopMoves = (topMoves ?? []).slice(0, topMoveCount).map((m) =>
+    console.log(
+      "[engineAnalysis] buildTopMovesResult raw topMoves:",
+      (topMoves ?? []).length,
+      "topMoveCount (live cap):",
+      topMoveCount,
+    );
+    const builtTopMoves = (topMoves ?? []).map((m) =>
       makeTopMove({
         move: m.move,
         san: m.san,
