@@ -22,6 +22,7 @@ interface RawPosition {
     white_elo: string | number;
     black_elo: string | number;
     date: string;
+    pgn?: string;
   };
 }
 
@@ -39,6 +40,7 @@ function toPosition(raw: RawPosition, sourceIndex?: number): Position {
     orientation: sideToMove === "w" ? "white" : "black",
     moves: raw.eval.pvs.map((pv) => pv.best_move),
     pvs: raw.eval.pvs,
+    pgn: raw.game.pgn ?? null,
   });
 }
 

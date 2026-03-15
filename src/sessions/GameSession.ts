@@ -46,6 +46,7 @@ export function createGameSession({
       label: position.label,
       event: position.event,
       moveNumber: position.moveNumber,
+      pgn: position.pgn,
       candidates: [...candidates],
       strikes,
       maxStrikes: MAX_STRIKES,

@@ -83,6 +83,7 @@ export interface GameSnapshot {
   label: string;
   event: string;
   moveNumber: number;
+  pgn?: string | null;
   candidates: Candidate[];
   strikes: number;
   maxStrikes: number;
