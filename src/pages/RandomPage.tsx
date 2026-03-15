@@ -81,6 +81,7 @@ function RandomPageContent() {
         event={snap.event}
         moveNumber={snap.moveNumber}
         orientation={snap.orientation}
+        pgn={snap.pgn}
       />
 
       {/* Two-column content */}

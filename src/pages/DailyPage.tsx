@@ -150,6 +150,7 @@ function DailyPageContent({ daily, activeDate, existingRecord }: DailyPageConten
           event={daily.event}
           moveNumber={daily.moveNumber}
           orientation={daily.orientation}
+          pgn={daily.pgn}
         />
 
         {/* Two-column content */}
