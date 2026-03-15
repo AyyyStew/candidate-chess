@@ -48,26 +48,24 @@ export default function MoveRowCard({
   const isRevealed = !hidden && flipped;
   const color = category?.color;
 
+  // Inline helper (not a component — avoids remounting PvLine on every render)
+  const pvLineSlot = pvLine && pvLine.sans.length > 0 && startFen
+    ? <PvLine startFen={startFen} sans={pvLine.sans} inline locked={!showLine} />
+    : null;
+
   // ── Miss row ──────────────────────────────────────────────────────────────
   if (isMiss) {
     return (
-      <div className="flex flex-col">
-        <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 bg-red-950/40 border border-red-900/50">
-          <span className="text-red-400 font-bold text-sm w-5 shrink-0">✕</span>
-          <span className="font-semibold text-label flex-1">{san}</span>
-          {category && (
-            <span className="text-xs font-medium shrink-0" style={{ color: category.color }}>
-              {category.icon} {category.label}
-            </span>
-          )}
-          {evalScore != null && (
-            <span className="text-xs text-faint tabular-nums shrink-0">{formatEval(evalScore)}</span>
-          )}
-        </div>
-        {showLine && pvLine && pvLine.sans.length > 0 && startFen && (
-          <div className="px-3 pt-1 pb-2 text-xs font-mono text-faint bg-red-950/40 border-x border-b border-red-900/50 rounded-b-lg -mt-1">
-            <PvLine startFen={startFen} sans={pvLine.sans} />
-          </div>
+      <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 bg-red-950/40 border border-red-900/50">
+        <span className="text-red-400 font-bold text-sm w-5 shrink-0">✕</span>
+        {pvLineSlot ?? <span className="font-semibold text-label flex-1">{san}</span>}
+        {category && (
+          <span className="text-xs font-medium shrink-0" style={{ color: category.color }}>
+            {category.icon} {category.label}
+          </span>
+        )}
+        {evalScore != null && (
+          <span className="text-xs text-faint tabular-nums shrink-0">{formatEval(evalScore)}</span>
         )}
       </div>
     );
@@ -86,7 +84,7 @@ export default function MoveRowCard({
     );
   }
 
-  // ── Revealed / static hit row ─────────────────────────────────────────────
+  // ── Revealed hit row ──────────────────────────────────────────────────────
   const cardStyle =
     isHit && flipped && color
       ? {
@@ -99,71 +97,60 @@ export default function MoveRowCard({
         };
 
   return (
-    <div className="flex flex-col">
-      <div
-        className="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4 transition-colors duration-500"
-        style={cardStyle}
+    <div
+      className="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4 transition-colors duration-500"
+      style={cardStyle}
+    >
+      {/* Rank */}
+      <span
+        className={`font-bold text-sm w-5 shrink-0 transition-all duration-500 ${
+          isHit && flipped ? "text-yellow-400" : "text-yellow-400/50"
+        }`}
       >
-        {/* Rank */}
-        <span
-          className={`font-bold text-sm w-5 shrink-0 transition-all duration-500 ${
-            isHit && flipped ? "text-yellow-400" : "text-yellow-400/50"
-          }`}
-        >
-          {rank}
-        </span>
+        {rank}
+      </span>
 
-        {/* Move — flip card when animated, plain text otherwise */}
-        {animate ? (
-          <div className="flip-card flex-1" style={{ height: "28px" }}>
-            <div className={`flip-card-inner ${flipped ? "flipped" : ""}`}>
-              <div className="flip-card-front">
-                <div className="h-5 w-20 rounded-md bg-surface-hi/50" />
-              </div>
-              <div className="flip-card-back">
-                <span className="font-semibold text-text">{san}</span>
-              </div>
+      {/* Move / line — flip card during animation, then inline PvLine */}
+      {animate && !flipped ? (
+        <div className="flip-card flex-1" style={{ height: "28px" }}>
+          <div className={`flip-card-inner ${flipped ? "flipped" : ""}`}>
+            <div className="flip-card-front">
+              <div className="h-5 w-20 rounded-md bg-surface-hi/50" />
+            </div>
+            <div className="flip-card-back">
+              <span className="font-semibold text-text">{san}</span>
             </div>
           </div>
-        ) : (
-          <span className="font-semibold text-text flex-1">{san}</span>
-        )}
-
-        {/* Category */}
-        {isRevealed && category && (
-          <span
-            className={`text-xs font-medium shrink-0 ${animate ? "animate-reveal-pop" : ""}`}
-            style={{ color: category.color, ...(animate ? { animationDelay: "400ms" } : {}) }}
-          >
-            {category.icon} {category.label}
-          </span>
-        )}
-
-        {/* Eval */}
-        {isRevealed && evalScore != null && (
-          <span
-            className={`text-xs text-faint tabular-nums shrink-0 ${animate ? "animate-reveal-pop" : ""}`}
-            style={animate ? { animationDelay: "460ms" } : {}}
-          >
-            {formatEval(evalScore)}
-          </span>
-        )}
-
-        {/* Hit indicator */}
-        {isRevealed && isHit !== undefined && (
-          isHit
-            ? <span className="text-xs text-green-400 font-medium shrink-0">✓</span>
-            : <span className="text-xs text-faint shrink-0">—</span>
-        )}
-      </div>
-
-      {isRevealed && showLine && pvLine && pvLine.sans.length > 0 && startFen && (
-        <div
-          className="px-3 pt-1 pb-2 text-xs font-mono text-faint rounded-b-lg -mt-1 transition-colors duration-500"
-          style={cardStyle}
-        >
-          <PvLine startFen={startFen} sans={pvLine.sans} />
         </div>
+      ) : (
+        pvLineSlot ?? <span className="font-semibold text-text flex-1">{san}</span>
+      )}
+
+      {/* Category */}
+      {isRevealed && category && (
+        <span
+          className={`text-xs font-medium shrink-0 ${animate ? "animate-reveal-pop" : ""}`}
+          style={{ color: category.color, ...(animate ? { animationDelay: "400ms" } : {}) }}
+        >
+          {category.icon} {category.label}
+        </span>
+      )}
+
+      {/* Eval */}
+      {isRevealed && evalScore != null && (
+        <span
+          className={`text-xs text-faint tabular-nums shrink-0 ${animate ? "animate-reveal-pop" : ""}`}
+          style={animate ? { animationDelay: "460ms" } : {}}
+        >
+          {formatEval(evalScore)}
+        </span>
+      )}
+
+      {/* Hit indicator */}
+      {isRevealed && isHit !== undefined && (
+        isHit
+          ? <span className="text-xs text-green-400 font-medium shrink-0">✓</span>
+          : <span className="text-xs text-faint shrink-0">—</span>
       )}
     </div>
   );
