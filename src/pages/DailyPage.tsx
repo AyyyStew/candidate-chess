@@ -9,6 +9,7 @@ import { buildFromPvs } from "../engine/engineCoordinator";
 import { createGameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
+import GameLayout from "../components/GameLayout";
 import PositionBanner from "../components/PositionBanner";
 import { getDailyPosition } from "../services/positionService";
 import {
@@ -158,27 +159,33 @@ function DailyPageContent({
           pgn={daily.pgn}
         />
 
-        {/* Two-column content */}
+        {/* Two-column on desktop, mobile-stacked on small screens */}
         {!snap ? (
           <div className="flex items-center justify-center h-64">
             <p className="text-muted animate-pulse">Engine loading...</p>
           </div>
         ) : (
-          <div className="flex gap-8">
-            <BoardPanel
-              snap={snap}
-              onDrop={
-                existingRecord
-                  ? undefined
-                  : (from, to) => sessionRef.current.submitMove(from, to)
-              }
-              locked={true}
-              onStudyFromPosition={() =>
-                navigate("/study", { state: { fen: board.fen } })
-              }
-            />
-            <div className="flex-1 flex flex-col gap-5">
-              {record ? (
+          <GameLayout
+            snap={snap}
+            activeGame={!record}
+            onReset={() => navigate("/random")}
+            resetMessage="Play a Random Position"
+            board={
+              <BoardPanel
+                snap={snap}
+                onDrop={
+                  existingRecord
+                    ? undefined
+                    : (from, to) => sessionRef.current.submitMove(from, to)
+                }
+                locked={true}
+                onStudyFromPosition={() =>
+                  navigate("/study", { state: { fen: board.fen } })
+                }
+              />
+            }
+            panel={
+              record ? (
                 <DailyResultsPanel
                   record={record}
                   participationStreak={participationStreak}
@@ -192,9 +199,9 @@ function DailyPageContent({
                   resetMessage="Play a Random Position"
                   showHeader={false}
                 />
-              )}
-            </div>
-          </div>
+              )
+            }
+          />
         )}
       </main>
     </>

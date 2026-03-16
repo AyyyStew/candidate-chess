@@ -6,6 +6,7 @@ import { createGameSession } from "../sessions/GameSession";
 import { getPositionByIndex } from "../services/positionService";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
+import GameLayout from "../components/GameLayout";
 import PositionBanner from "../components/PositionBanner";
 
 function RandomPageContent() {
@@ -84,18 +85,21 @@ function RandomPageContent() {
         pgn={snap.pgn}
       />
 
-      {/* Two-column content */}
-      <div className="flex gap-8">
-        <BoardPanel
-          snap={snap}
-          onDrop={(from, to) => sessionRef.current.submitMove(from, to)}
-          locked={true}
-          onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
-        />
-        <div className="flex-1 flex flex-col gap-5">
-          <GamePanel snap={snap} onNext={startNext} showHeader={false} />
-        </div>
-      </div>
+      <GameLayout
+        snap={snap}
+        activeGame
+        onReset={startNext}
+        resetMessage="Play Another Position?"
+        board={
+          <BoardPanel
+            snap={snap}
+            onDrop={(from, to) => sessionRef.current.submitMove(from, to)}
+            locked={true}
+            onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
+          />
+        }
+        panel={<GamePanel snap={snap} onNext={startNext} showHeader={false} />}
+      />
     </main>
   );
 }

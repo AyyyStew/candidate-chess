@@ -46,6 +46,9 @@ interface FamilyFeudBoardProps {
   maxStrikes: number;
   onReset: () => void;
   resetMessage?: string;
+  /** Mobile context: hides the header and misses section since GameLayout
+   *  renders StrikesPipsBar and GuessList above/below the board instead. */
+  isMobile?: boolean;
 }
 
 export default function FamilyFeudBoard({
@@ -58,6 +61,7 @@ export default function FamilyFeudBoard({
   maxStrikes,
   onReset,
   resetMessage,
+  isMobile = false,
 }: FamilyFeudBoardProps) {
   const [revealedMoves, setRevealedMoves] = useState<Set<string>>(new Set());
   const seenMoves = useRef<Set<string>>(new Set());
@@ -106,18 +110,20 @@ export default function FamilyFeudBoard({
   return (
     <div className="flex flex-col gap-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-muted uppercase tracking-widest mb-0.5">
-            Challenge
-          </p>
-          <h3 className="font-black text-xl text-text leading-tight">
-            Find the Top <span className="text-yellow-400">{targetMoves}</span>{" "}
-            Moves
-          </h3>
+      {!isMobile && (
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted uppercase tracking-widest mb-0.5">
+              Challenge
+            </p>
+            <h3 className="font-black text-xl text-text leading-tight">
+              Find the Top <span className="text-yellow-400">{targetMoves}</span>{" "}
+              Moves
+            </h3>
+          </div>
+          <StrikeIndicator strikes={strikes} maxStrikes={maxStrikes} />
         </div>
-        <StrikeIndicator strikes={strikes} maxStrikes={maxStrikes} />
-      </div>
+      )}
 
       {/* Main board */}
       <div className="flex flex-col gap-1.5">
@@ -176,8 +182,8 @@ export default function FamilyFeudBoard({
         })}
       </div>
 
-      {/* Misses */}
-      {missMoves.length > 0 && (
+      {/* Misses — hidden on mobile since GuessList already shows them */}
+      {!isMobile && missMoves.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-xs text-faint uppercase tracking-widest">Misses</p>
           <div className="flex flex-col gap-1.5">

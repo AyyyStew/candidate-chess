@@ -6,6 +6,7 @@ import { createEngineAnalysis } from "../engine/engineAnalysis";
 import { createGameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
+import GameLayout from "../components/GameLayout";
 import FenInput from "../components/FenInput";
 import { makePosition } from "../types";
 import type { GameSnapshot } from "../types";
@@ -75,7 +76,7 @@ function PracticePageContent() {
 
   if (isIdle) {
     return (
-      <main className="flex gap-8 p-8 max-w-6xl mx-auto">
+      <main className="flex flex-col lg:flex-row gap-8 p-8 max-w-6xl mx-auto">
         <BoardPanel snap={null} locked={false} onReset={board.reset} />
         <div className="flex-1 flex flex-col gap-5">
           <FenInput
@@ -101,21 +102,23 @@ function PracticePageContent() {
 
   return (
     <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
-      <div className="flex gap-8">
-        <BoardPanel
-          snap={snap}
-          onDrop={(from, to) => sessionRef.current!.submitMove(from, to)}
-          locked={true}
-          onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
-        />
-        <div className="flex-1 flex flex-col gap-5">
-          <GamePanel
-            snap={snap!}
-            onNext={handleReset}
-            resetMessage="Play Again"
+      <GameLayout
+        snap={snap}
+        activeGame
+        onReset={handleReset}
+        resetMessage="Play Again"
+        board={
+          <BoardPanel
+            snap={snap}
+            onDrop={(from, to) => sessionRef.current!.submitMove(from, to)}
+            locked={true}
+            onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
           />
-        </div>
-      </div>
+        }
+        panel={
+          <GamePanel snap={snap!} onNext={handleReset} resetMessage="Play Again" />
+        }
+      />
     </main>
   );
 }
