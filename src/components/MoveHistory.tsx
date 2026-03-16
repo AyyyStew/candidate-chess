@@ -82,7 +82,7 @@ export default function MoveHistory({
             key={label}
             onClick={onClick}
             disabled={d}
-            className="flex-1 py-1.5 rounded-lg text-sm bg-surface-hi hover:bg-interactive-hi disabled:opacity-40 transition-colors"
+            className="flex-1 py-1.5 rounded-lg text-sm font-mono bg-surface-hi border border-edge-hi hover:bg-interactive hover:text-label hover:border-edge-hi disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           >
             {label}
           </button>

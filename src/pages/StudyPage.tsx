@@ -109,7 +109,7 @@ function StudyPageContent() {
             <button
               onClick={handleAnalyze}
               disabled={!engine.ready}
-              className="w-full py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-interactive-hi text-white transition-colors"
+              className="w-full py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-500 disabled:bg-interactive-hi disabled:shadow-none text-white transition-all shadow-lg shadow-blue-900/50 ring-1 ring-blue-500/30 disabled:ring-0"
             >
               {engine.ready ? "Analyze Position" : "Engine loading..."}
             </button>
