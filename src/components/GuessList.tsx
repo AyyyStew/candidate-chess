@@ -39,7 +39,7 @@ export default function GuessList({ candidates, topMoves, fen, isDone }: Props) 
     <div className="flex flex-col gap-1.5">
       <p className="text-xs text-faint uppercase tracking-widest">Your Guesses</p>
       <div className="flex flex-col gap-1.5">
-        {candidates.map((c) => {
+        {[...candidates].reverse().map((c) => {
           if (c.status === "pending") {
             return (
               <div
