@@ -34,11 +34,7 @@ export function createGameSession({
   let moveQueue: { uci: string; san: string }[] = [];
   let processingQueue = false;
 
-  function notify(): void {
-    onChange?.(getSnapshot());
-  }
-
-  function getSnapshot(): GameSnapshot {
+  function buildSnapshot(): GameSnapshot {
     return {
       phase,
       fen: position.fen,
@@ -54,6 +50,17 @@ export function createGameSession({
       liveTopMoves: analysisReady ? analysis.getTopMoves() : [],
       analysisReady,
     };
+  }
+
+  let cachedSnapshot: GameSnapshot = buildSnapshot();
+
+  function getSnapshot(): GameSnapshot {
+    return cachedSnapshot;
+  }
+
+  function notify(): void {
+    cachedSnapshot = buildSnapshot();
+    onChange?.(cachedSnapshot);
   }
 
   analysis.waitForAnalysis().then(() => {

@@ -30,11 +30,7 @@ export function createStudySession({
   let lockedFen: string | null = null;
   let onChange: ((snap: StudySnapshot) => void) | null = null;
 
-  function notify(): void {
-    onChange?.(getSnapshot());
-  }
-
-  function getSnapshot(): StudySnapshot {
+  function buildSnapshot(): StudySnapshot {
     return {
       phase,
       lockedFen,
@@ -44,6 +40,17 @@ export function createStudySession({
       minCandidates,
       canCompare: candidates.length >= minCandidates && analysis.isReady(),
     };
+  }
+
+  let cachedSnapshot: StudySnapshot = buildSnapshot();
+
+  function getSnapshot(): StudySnapshot {
+    return cachedSnapshot;
+  }
+
+  function notify(): void {
+    cachedSnapshot = buildSnapshot();
+    onChange?.(cachedSnapshot);
   }
 
   function start(fen: string): void {

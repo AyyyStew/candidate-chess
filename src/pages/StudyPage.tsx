@@ -1,9 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
+import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useLocation } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
-import { createStudySession } from "../sessions/StudySession";
+import { createStudySession, type StudySession } from "../sessions/StudySession";
 import BoardPanel from "../components/BoardPanel";
 import FenInput from "../components/FenInput";
 import AnalysisSettings from "../components/AnalysisSettings";
@@ -16,8 +17,8 @@ const MAX_CANDIDATES = 10;
 function StudyPageContent() {
   const board = useBoard();
   const engine = useEnginePool();
-  const sessionRef = useRef(null);
-  const [snap, setSnap] = useState(null);
+  const [session, setSession] = useState<StudySession | null>(null);
+  const snap = useSessionSnapshot(session);
   const [depth, setDepth] = useState(15);
   const [useMovetime, setUseMovetime] = useState(false);
   const [movetime, setMovetime] = useState(2000);
@@ -37,32 +38,32 @@ function StudyPageContent() {
       goCommand: cmd,
       topMoveCount,
     });
-    const session = createStudySession({ analysis, minCandidates });
-    session.onChange = setSnap;
-    sessionRef.current = session;
-    session.start(board.fen);
+    const newSession = createStudySession({ analysis, minCandidates });
+    newSession.start(board.fen);
+    setSession(newSession);
   }
 
   function handleDrop(sourceSquare: string, targetSquare: string): boolean {
-    if (!sessionRef.current) return false;
-    return sessionRef.current.addCandidate(sourceSquare, targetSquare);
+    if (!session) return false;
+    return session.addCandidate(sourceSquare, targetSquare);
   }
+
   function handleClearBoard() {
-    sessionRef.current?.reset();
+    session?.reset();
     board.reset();
-    setSnap(null);
+    setSession(null);
   }
 
   function handleReset() {
-    sessionRef.current?.reset();
+    session?.reset();
     board.resetToCheckpoint();
-    setSnap(null);
+    setSession(null);
   }
 
   function handleStudyFromPreview() {
     const positionFen = board.fen;
-    sessionRef.current?.reset();
-    setSnap(null);
+    session?.reset();
+    setSession(null);
     board.startFromFen(positionFen);
   }
 
@@ -125,13 +126,11 @@ function StudyPageContent() {
             <CandidateList
               candidates={snap.candidates}
               results={null}
-              onRemove={(uci: string) =>
-                sessionRef.current!.removeCandidate(uci)
-              }
+              onRemove={(uci: string) => session?.removeCandidate(uci)}
             />
             {isActive && (
               <button
-                onClick={() => sessionRef.current.compare()}
+                onClick={() => session?.compare()}
                 disabled={!snap.canCompare}
                 className="w-full py-2.5 rounded-xl font-semibold bg-green-600 hover:bg-green-700 disabled:bg-interactive-hi disabled:cursor-not-allowed text-white transition-colors"
               >
