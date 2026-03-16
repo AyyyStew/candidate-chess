@@ -75,16 +75,20 @@ function StudyPageContent() {
     : null;
 
   return (
-    <main className="flex gap-8 p-8 max-w-6xl mx-auto">
-      <BoardPanel
-        snap={boardSnap}
-        onDrop={handleDrop}
-        locked={false}
-        onReset={handleClearBoard}
-        onStudyFromPosition={handleStudyFromPreview}
-      />
+    <main className="flex flex-col lg:flex-row gap-8 p-8 max-w-6xl mx-auto">
+      {/* Board: always second on mobile (settings sit above when idle, results below when active/done) */}
+      <div className="order-2 lg:order-0">
+        <BoardPanel
+          snap={boardSnap}
+          onDrop={handleDrop}
+          locked={false}
+          onReset={handleClearBoard}
+          onStudyFromPosition={handleStudyFromPreview}
+        />
+      </div>
 
-      <div className="flex-1 flex flex-col gap-5">
+      {/* Right panel: order-1 on mobile when idle (above board), order-3 when active/done (below board) */}
+      <div className={`flex-1 flex flex-col gap-5 lg:order-0 ${isIdle ? "order-1" : "order-3"}`}>
         {isIdle && (
           <>
             <FenInput
