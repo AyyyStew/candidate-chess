@@ -64,7 +64,7 @@ export default function FamilyFeudBoard({
 
   useEffect(() => {
     if (!isDone) return;
-    const t = setTimeout(playSuccessJingle, 100);
+    const t = setTimeout(playSuccessJingle);
     return () => clearTimeout(t);
   }, [isDone]);
 
@@ -121,7 +121,9 @@ export default function FamilyFeudBoard({
 
       {/* Main board */}
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs text-faint uppercase tracking-widest">Top moves</p>
+        <p className="text-xs text-faint uppercase tracking-widest">
+          Top moves
+        </p>
         {slots.map((slot, i) => {
           if (slot.loading) {
             return (
@@ -130,10 +132,15 @@ export default function FamilyFeudBoard({
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4 bg-blue-950/40"
                 style={{ borderLeftColor: "var(--color-edge)" }}
               >
-                <span className="text-yellow-400/20 font-bold text-sm w-5 shrink-0">{i + 1}</span>
+                <span className="text-yellow-400/20 font-bold text-sm w-5 shrink-0">
+                  {i + 1}
+                </span>
                 <div
                   className="h-4 rounded-md bg-blue-900/60 animate-pulse flex-1"
-                  style={{ maxWidth: `${88 + ((i * 29) % 64)}px`, animationDelay: `${i * 80}ms` }}
+                  style={{
+                    maxWidth: `${88 + ((i * 29) % 64)}px`,
+                    animationDelay: `${i * 80}ms`,
+                  }}
                 />
                 <div
                   className="h-3 w-10 rounded-md bg-blue-900/40 animate-pulse"
@@ -143,7 +150,10 @@ export default function FamilyFeudBoard({
             );
           }
 
-          const m = slot as TopMove & { hit: Candidate | undefined; loading: false };
+          const m = slot as TopMove & {
+            hit: Candidate | undefined;
+            loading: false;
+          };
           const isRevealed = !!m.hit || isDone;
           const isNew = !!m.hit && revealedMoves.has(m.hit.move);
           const category = m.hit?.category ?? m.category ?? null;
