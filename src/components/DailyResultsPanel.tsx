@@ -7,6 +7,7 @@ interface DailyResultsPanelProps {
   participationStreak: number;
   winStreak: number;
   onShare: () => void;
+  onPlayRandom?: () => void;
 }
 
 export default function DailyResultsPanel({
@@ -14,6 +15,7 @@ export default function DailyResultsPanel({
   participationStreak,
   winStreak,
   onShare,
+  onPlayRandom,
 }: DailyResultsPanelProps) {
   const misses = record.candidates.filter((c) => c.status === "miss");
   const foundMoves = new Set(
@@ -110,6 +112,15 @@ export default function DailyResultsPanel({
         </svg>
         Share result
       </button>
+
+      {onPlayRandom && (
+        <button
+          onClick={onPlayRandom}
+          className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
+        >
+          Play a Random Position
+        </button>
+      )}
     </div>
   );
 }

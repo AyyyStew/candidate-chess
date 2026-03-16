@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DailyResultsModal from "../components/DailyResultsModal";
 import StreakDisplay from "../components/StreakDisplay";
@@ -111,6 +111,13 @@ function DailyPageContent({
     return () => clearTimeout(t);
   }, [snap?.phase]);
 
+  const boardSnap = useMemo(
+    () => record && snap
+      ? { ...snap, phase: "done", liveTopMoves: record.answers, candidates: record.candidates }
+      : snap,
+    [record, snap],
+  );
+
   return (
     <>
       {showModal && (
@@ -172,7 +179,7 @@ function DailyPageContent({
             resetMessage="Play a Random Position"
             board={
               <BoardPanel
-                snap={snap}
+                snap={boardSnap}
                 onDrop={
                   existingRecord
                     ? undefined
@@ -181,6 +188,9 @@ function DailyPageContent({
                 locked={true}
                 onStudyFromPosition={() =>
                   navigate("/study", { state: { fen: board.fen } })
+                }
+                onPlayFromPosition={() =>
+                  navigate("/practice", { state: { fen: board.fen } })
                 }
               />
             }
@@ -191,6 +201,7 @@ function DailyPageContent({
                   participationStreak={participationStreak}
                   winStreak={winStreak}
                   onShare={() => setShowModal(true)}
+                  onPlayRandom={() => navigate("/random")}
                 />
               ) : (
                 <GamePanel

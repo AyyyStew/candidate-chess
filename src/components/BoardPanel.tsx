@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Chessboard } from "react-chessboard";
 import MoveHistory from "./MoveHistory";
 import { useBoard } from "../contexts/BoardContext";
@@ -10,9 +10,9 @@ import { playMoveSound, playBounceSound } from "../utils/sounds";
 interface BoardSnap {
   phase: string;
   candidates: { move: string }[];
-  results?: {
-    topMoves: { move: string }[];
-  } | null;
+  results?: { topMoves: { move: string }[] } | null;
+  /** Top engine moves from GameSnapshot — used to draw arrows when done */
+  liveTopMoves?: { move: string }[];
 }
 
 interface BoardPanelProps {
@@ -21,6 +21,7 @@ interface BoardPanelProps {
   locked?: boolean;
   onReset?: () => void;
   onStudyFromPosition?: () => void;
+  onPlayFromPosition?: () => void;
 }
 
 export default function BoardPanel({
@@ -29,6 +30,7 @@ export default function BoardPanel({
   locked = false,
   onReset,
   onStudyFromPosition,
+  onPlayFromPosition,
 }: BoardPanelProps) {
   const [showArrows, setShowArrows] = useState(true);
   const board = useBoard();
@@ -46,42 +48,20 @@ export default function BoardPanel({
   const isDone = snap?.phase === "done";
   const candidates = snap?.candidates ?? [];
   const results = snap?.results ?? null;
+  // Game pages expose liveTopMoves instead of results.topMoves
+  const topMovesForArrows = results?.topMoves ?? (isDone ? (snap?.liveTopMoves ?? []) : []);
 
-  const candidateArrows: [Square, Square, string][] =
-    showArrows && !isPreviewing
-      ? [
-          ...candidates.map((c): [Square, Square, string] => [
-            c.move.slice(0, 2) as Square,
-            c.move.slice(2, 4) as Square,
-            "rgb(0, 100, 255)",
-          ]),
-          ...(isDone && results
-            ? [
-                results.topMoves[0]
-                  ? ([
-                      results.topMoves[0].move.slice(0, 2) as Square,
-                      results.topMoves[0].move.slice(2, 4) as Square,
-                      "rgb(255, 180, 0)",
-                    ] as [Square, Square, string])
-                  : null,
-                results.topMoves[1]
-                  ? ([
-                      results.topMoves[1].move.slice(0, 2) as Square,
-                      results.topMoves[1].move.slice(2, 4) as Square,
-                      "rgb(180, 180, 180)",
-                    ] as [Square, Square, string])
-                  : null,
-                results.topMoves[2]
-                  ? ([
-                      results.topMoves[2].move.slice(0, 2) as Square,
-                      results.topMoves[2].move.slice(2, 4) as Square,
-                      "rgb(180, 100, 0)",
-                    ] as [Square, Square, string])
-                  : null,
-              ].filter((x): x is [Square, Square, string] => x !== null)
-            : []),
-        ]
-      : [];
+  const TOP_MOVE_COLORS = ["rgba(234, 179, 8, 0.92)", "rgba(148, 163, 184, 0.80)", "rgba(180, 83, 9, 0.82)"];
+
+  const candidateArrows = useMemo<[Square, Square, string][]>(() => {
+    if (!showArrows || isPreviewing) return [];
+    const from = (m: { move: string }) => m.move.slice(0, 2) as Square;
+    const to   = (m: { move: string }) => m.move.slice(2, 4) as Square;
+    return [
+      ...candidates.map((c): [Square, Square, string] => [from(c), to(c), "rgba(59, 130, 246, 0.75)"]),
+      ...(isDone ? topMovesForArrows.slice(0, 3).map((m, i): [Square, Square, string] => [from(m), to(m), TOP_MOVE_COLORS[i]]) : []),
+    ];
+  }, [showArrows, isPreviewing, candidates, isDone, topMovesForArrows]);
 
   function handlePieceDrop(
     sourceSquare: string,
@@ -154,7 +134,10 @@ export default function BoardPanel({
           customArrows={candidateArrows}
         />
         {onStudyFromPosition && (
-          <StudyFromPositionButton onStudy={onStudyFromPosition} />
+          <StudyFromPositionButton
+            onStudy={onStudyFromPosition}
+            onPlay={onPlayFromPosition}
+          />
         )}
         {!locked && (
           <>

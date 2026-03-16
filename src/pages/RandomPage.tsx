@@ -96,6 +96,7 @@ function RandomPageContent() {
             onDrop={(from, to) => sessionRef.current.submitMove(from, to)}
             locked={true}
             onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
+            onPlayFromPosition={() => navigate("/practice", { state: { fen: board.fen } })}
           />
         }
         panel={<GamePanel snap={snap} onNext={startNext} showHeader={false} />}

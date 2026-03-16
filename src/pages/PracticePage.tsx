@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
@@ -113,6 +113,7 @@ function PracticePageContent() {
             onDrop={(from, to) => sessionRef.current!.submitMove(from, to)}
             locked={true}
             onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
+            onPlayFromPosition={() => navigate("/practice", { state: { fen: board.fen } })}
           />
         }
         panel={
@@ -124,8 +125,10 @@ function PracticePageContent() {
 }
 
 export default function PracticePage() {
+  const location = useLocation();
+  const initialFen = (location.state as { fen?: string } | null)?.fen;
   return (
-    <BoardProvider>
+    <BoardProvider initialFen={initialFen}>
       <PracticePageContent />
     </BoardProvider>
   );
