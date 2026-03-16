@@ -14,7 +14,8 @@ export default function PositionBanner({
   pgn,
 }: PositionBannerProps) {
   return (
-    <div className="rounded-xl border border-edge-hi bg-surface px-4 py-3 flex items-center justify-between gap-6 shadow-lg shadow-black/30">
+    <div className="rounded-xl border border-edge-hi bg-surface px-4 py-3 shadow-lg shadow-black/30">
+      {/* Top row: label */}
       <div className="min-w-0">
         <h2 className="font-black text-lg text-text leading-tight">
           {pgn ? (
@@ -45,11 +46,9 @@ export default function PositionBanner({
         </h2>
         {event && <p className="text-xs text-muted mt-0.5">{event}</p>}
       </div>
-      <div className="shrink-0 flex items-center gap-4">
+      {/* Bottom row: color to move + move number */}
+      <div className="flex items-center justify-between mt-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-label">
-            {orientation === "white" ? "White" : "Black"} to move
-          </span>
           <span
             className="w-2.5 h-2.5 rounded-full ring-1 ring-white/10"
             style={{
@@ -60,14 +59,15 @@ export default function PositionBanner({
                   : "0 0 6px rgba(0,0,0,0.8)",
             }}
           />
+          <span className="text-xs font-semibold text-label">
+            {orientation === "white" ? "White" : "Black"} to move
+          </span>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-faint uppercase tracking-widest mb-0.5">
-            Move
-          </p>
-          <p className="font-black text-2xl text-yellow-400 leading-none">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-xs text-faint uppercase tracking-widest">Move</span>
+          <span className="font-black text-2xl text-yellow-400 leading-none">
             {moveNumber}
-          </p>
+          </span>
         </div>
       </div>
     </div>
