@@ -87,7 +87,24 @@ Output: `training_positions_enriched.jsonl`
 
 ---
 
-### 4. Chunking (`chunking.py`)
+### 4. Filtering (`position_filter.py`)
+
+Heuristic pass over the enriched dataset to remove positions that make poor puzzles.
+No engine required — runs on the enriched metadata.
+
+**Rules (all must pass):**
+
+- `balance != "losing"` — drops positions where the side to move is below −300cp
+- Not locked pawn structure: rejected when `blocked_pawns ≥ 6` AND `pawn_tension == 0` (pawns frozen with no breaks available)
+- `captures + checks ≥ 2` — minimum tactical activity for the side to move
+
+Thresholds are constants at the top of the script.
+
+Output: `training_positions_filtered.jsonl`
+
+---
+
+### 5. Chunking (`chunking.py`)
 
 Slims each position to fields needed by the React app, shuffles both pools
 (seed=42 for reproducibility), assigns calendar dates to daily positions

@@ -2,7 +2,7 @@ import json
 import chess
 from collections import Counter
 
-INPUT_FILE = "training_positions_evaluated.jsonl"
+INPUT_FILE = "training_positions.jsonl"
 OUTPUT_FILE = "training_positions_enriched.jsonl"
 
 # ── classifiers ───────────────────────────────────────────────────────────────
@@ -69,13 +69,30 @@ def position_features(fen):
 
     white_pawns = board.pieces(chess.PAWN, chess.WHITE)
     black_pawns = board.pieces(chess.PAWN, chess.BLACK)
-    blocked_pawns = sum(1 for sq in white_pawns if sq + 8 in black_pawns)
+
+    # Count pawns directly blocked on both sides
+    white_blocked = sum(1 for sq in white_pawns if sq + 8 in black_pawns)
+    black_blocked = sum(1 for sq in black_pawns if sq - 8 in white_pawns)
+    blocked_pawns = white_blocked + black_blocked
+
+    # Pawn tension: how many pawn x pawn captures exist on the board.
+    # Zero tension + high blocked count = truly locked structure.
+    pawn_tension = 0
+    for sq in white_pawns:
+        for cap_sq in board.attacks(sq):
+            if cap_sq in black_pawns:
+                pawn_tension += 1
+    for sq in black_pawns:
+        for cap_sq in board.attacks(sq):
+            if cap_sq in white_pawns:
+                pawn_tension += 1
 
     return {
         "mobility": mobility,
         "captures": captures,
         "checks": checks,
         "blocked_pawns": blocked_pawns,
+        "pawn_tension": pawn_tension,
     }
 
 
