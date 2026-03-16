@@ -124,7 +124,7 @@ function DailyPageContent({
       )}
       <main className="max-w-6xl mx-auto px-8 py-8 flex flex-col gap-6">
         {/* Page title */}
-        <div className="flex items-baseline justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-0">
           <div className="flex items-baseline gap-4">
             <h1 className="font-black text-3xl tracking-tight">
               Daily Challenge
