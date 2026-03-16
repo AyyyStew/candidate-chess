@@ -141,10 +141,10 @@ export default function DailyResultsModal({
       className="fixed inset-0 z-50 flex items-center justify-center"
       onClick={onClose}
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-modal-backdrop" />
 
       <div
-        className="relative bg-surface border border-edge rounded-2xl p-8 max-w-sm w-full mx-4 flex flex-col gap-7 shadow-2xl"
+        className="relative bg-surface border border-edge rounded-2xl p-8 max-w-sm w-full mx-4 flex flex-col gap-7 shadow-2xl animate-modal-panel"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close */}
