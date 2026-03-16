@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Chessboard } from "react-chessboard";
 import MoveHistory from "./MoveHistory";
 import { useBoard } from "../contexts/BoardContext";
@@ -33,6 +33,8 @@ export default function BoardPanel({
   onPlayFromPosition,
 }: BoardPanelProps) {
   const [showArrows, setShowArrows] = useState(true);
+  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
+  const boardContainerRef = useRef<HTMLDivElement>(null);
   const board = useBoard();
   const {
     boardOrientation,
@@ -42,6 +44,14 @@ export default function BoardPanel({
     handleNavigate,
     isPreviewing,
   } = board;
+
+  useEffect(() => {
+    const el = boardContainerRef.current;
+    if (!el) return;
+    const prevent = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener("touchmove", prevent, { passive: false });
+    return () => el.removeEventListener("touchmove", prevent);
+  }, []);
 
   const isIdle = !snap;
   const isActive = snap?.phase === "active";
@@ -62,6 +72,39 @@ export default function BoardPanel({
       ...(isDone ? topMovesForArrows.slice(0, 3).map((m, i): [Square, Square, string] => [from(m), to(m), TOP_MOVE_COLORS[i]]) : []),
     ];
   }, [showArrows, isPreviewing, candidates, isDone, topMovesForArrows]);
+
+  function handleSquareClick(square: Square) {
+    if (!isIdle && !isActive) return;
+    const chess = new Chess(board.fen);
+    const piece = chess.get(square);
+    const turn = chess.turn();
+
+    if (selectedSquare) {
+      if (selectedSquare === square) {
+        setSelectedSquare(null);
+        return;
+      }
+      // Re-select if clicking another movable piece
+      const isFriendly = piece && (isIdle || piece.color === turn);
+      if (isFriendly) {
+        setSelectedSquare(square);
+        return;
+      }
+      handlePieceDrop(selectedSquare, square);
+      setSelectedSquare(null);
+    } else {
+      if (piece && (isIdle || piece.color === turn)) {
+        setSelectedSquare(square);
+      }
+    }
+  }
+
+  const customSquareStyles = useMemo<Record<string, Record<string, string | number>>>(() => {
+    if (!selectedSquare) return {};
+    return {
+      [selectedSquare]: { backgroundColor: "rgba(59, 130, 246, 0.45)" },
+    };
+  }, [selectedSquare]);
 
   function handlePieceDrop(
     sourceSquare: string,
@@ -126,13 +169,17 @@ export default function BoardPanel({
             Flip
           </button>
         </div>
-        <Chessboard
-          position={board.fen}
-          onPieceDrop={handlePieceDrop}
-          boardOrientation={boardOrientation}
-          arePiecesDraggable={isIdle || isActive}
-          customArrows={candidateArrows}
-        />
+        <div ref={boardContainerRef}>
+          <Chessboard
+            position={board.fen}
+            onPieceDrop={handlePieceDrop}
+            onSquareClick={handleSquareClick}
+            boardOrientation={boardOrientation}
+            arePiecesDraggable={isIdle || isActive}
+            customArrows={candidateArrows}
+            customSquareStyles={customSquareStyles}
+          />
+        </div>
         {onStudyFromPosition && (
           <StudyFromPositionButton
             onStudy={onStudyFromPosition}
