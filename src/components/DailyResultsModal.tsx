@@ -4,6 +4,7 @@ import type { GameSnapshot } from "../types";
 import { getRank } from "../types";
 import type { DailyRecord } from "../services/dailyStatsService";
 import StreakDisplay from "./StreakDisplay";
+import { RANK_EMOJI } from "../constants/daily";
 
 interface DailyResultsModalProps {
   activeDate: string;
@@ -97,8 +98,6 @@ export default function DailyResultsModal({
 }: DailyResultsModalProps) {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-
-  const RANK_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
 
   // Derive display data from whichever source is available
   const hits =

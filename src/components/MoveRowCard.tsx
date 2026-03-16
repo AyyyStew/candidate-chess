@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type { ReactNode } from "react";
 import { formatEval } from "../utils/chess";
 import type { Category, PVLine } from "../types";
 import PvLine from "./PvLine";
@@ -20,71 +21,72 @@ export interface MoveRowCardProps {
   showLine?: boolean;
 }
 
-export default function MoveRowCard({
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+interface MissRowProps {
+  san: string;
+  pvLineSlot: ReactNode;
+  category: Category | null;
+  evalScore: number | null;
+}
+
+function MissRow({ san, pvLineSlot, category, evalScore }: MissRowProps) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 bg-red-950/40 border border-red-900/50">
+      <span className="text-red-400 font-bold text-sm w-5 shrink-0">✕</span>
+      {pvLineSlot ?? <span className="font-semibold text-label flex-1">{san}</span>}
+      {category && (
+        <span className="text-xs font-medium shrink-0" style={{ color: category.color }}>
+          {category.icon} {category.label}
+        </span>
+      )}
+      {evalScore != null && (
+        <span className="text-xs text-faint tabular-nums shrink-0">{formatEval(evalScore)}</span>
+      )}
+    </div>
+  );
+}
+
+interface HiddenRowProps {
+  rank: number;
+}
+
+function HiddenRow({ rank }: HiddenRowProps) {
+  return (
+    <div
+      className="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4"
+      style={{ borderLeftColor: "var(--color-edge)", background: "var(--color-surface)" }}
+    >
+      <span className="text-yellow-400/50 font-bold text-sm w-5 shrink-0">{rank}</span>
+      <span className="font-black text-xl text-muted/30 tracking-widest flex-1">· · ·</span>
+    </div>
+  );
+}
+
+interface RevealedRowProps {
+  rank: number;
+  san: string;
+  pvLineSlot: ReactNode;
+  category: Category | null;
+  evalScore: number | null;
+  isHit?: boolean;
+  animate: boolean;
+  flipped: boolean;
+  isRevealed: boolean;
+}
+
+function RevealedRow({
   rank,
   san,
+  pvLineSlot,
   category,
-  eval: evalScore,
+  evalScore,
   isHit,
-  hidden = false,
-  animate = false,
-  pvLine,
-  startFen,
-  showLine = false,
-}: MoveRowCardProps) {
-  const [flipped, setFlipped] = useState(false);
-
-  useEffect(() => {
-    if (hidden) return;
-    if (animate) {
-      const t = setTimeout(() => setFlipped(true), 60);
-      return () => clearTimeout(t);
-    } else {
-      setFlipped(true);
-    }
-  }, [animate, hidden]);
-
-  const isMiss = rank === "miss";
-  const isRevealed = !hidden && flipped;
+  animate,
+  flipped,
+  isRevealed,
+}: RevealedRowProps) {
   const color = category?.color;
-
-  // Inline helper (not a component — avoids remounting PvLine on every render)
-  const pvLineSlot = pvLine && pvLine.sans.length > 0 && startFen
-    ? <PvLine startFen={startFen} sans={pvLine.sans} inline locked={!showLine} />
-    : null;
-
-  // ── Miss row ──────────────────────────────────────────────────────────────
-  if (isMiss) {
-    return (
-      <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 bg-red-950/40 border border-red-900/50">
-        <span className="text-red-400 font-bold text-sm w-5 shrink-0">✕</span>
-        {pvLineSlot ?? <span className="font-semibold text-label flex-1">{san}</span>}
-        {category && (
-          <span className="text-xs font-medium shrink-0" style={{ color: category.color }}>
-            {category.icon} {category.label}
-          </span>
-        )}
-        {evalScore != null && (
-          <span className="text-xs text-faint tabular-nums shrink-0">{formatEval(evalScore)}</span>
-        )}
-      </div>
-    );
-  }
-
-  // ── Hidden slot ───────────────────────────────────────────────────────────
-  if (hidden) {
-    return (
-      <div
-        className="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4"
-        style={{ borderLeftColor: "var(--color-edge)", background: "var(--color-surface)" }}
-      >
-        <span className="text-yellow-400/50 font-bold text-sm w-5 shrink-0">{rank}</span>
-        <span className="font-black text-xl text-muted/30 tracking-widest flex-1">· · ·</span>
-      </div>
-    );
-  }
-
-  // ── Revealed hit row ──────────────────────────────────────────────────────
   const cardStyle =
     isHit && flipped && color
       ? {
@@ -153,5 +155,56 @@ export default function MoveRowCard({
           : <span className="text-xs text-faint shrink-0">—</span>
       )}
     </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+export default function MoveRowCard({
+  rank,
+  san,
+  category,
+  eval: evalScore,
+  isHit,
+  hidden = false,
+  animate = false,
+  pvLine,
+  startFen,
+  showLine = false,
+}: MoveRowCardProps) {
+  const [flipped, setFlipped] = useState(false);
+
+  useEffect(() => {
+    if (hidden) return;
+    if (animate) {
+      const t = setTimeout(() => setFlipped(true), 60);
+      return () => clearTimeout(t);
+    } else {
+      setFlipped(true);
+    }
+  }, [animate, hidden]);
+
+  const isMiss = rank === "miss";
+  const isRevealed = !hidden && flipped;
+
+  // Inline helper (not a component — avoids remounting PvLine on every render)
+  const pvLineSlot = pvLine && pvLine.sans.length > 0 && startFen
+    ? <PvLine startFen={startFen} sans={pvLine.sans} inline locked={!showLine} />
+    : null;
+
+  if (isMiss) return <MissRow san={san} pvLineSlot={pvLineSlot} category={category} evalScore={evalScore} />;
+  if (hidden) return <HiddenRow rank={rank as number} />;
+  return (
+    <RevealedRow
+      rank={rank as number}
+      san={san}
+      pvLineSlot={pvLineSlot}
+      category={category}
+      evalScore={evalScore}
+      isHit={isHit}
+      animate={animate}
+      flipped={flipped}
+      isRevealed={isRevealed}
+    />
   );
 }

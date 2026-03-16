@@ -1,14 +1,15 @@
-import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
+import { useNavigate, useLocation } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
-import { createGameSession } from "../sessions/GameSession";
+import { createGameSession, type GameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
+import GameLayout from "../components/GameLayout";
 import FenInput from "../components/FenInput";
 import { makePosition } from "../types";
-import type { GameSnapshot } from "../types";
 import { isBlackToMove } from "../utils/chess";
 
 function extractPgnMeta(pgn: string): { label: string; event: string } {
@@ -24,8 +25,8 @@ function PracticePageContent() {
   const navigate = useNavigate();
   const board = useBoard();
   const engine = useEnginePool();
-  const sessionRef = useRef<ReturnType<typeof createGameSession> | null>(null);
-  const [snap, setSnap] = useState<GameSnapshot | null>(null);
+  const [session, setSession] = useState<GameSession | null>(null);
+  const snap = useSessionSnapshot(session);
   const [lastPgn, setLastPgn] = useState<string>("");
 
   const isIdle = !snap;
@@ -61,21 +62,17 @@ function PracticePageContent() {
     });
     analysis.startAnalysis(fen);
 
-    const session = createGameSession({ analysis, position });
-    session.onChange = setSnap;
-    sessionRef.current = session;
-    setSnap(session.getSnapshot());
+    setSession(createGameSession({ analysis, position }));
   }
 
   function handleReset() {
-    sessionRef.current = null;
+    setSession(null);
     board.resetToCheckpoint();
-    setSnap(null);
   }
 
   if (isIdle) {
     return (
-      <main className="flex gap-8 p-8 max-w-6xl mx-auto">
+      <main className="flex flex-col lg:flex-row gap-8 p-8 max-w-6xl mx-auto">
         <BoardPanel snap={null} locked={false} onReset={board.reset} />
         <div className="flex-1 flex flex-col gap-5">
           <FenInput
@@ -101,28 +98,33 @@ function PracticePageContent() {
 
   return (
     <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
-      <div className="flex gap-8">
-        <BoardPanel
-          snap={snap}
-          onDrop={(from, to) => sessionRef.current!.submitMove(from, to)}
-          locked={true}
-          onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
-        />
-        <div className="flex-1 flex flex-col gap-5">
-          <GamePanel
-            snap={snap!}
-            onNext={handleReset}
-            resetMessage="Play Again"
+      <GameLayout
+        snap={snap}
+        activeGame
+        onReset={handleReset}
+        resetMessage="Play Again"
+        board={
+          <BoardPanel
+            snap={snap}
+            onDrop={(from, to) => session?.submitMove(from, to)}
+            locked={true}
+            onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
+            onPlayFromPosition={() => navigate("/practice", { state: { fen: board.fen } })}
           />
-        </div>
-      </div>
+        }
+        panel={
+          <GamePanel snap={snap!} onNext={handleReset} resetMessage="Play Again" />
+        }
+      />
     </main>
   );
 }
 
 export default function PracticePage() {
+  const location = useLocation();
+  const initialFen = (location.state as { fen?: string } | null)?.fen;
   return (
-    <BoardProvider>
+    <BoardProvider initialFen={initialFen}>
       <PracticePageContent />
     </BoardProvider>
   );

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DailyResultsModal from "../components/DailyResultsModal";
 import StreakDisplay from "../components/StreakDisplay";
@@ -6,9 +7,10 @@ import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
 import { buildFromPvs } from "../engine/engineCoordinator";
-import { createGameSession } from "../sessions/GameSession";
+import { createGameSession, type GameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
+import GameLayout from "../components/GameLayout";
 import PositionBanner from "../components/PositionBanner";
 import { getDailyPosition } from "../services/positionService";
 import {
@@ -21,8 +23,7 @@ import {
 import type { Position, Candidate } from "../types";
 import { getRank } from "../types";
 import DailyResultsPanel from "../components/DailyResultsPanel";
-
-const RANK_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+import { RANK_EMOJI } from "../constants/daily";
 
 function formatDateString(isoDate: string): string {
   return new Date(isoDate + "T00:00:00").toLocaleDateString("en-US", {
@@ -46,8 +47,8 @@ function DailyPageContent({
   const navigate = useNavigate();
   const board = useBoard();
   const engine = useEnginePool();
-  const sessionRef = useRef(null);
-  const [snap, setSnap] = useState(null);
+  const [session, setSession] = useState<GameSession | null>(null);
+  const snap = useSessionSnapshot(session);
   const [showModal, setShowModal] = useState(false);
   const [record, setRecord] = useState<DailyRecord | null>(existingRecord);
   const hasStartedRef = useRef(false);
@@ -71,10 +72,8 @@ function DailyPageContent({
       analysis.startAnalysis(daily.fen);
     }
 
-    const session = createGameSession({ analysis, position: daily });
-    session.onChange = setSnap;
-    sessionRef.current = session;
-    setSnap(session.getSnapshot());
+    const newSession = createGameSession({ analysis, position: daily });
+    setSession(newSession);
 
     // Results shown inline for already-played dates — no auto-modal
   }, [engine.ready]);
@@ -110,6 +109,13 @@ function DailyPageContent({
     return () => clearTimeout(t);
   }, [snap?.phase]);
 
+  const boardSnap = useMemo(
+    () => record && snap
+      ? { ...snap, phase: "done", liveTopMoves: record.answers, candidates: record.candidates }
+      : snap,
+    [record, snap],
+  );
+
   return (
     <>
       {showModal && (
@@ -124,7 +130,7 @@ function DailyPageContent({
       )}
       <main className="max-w-6xl mx-auto px-8 py-8 flex flex-col gap-6">
         {/* Page title */}
-        <div className="flex items-baseline justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-0">
           <div className="flex items-baseline gap-4">
             <h1 className="font-black text-3xl tracking-tight">
               Daily Challenge
@@ -158,32 +164,42 @@ function DailyPageContent({
           pgn={daily.pgn}
         />
 
-        {/* Two-column content */}
+        {/* Two-column on desktop, mobile-stacked on small screens */}
         {!snap ? (
           <div className="flex items-center justify-center h-64">
             <p className="text-muted animate-pulse">Engine loading...</p>
           </div>
         ) : (
-          <div className="flex gap-8">
-            <BoardPanel
-              snap={snap}
-              onDrop={
-                existingRecord
-                  ? undefined
-                  : (from, to) => sessionRef.current.submitMove(from, to)
-              }
-              locked={true}
-              onStudyFromPosition={() =>
-                navigate("/study", { state: { fen: board.fen } })
-              }
-            />
-            <div className="flex-1 flex flex-col gap-5">
-              {record ? (
+          <GameLayout
+            snap={snap}
+            activeGame={!record}
+            onReset={() => navigate("/random")}
+            resetMessage="Play a Random Position"
+            board={
+              <BoardPanel
+                snap={boardSnap}
+                onDrop={
+                  existingRecord
+                    ? undefined
+                    : (from, to) => session?.submitMove(from, to)
+                }
+                locked={true}
+                onStudyFromPosition={() =>
+                  navigate("/study", { state: { fen: board.fen } })
+                }
+                onPlayFromPosition={() =>
+                  navigate("/practice", { state: { fen: board.fen } })
+                }
+              />
+            }
+            panel={
+              record ? (
                 <DailyResultsPanel
                   record={record}
                   participationStreak={participationStreak}
                   winStreak={winStreak}
                   onShare={() => setShowModal(true)}
+                  onPlayRandom={() => navigate("/random")}
                 />
               ) : (
                 <GamePanel
@@ -192,9 +208,9 @@ function DailyPageContent({
                   resetMessage="Play a Random Position"
                   showHeader={false}
                 />
-              )}
-            </div>
-          </div>
+              )
+            }
+          />
         )}
       </main>
     </>
