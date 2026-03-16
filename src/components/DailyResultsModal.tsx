@@ -25,13 +25,22 @@ function formatDate(isoDate: string): string {
 function getHeadline(hits: number, target: number, won: boolean): string {
   if (won) return "Perfect game!";
   if (hits >= target * 0.8) return "So close!";
-  if (hits >= target * 0.5) return "Solid effort.";
+  if (hits >= target * 0.5) return "Good Try!";
   return "Better luck tomorrow.";
 }
 
 function IconClipboard() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="9" y="2" width="6" height="4" rx="1" />
       <path d="M9 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-3" />
     </svg>
@@ -40,7 +49,16 @@ function IconClipboard() {
 
 function IconCheck() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <polyline points="20 6 9 17 4 12" />
     </svg>
   );
@@ -48,7 +66,16 @@ function IconCheck() {
 
 function IconDice() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="2" y="2" width="20" height="20" rx="3" />
       <circle cx="8" cy="8" r="1.5" fill="currentColor" />
       <circle cx="16" cy="8" r="1.5" fill="currentColor" />
@@ -73,19 +100,31 @@ export default function DailyResultsModal({
   const RANK_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
 
   // Derive display data from whichever source is available
-  const hits = record?.hits ?? snap?.candidates.filter((c) => !c.pending && c.isHit).length ?? 0;
+  const hits =
+    record?.hits ??
+    snap?.candidates.filter((c) => !c.pending && c.isHit).length ??
+    0;
   const target = record?.target ?? snap?.targetMoves ?? 5;
   const won = record?.won ?? hits === target;
-  const squares: string[] = record?.squares ?? (snap
-    ? snap.candidates.filter((c) => !c.pending).map((c) => {
-        if (!c.isHit) return "🟥";
-        return (c.rank != null && c.rank >= 1 && c.rank <= 5) ? RANK_EMOJI[c.rank - 1] : "🟩";
-      })
-    : []);
+  const squares: string[] =
+    record?.squares ??
+    (snap
+      ? snap.candidates
+          .filter((c) => !c.pending)
+          .map((c) => {
+            if (!c.isHit) return "❌";
+            return c.rank != null && c.rank >= 1 && c.rank <= 5
+              ? RANK_EMOJI[c.rank - 1]
+              : "🟩";
+          })
+      : []);
 
   const emptySlots = Math.max(0, target - squares.length);
   const shareUrl = window.location.href;
-  const shareDate = new Date(activeDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const shareDate = new Date(activeDate + "T00:00:00").toLocaleDateString(
+    "en-US",
+    { month: "short", day: "numeric" },
+  );
   const shareText = `CandidateChess Daily – ${shareDate}\n${hits}/${target} candidate moves ${squares.join("")}\n${shareUrl}`;
 
   function handleShare() {
@@ -96,7 +135,10 @@ export default function DailyResultsModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={onClose}
+    >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
       <div
@@ -109,7 +151,15 @@ export default function DailyResultsModal({
           className="absolute top-4 right-4 text-faint hover:text-text transition-colors"
           aria-label="Close"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
@@ -117,15 +167,21 @@ export default function DailyResultsModal({
 
         {/* Header */}
         <div className="flex flex-col gap-1">
-          <p className="text-xs text-faint uppercase tracking-widest">Daily Challenge · {formatDate(activeDate)}</p>
-          <h2 className="font-black text-2xl text-text">{getHeadline(hits, target, won)}</h2>
+          <p className="text-xs text-faint uppercase tracking-widest">
+            Daily Challenge · {formatDate(activeDate)}
+          </p>
+          <h2 className="font-black text-2xl text-text">
+            {getHeadline(hits, target, won)}
+          </h2>
         </div>
 
         {/* Score + squares */}
         <div className="bg-bg rounded-xl p-4 flex flex-col gap-3">
           <div className="flex items-baseline gap-1.5">
             <span className="text-4xl font-black text-text">{hits}</span>
-            <span className="text-lg text-muted font-medium">/ {target} moves found</span>
+            <span className="text-lg text-muted font-medium">
+              / {target} moves found
+            </span>
           </div>
           <div className="flex gap-2 text-2xl">
             {squares.map((s, i) => (
@@ -140,8 +196,13 @@ export default function DailyResultsModal({
         {/* Streaks */}
         {(participationStreak > 0 || winStreak > 0) && (
           <div className="flex flex-col gap-1.5">
-            <p className="text-xs text-faint uppercase tracking-widest">Your streaks</p>
-            <StreakDisplay participationStreak={participationStreak} winStreak={winStreak} />
+            <p className="text-xs text-faint uppercase tracking-widest">
+              Your streaks
+            </p>
+            <StreakDisplay
+              participationStreak={participationStreak}
+              winStreak={winStreak}
+            />
           </div>
         )}
 

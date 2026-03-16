@@ -10,13 +10,13 @@ export interface StoredCandidate {
 }
 
 export interface DailyRecord {
-  date: string;           // YYYY-MM-DD
+  date: string; // YYYY-MM-DD
   hits: number;
   target: number;
   won: boolean;
-  squares: string[];      // ordered emoji per guess e.g. ["4️⃣", "🟥", "🟥", "1️⃣", "🟥"]
-  candidates: StoredCandidate[];  // user's guesses in submission order
-  answers: StoredCandidate[];     // top N moves in rank order (the correct answers)
+  squares: string[]; // ordered emoji per guess e.g. ["4️⃣", "❌", "❌", "1️⃣", "❌"]
+  candidates: StoredCandidate[]; // user's guesses in submission order
+  answers: StoredCandidate[]; // top N moves in rank order (the correct answers)
 }
 
 interface DailyStorage {
