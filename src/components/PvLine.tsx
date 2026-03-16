@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Chess } from "chess.js";
 import { useBoard } from "../contexts/BoardContext";
+import { playMoveSound } from "../utils/sounds";
 
 interface PvLineProps {
   startFen: string;
@@ -54,9 +55,9 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
         clearPreview();
       } else {
         setStep(newStep);
-        // Reveal up to this move (never go backwards in reveal count)
         setRevealed(prev => Math.max(prev, newStep + 1));
         showPreviewFen(fens[newStep + 1]);
+        playMoveSound();
       }
     }
 
@@ -163,23 +164,23 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
   function handleNext(e: React.MouseEvent) {
     e.stopPropagation();
     if (step === null) {
-      setStep(0); showPreviewFen(fens[1]);
+      setStep(0); showPreviewFen(fens[1]); playMoveSound();
     } else if (step < revealed - 1) {
-      const next = step + 1; setStep(next); showPreviewFen(fens[next + 1]);
+      const next = step + 1; setStep(next); showPreviewFen(fens[next + 1]); playMoveSound();
     } else if (revealed < moves.length) {
-      const next = step + 1; setRevealed(next + 1); setStep(next); showPreviewFen(fens[next + 1]);
+      const next = step + 1; setRevealed(next + 1); setStep(next); showPreviewFen(fens[next + 1]); playMoveSound();
     }
   }
 
   function handlePrev(e: React.MouseEvent) {
     e.stopPropagation();
     if (step === null || step === 0) { setStep(null); clearPreview(); }
-    else { const next = step - 1; setStep(next); showPreviewFen(fens[next + 1]); }
+    else { const next = step - 1; setStep(next); showPreviewFen(fens[next + 1]); playMoveSound(); }
   }
 
   function handleGoTo(i: number, e: React.MouseEvent) {
     e.stopPropagation();
-    setStep(i); showPreviewFen(fens[i + 1]);
+    setStep(i); showPreviewFen(fens[i + 1]); playMoveSound();
   }
 
   const btnBase = "text-xs px-1.5 py-0.5 rounded transition-colors leading-none";

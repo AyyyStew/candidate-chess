@@ -1,30 +1,12 @@
 import React, { useState } from "react";
-import pieceBounce from "../assets/sounds/edited/piece_bounce.ogg";
 import { Chessboard } from "react-chessboard";
 import MoveHistory from "./MoveHistory";
 import { useBoard } from "../contexts/BoardContext";
 import StudyFromPositionButton from "./StudyFromPositionButton";
 import type { GameSnapshot } from "../types";
+import { Chess } from "chess.js";
 import type { Square } from "chess.js";
-
-const PIECE_SOUNDS = Object.values(
-  import.meta.glob("../assets/sounds/edited/pieces/*", {
-    eager: true,
-    as: "url",
-  }),
-).map((src) => new Audio(src as string));
-const BOUNCE_SOUND = new Audio(pieceBounce);
-
-function playMoveSound() {
-  const sound = PIECE_SOUNDS[Math.floor(Math.random() * PIECE_SOUNDS.length)];
-  sound.currentTime = 0;
-  sound.play().catch(() => {});
-}
-
-function playBounceSound() {
-  BOUNCE_SOUND.currentTime = 0;
-  BOUNCE_SOUND.play().catch(() => {});
-}
+import { playMoveSound, playBounceSound } from "../utils/sounds";
 interface BoardSnap {
   phase: string;
   candidates: { move: string }[];
@@ -116,8 +98,18 @@ export default function BoardPanel({
       return success;
     }
     if (isActive) {
+      try {
+        const valid = !!new Chess(board.fen).move({
+          from: sourceSquare,
+          to: targetSquare,
+          promotion: "q",
+        });
+        if (valid) playMoveSound();
+        else playBounceSound();
+      } catch {
+        playBounceSound();
+      }
       onDrop?.(sourceSquare, targetSquare);
-      playMoveSound();
       return false;
     }
     return false;
