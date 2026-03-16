@@ -12,17 +12,36 @@ interface PvLineProps {
   locked?: boolean;
 }
 
-export default function PvLine({ startFen, sans, inline = false, locked = false }: PvLineProps) {
+export default function PvLine({
+  startFen,
+  sans,
+  inline = false,
+  locked = false,
+}: PvLineProps) {
   const { showPreviewFen, clearPreview } = useBoard();
   const [step, setStep] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(1);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.innerWidth < 640,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const fens = useMemo(() => {
     const result: string[] = [startFen];
     const game = new Chess(startFen);
     for (const s of sans) {
-      try { game.move(s); result.push(game.fen()); }
-      catch { break; }
+      try {
+        game.move(s);
+        result.push(game.fen());
+      } catch {
+        break;
+      }
     }
     return result;
   }, [startFen, sans]);
@@ -38,12 +57,14 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
     if (!inline) return;
     const el = contRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => setContWidth(entry.contentRect.width));
+    const ro = new ResizeObserver(([entry]) =>
+      setContWidth(entry.contentRect.width),
+    );
     ro.observe(el);
     return () => ro.disconnect();
   }, [inline]);
 
-  if (inline) {
+  if (inline && !isMobile) {
     const atStart = step === null;
     // atEnd only true when we've actually reached the last move (not when step is null)
     const atEnd = step !== null && step >= moves.length - 1;
@@ -55,7 +76,7 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
         clearPreview();
       } else {
         setStep(newStep);
-        setRevealed(prev => Math.max(prev, newStep + 1));
+        setRevealed((prev) => Math.max(prev, newStep + 1));
         showPreviewFen(fens[newStep + 1]);
         playMoveSound();
       }
@@ -72,14 +93,17 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
       <div className="flex items-center gap-1 flex-1 min-w-0">
         {/* First move — always visible, prominent */}
         <button
-          onClick={(e) => { e.stopPropagation(); if (!locked) goTo(0); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!locked) goTo(0);
+          }}
           disabled={locked}
           className={`font-semibold text-sm shrink-0 px-1.5 py-0.5 rounded transition-colors ${
             locked
               ? "text-text cursor-default"
               : step === 0
-              ? "bg-blue-500 text-white"
-              : "text-text hover:bg-interactive-hi"
+                ? "bg-blue-500 text-white"
+                : "text-text hover:bg-interactive-hi"
           }`}
         >
           {moves[0]}
@@ -89,15 +113,25 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
         {!locked && (
           <>
             <button
-              onClick={(e) => { e.stopPropagation(); goTo(null); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                goTo(null);
+              }}
               disabled={atStart}
               className={navBtn(atStart)}
-            >|‹</button>
+            >
+              |‹
+            </button>
             <button
-              onClick={(e) => { e.stopPropagation(); goTo(step === null || step === 0 ? null : step - 1); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                goTo(step === null || step === 0 ? null : step - 1);
+              }}
               disabled={atStart}
               className={navBtn(atStart)}
-            >‹</button>
+            >
+              ‹
+            </button>
 
             {/* Windowed continuation moves with ellipsis */}
             {(() => {
@@ -110,7 +144,8 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
               if (step !== null && step > 0) {
                 const activeContIdx = step - 1;
                 if (activeContIdx < winStart) winStart = activeContIdx;
-                if (activeContIdx >= winStart + WINDOW) winStart = activeContIdx - WINDOW + 1;
+                if (activeContIdx >= winStart + WINDOW)
+                  winStart = activeContIdx - WINDOW + 1;
               }
 
               const visible = contMoves.slice(winStart, winStart + WINDOW);
@@ -119,14 +154,19 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
               return (
                 <div ref={contRef} className="flex gap-0.5 items-center flex-1">
                   {showEllipsis && (
-                    <span className="text-xs font-mono text-muted/40 shrink-0 px-0.5">…</span>
+                    <span className="text-xs font-mono text-muted/40 shrink-0 px-0.5">
+                      …
+                    </span>
                   )}
                   {visible.map((s, i) => {
                     const idx = winStart + i + 1;
                     return (
                       <button
                         key={idx}
-                        onClick={(e) => { e.stopPropagation(); goTo(idx); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goTo(idx);
+                        }}
                         className={`px-1.5 py-0.5 rounded text-xs font-mono leading-none shrink-0 transition-colors ${
                           step === idx
                             ? "bg-blue-500 text-white"
@@ -142,15 +182,25 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
             })()}
 
             <button
-              onClick={(e) => { e.stopPropagation(); if (!atEnd) goTo(step === null ? 0 : step + 1); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!atEnd) goTo(step === null ? 0 : step + 1);
+              }}
               disabled={atEnd}
               className={navBtn(atEnd)}
-            >›</button>
+            >
+              ›
+            </button>
             <button
-              onClick={(e) => { e.stopPropagation(); goTo(moves.length - 1); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                goTo(moves.length - 1);
+              }}
               disabled={atEnd}
               className={navBtn(atEnd)}
-            >›|</button>
+            >
+              ›|
+            </button>
           </>
         )}
       </div>
@@ -164,26 +214,45 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
   function handleNext(e: React.MouseEvent) {
     e.stopPropagation();
     if (step === null) {
-      setStep(0); showPreviewFen(fens[1]); playMoveSound();
+      setStep(0);
+      showPreviewFen(fens[1]);
+      playMoveSound();
     } else if (step < revealed - 1) {
-      const next = step + 1; setStep(next); showPreviewFen(fens[next + 1]); playMoveSound();
+      const next = step + 1;
+      setStep(next);
+      showPreviewFen(fens[next + 1]);
+      playMoveSound();
     } else if (revealed < moves.length) {
-      const next = step + 1; setRevealed(next + 1); setStep(next); showPreviewFen(fens[next + 1]); playMoveSound();
+      const next = step + 1;
+      setRevealed(next + 1);
+      setStep(next);
+      showPreviewFen(fens[next + 1]);
+      playMoveSound();
     }
   }
 
   function handlePrev(e: React.MouseEvent) {
     e.stopPropagation();
-    if (step === null || step === 0) { setStep(null); clearPreview(); }
-    else { const next = step - 1; setStep(next); showPreviewFen(fens[next + 1]); playMoveSound(); }
+    if (step === null || step === 0) {
+      setStep(null);
+      clearPreview();
+    } else {
+      const next = step - 1;
+      setStep(next);
+      showPreviewFen(fens[next + 1]);
+      playMoveSound();
+    }
   }
 
   function handleGoTo(i: number, e: React.MouseEvent) {
     e.stopPropagation();
-    setStep(i); showPreviewFen(fens[i + 1]); playMoveSound();
+    setStep(i);
+    showPreviewFen(fens[i + 1]);
+    playMoveSound();
   }
 
-  const btnBase = "text-xs px-1.5 py-0.5 rounded transition-colors leading-none";
+  const btnBase =
+    "text-xs px-1.5 py-0.5 rounded transition-colors leading-none";
   const btnEnabled = "bg-surface-hi text-label hover:bg-interactive-hi";
   const btnDisabled = "text-muted cursor-not-allowed opacity-40";
 
@@ -195,7 +264,9 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
             key={i}
             onClick={(e) => handleGoTo(i, e)}
             className={`px-1 py-0.5 rounded transition-colors leading-none ${
-              step === i ? "bg-blue-500 text-white" : "hover:bg-interactive-hi text-label"
+              step === i
+                ? "bg-blue-500 text-white"
+                : "hover:bg-interactive-hi text-label"
             }`}
           >
             {san}
@@ -203,10 +274,18 @@ export default function PvLine({ startFen, sans, inline = false, locked = false 
         ))}
       </span>
       <div className="flex gap-2 mt-1">
-        <button onClick={handlePrev} disabled={!isActive} className={`${btnBase} ${!isActive ? btnDisabled : btnEnabled} px-2 py-1`}>
+        <button
+          onClick={handlePrev}
+          disabled={!isActive}
+          className={`${btnBase} ${!isActive ? btnDisabled : btnEnabled} px-2 py-1`}
+        >
           &lt; prev
         </button>
-        <button onClick={handleNext} disabled={atEnd} className={`${btnBase} ${atEnd ? btnDisabled : btnEnabled} px-2 py-1`}>
+        <button
+          onClick={handleNext}
+          disabled={atEnd}
+          className={`${btnBase} ${atEnd ? btnDisabled : btnEnabled} px-2 py-1`}
+        >
           next &gt;
         </button>
       </div>
