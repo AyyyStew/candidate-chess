@@ -6,7 +6,7 @@ A chess training app built around one question:
 
 You're shown a position and asked to find the engine's top 5 moves, Family Feud style — no eval bar, no hints. Loosely inspired by the Kotov method. Built to develop middlegame intuition without leaning on the eval bar.
 
-→ **[Live app](candidatechess.com)**
+→ **[Live app](https://candidatechess.com)**
 
 ---
 
