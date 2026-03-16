@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createStudySession } from "./StudySession";
-import { makeCandidate, makeAnalysisResult, makeTopMove } from "../types";
+import { makeAnalysisResult, makeTopMove } from "../types";
+import type { EvaluatedMove } from "../types";
 import type { EngineAnalysis } from "../engine/engineAnalysis";
 
 const TEST_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -14,9 +15,13 @@ function makeMockAnalysis(
     startAnalysis: vi.fn(),
     reset: vi.fn(),
     loadPrecomputed: vi.fn(),
-    evaluateMove: vi.fn(async (uci: string, san: string) =>
-      makeCandidate({ move: uci, san, rank: 1, eval: 0.5, pending: false }),
-    ),
+    evaluateMove: vi.fn(async (uci: string, san: string): Promise<EvaluatedMove> => ({
+      move: uci, san, eval: 0.5, rank: 1, category: null,
+      diffBest: 0, diffPos: 0, line: { moves: [], sans: [] },
+    })),
+    getTopMoves: vi.fn(() => []),
+    getPositionEval: vi.fn(() => 0),
+    getFen: vi.fn(() => TEST_FEN),
     buildTopMovesResult: vi.fn((candidates = []) =>
       makeAnalysisResult({
         fen: TEST_FEN,

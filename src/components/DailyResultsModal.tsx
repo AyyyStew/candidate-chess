@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { GameSnapshot } from "../types";
+import { getRank } from "../types";
 import type { DailyRecord } from "../services/dailyStatsService";
 import StreakDisplay from "./StreakDisplay";
 
@@ -102,7 +103,7 @@ export default function DailyResultsModal({
   // Derive display data from whichever source is available
   const hits =
     record?.hits ??
-    snap?.candidates.filter((c) => !c.pending && c.isHit).length ??
+    snap?.candidates.filter((c) => c.status === "hit").length ??
     0;
   const target = record?.target ?? snap?.targetMoves ?? 5;
   const won = record?.won ?? hits === target;
@@ -110,11 +111,12 @@ export default function DailyResultsModal({
     record?.squares ??
     (snap
       ? snap.candidates
-          .filter((c) => !c.pending)
+          .filter((c) => c.status !== "pending")
           .map((c) => {
-            if (!c.isHit) return "❌";
-            return c.rank != null && c.rank >= 1 && c.rank <= 5
-              ? RANK_EMOJI[c.rank - 1]
+            if (c.status !== "hit") return "❌";
+            const rank = getRank(snap.liveTopMoves, c.move);
+            return rank != null && rank >= 1 && rank <= 5
+              ? RANK_EMOJI[rank - 1]
               : "🟩";
           })
       : []);

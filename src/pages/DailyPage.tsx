@@ -18,7 +18,8 @@ import {
   getWinStreak,
   type DailyRecord,
 } from "../services/dailyStatsService";
-import type { Position, Candidate, TopMove } from "../types";
+import type { Position, Candidate } from "../types";
+import { getRank } from "../types";
 import DailyResultsPanel from "../components/DailyResultsPanel";
 
 const RANK_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
@@ -82,40 +83,25 @@ function DailyPageContent({
     if (snap?.phase !== "done" || existingRecord || activeDate !== today)
       return;
 
-    const resolved = snap.candidates.filter((c: Candidate) => !c.pending);
-    const hits = resolved.filter((c: Candidate) => c.isHit).length;
+    const resolved = snap.candidates.filter((c: Candidate) => c.status !== "pending");
+    const hits = resolved.filter((c: Candidate) => c.status === "hit").length;
     const squares = resolved.map((c: Candidate) => {
-      if (!c.isHit) return "❌";
-      return c.rank != null && c.rank >= 1 && c.rank <= 5
-        ? RANK_EMOJI[c.rank - 1]
+      if (c.status !== "hit") return "❌";
+      const rank = getRank(snap.liveTopMoves, c.move);
+      return rank != null && rank >= 1 && rank <= 5
+        ? RANK_EMOJI[rank - 1]
         : "🟩";
     });
-    const storedCandidates = resolved.map((c: Candidate) => ({
-      san: c.san,
-      isHit: !!c.isHit,
-      rank: c.rank ?? null,
-      category: c.category ?? null,
-      eval: c.eval ?? null,
-    }));
-
-    const answers = snap.liveTopMoves
-      .slice(0, snap.targetMoves)
-      .map((m: TopMove, i: number) => ({
-        san: m.san,
-        isHit: true,
-        rank: i + 1,
-        category: m.category ?? null,
-        eval: m.eval ?? null,
-      }));
 
     const newRecord: DailyRecord = {
       date: activeDate,
+      fen: snap.fen,
       hits,
       target: snap.targetMoves,
       won: hits >= snap.targetMoves,
       squares,
-      candidates: storedCandidates,
-      answers,
+      candidates: resolved,
+      answers: snap.liveTopMoves.slice(0, snap.targetMoves),
     };
     saveDailyResult(newRecord);
     setRecord(newRecord);

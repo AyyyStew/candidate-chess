@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createGameSession } from "./GameSession";
-import { makeCandidate, makeAnalysisResult, makeTopMove } from "../types";
+import { makeAnalysisResult, makeTopMove } from "../types";
+import type { EvaluatedMove } from "../types";
 import type { EngineAnalysis } from "../engine/engineAnalysis";
 import type { Position } from "../types";
 
@@ -24,9 +25,13 @@ function makeMockAnalysis(
     startAnalysis: vi.fn(),
     reset: vi.fn(),
     loadPrecomputed: vi.fn(),
-    evaluateMove: vi.fn(async (uci: string, san: string) =>
-      makeCandidate({ move: uci, san, rank: 1, eval: 0.5, pending: false }),
-    ),
+    evaluateMove: vi.fn(async (uci: string, san: string): Promise<EvaluatedMove> => ({
+      move: uci, san, eval: 0.5, rank: 1, category: null,
+      diffBest: 0, diffPos: 0, line: { moves: [], sans: [] },
+    })),
+    getTopMoves: vi.fn(() => []),
+    getPositionEval: vi.fn(() => 0),
+    getFen: vi.fn(() => TEST_FEN),
     buildTopMovesResult: vi.fn(() =>
       makeAnalysisResult({
         fen: TEST_FEN,
@@ -79,14 +84,14 @@ describe("GameSession", () => {
 
   it("adds a pending candidate immediately on submit", async () => {
     const analysis = makeMockAnalysis({
-      evaluateMove: vi.fn(() => new Promise(() => {})), // never resolves
+      evaluateMove: vi.fn((): Promise<EvaluatedMove> => new Promise(() => {})), // never resolves
     });
     const session = createGameSession({ analysis, position: testPosition });
     session.onChange = vi.fn();
     session.submitMove("e2", "e4");
     // synchronously check — candidate should be pending
     expect(session.getSnapshot().candidates).toHaveLength(1);
-    expect(session.getSnapshot().candidates[0].pending).toBe(true);
+    expect(session.getSnapshot().candidates[0].status).toBe("pending");
   });
 
   it("does not allow duplicate moves", async () => {
@@ -102,9 +107,10 @@ describe("GameSession", () => {
 
   it("increments strikes on a miss", async () => {
     const analysis = makeMockAnalysis({
-      evaluateMove: vi.fn(async (uci: string, san: string) =>
-        makeCandidate({ move: uci, san, rank: 99, eval: -2, pending: false }),
-      ),
+      evaluateMove: vi.fn(async (uci: string, san: string): Promise<EvaluatedMove> => ({
+        move: uci, san, eval: -2, rank: 99, category: null,
+        diffBest: 0, diffPos: 0, line: { moves: [], sans: [] },
+      })),
     });
     const session = createGameSession({ analysis, position: testPosition });
     session.onChange = vi.fn();
@@ -114,9 +120,10 @@ describe("GameSession", () => {
 
   it("increments hits on a correct move", async () => {
     const analysis = makeMockAnalysis({
-      evaluateMove: vi.fn(async (uci: string, san: string) =>
-        makeCandidate({ move: uci, san, rank: 1, eval: 0.5, pending: false }),
-      ),
+      evaluateMove: vi.fn(async (uci: string, san: string): Promise<EvaluatedMove> => ({
+        move: uci, san, eval: 0.5, rank: 1, category: null,
+        diffBest: 0, diffPos: 0, line: { moves: [], sans: [] },
+      })),
     });
     const session = createGameSession({ analysis, position: testPosition });
     session.onChange = vi.fn();
@@ -126,9 +133,10 @@ describe("GameSession", () => {
 
   it("ends game after max strikes", async () => {
     const analysis = makeMockAnalysis({
-      evaluateMove: vi.fn(async (uci: string, san: string) =>
-        makeCandidate({ move: uci, san, rank: 99, pending: false }),
-      ),
+      evaluateMove: vi.fn(async (uci: string, san: string): Promise<EvaluatedMove> => ({
+        move: uci, san, eval: 0, rank: 99, category: null,
+        diffBest: 0, diffPos: 0, line: { moves: [], sans: [] },
+      })),
     });
     const session = createGameSession({
       analysis,
@@ -146,10 +154,10 @@ describe("GameSession", () => {
     let callCount = 0;
     const moves = ["e2e4", "d2d4", "g1f3", "c2c4", "e2e3"];
     const analysis = makeMockAnalysis({
-      evaluateMove: vi.fn(async (uci: string, san: string) => {
-        const rank = callCount++ + 1;
-        return makeCandidate({ move: uci, san, rank, pending: false });
-      }),
+      evaluateMove: vi.fn(async (uci: string, san: string): Promise<EvaluatedMove> => ({
+        move: uci, san, eval: 0.5, rank: callCount++ + 1, category: null,
+        diffBest: 0, diffPos: 0, line: { moves: [], sans: [] },
+      })),
     });
     const session = createGameSession({
       analysis,
