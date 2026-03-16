@@ -28,3 +28,10 @@ dist-ssr
 # data
 position_generation/LichessEliteDatabase
 
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
