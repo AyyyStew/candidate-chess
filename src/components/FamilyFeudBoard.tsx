@@ -1,6 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { TopMove, Candidate } from "../types";
 import MoveRowCard from "./MoveRowCard";
+import successSound from "../assets/sounds/edited/success.wav";
+import failureSound from "../assets/sounds/edited/failure.wav";
+
+const SUCCESS_SOUND = new Audio(successSound);
+const FAILURE_SOUND = new Audio(failureSound);
 
 interface StrikeIndicatorProps {
   strikes: number;
@@ -54,11 +59,19 @@ export default function FamilyFeudBoard({
   resetMessage,
 }: FamilyFeudBoardProps) {
   const [revealedMoves, setRevealedMoves] = useState<Set<string>>(new Set());
+  const seenMoves = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     candidates.forEach((c) => {
-      if (!c.pending && c.isHit && !revealedMoves.has(c.move)) {
+      if (c.pending || seenMoves.current.has(c.move)) return;
+      seenMoves.current.add(c.move);
+      if (c.isHit) {
         setRevealedMoves((prev) => new Set([...prev, c.move]));
+        SUCCESS_SOUND.currentTime = 0;
+        SUCCESS_SOUND.play().catch(() => {});
+      } else if (c.isMiss) {
+        FAILURE_SOUND.currentTime = 0;
+        FAILURE_SOUND.play().catch(() => {});
       }
     });
   }, [candidates]);
