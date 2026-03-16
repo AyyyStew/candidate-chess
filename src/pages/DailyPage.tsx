@@ -58,14 +58,19 @@ function DailyPageContent({
   const winStreak = getWinStreak(today);
 
   useEffect(() => {
-    if (!engine.ready || hasStartedRef.current) return;
+    if (hasStartedRef.current) return;
+
+    const hasPVs = daily.pvs && daily.pvs.length > 0;
+    // If no precomputed PVs, we need the engine to be ready before starting
+    if (!hasPVs && !engine.ready) return;
+
     hasStartedRef.current = true;
 
     const analysis = createEngineAnalysis({
       pool: engine,
       goCommand: "go depth 15",
     });
-    if (daily.pvs && daily.pvs.length > 0) {
+    if (hasPVs) {
       const { topMoves, positionEval } = buildFromPvs(daily.fen, daily.pvs);
       analysis.loadPrecomputed(daily.fen, topMoves, positionEval);
     } else {
@@ -82,7 +87,9 @@ function DailyPageContent({
     if (snap?.phase !== "done" || existingRecord || activeDate !== today)
       return;
 
-    const resolved = snap.candidates.filter((c: Candidate) => c.status !== "pending");
+    const resolved = snap.candidates.filter(
+      (c: Candidate) => c.status !== "pending",
+    );
     const hits = resolved.filter((c: Candidate) => c.status === "hit").length;
     const squares = resolved.map((c: Candidate) => {
       if (c.status !== "hit") return "❌";
@@ -110,9 +117,15 @@ function DailyPageContent({
   }, [snap?.phase]);
 
   const boardSnap = useMemo(
-    () => record && snap
-      ? { ...snap, phase: "done", liveTopMoves: record.answers, candidates: record.candidates }
-      : snap,
+    () =>
+      record && snap
+        ? {
+            ...snap,
+            phase: "done",
+            liveTopMoves: record.answers,
+            candidates: record.candidates,
+          }
+        : snap,
     [record, snap],
   );
 
@@ -130,9 +143,9 @@ function DailyPageContent({
       )}
       <main className="max-w-6xl mx-auto px-8 py-8 flex flex-col gap-6">
         {/* Page title */}
-        <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-0">
-          <div className="flex items-baseline gap-4">
-            <h1 className="font-black text-3xl tracking-tight">
+        <div className="flex flex-row items-baseline justify-between gap-2 sm:gap-0">
+          <div className="flex items-baseline gap-2 sm:gap-4">
+            <h1 className="font-black text-xl sm:text-3xl tracking-tight">
               Daily Challenge
             </h1>
             <StreakDisplay
@@ -140,7 +153,7 @@ function DailyPageContent({
               winStreak={winStreak}
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {existingRecord && (
               <button
                 onClick={() => setShowModal(true)}
@@ -149,7 +162,7 @@ function DailyPageContent({
                 View results
               </button>
             )}
-            <span className="text-sm text-muted">
+            <span className="text-xs sm:text-sm text-muted">
               {formatDateString(activeDate)}
             </span>
           </div>

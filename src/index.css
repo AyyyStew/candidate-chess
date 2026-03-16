@@ -1,3 +1,6 @@
+@import "@lichess-org/chessground/assets/chessground.base.css";
+@import "@lichess-org/chessground/assets/chessground.brown.css";
+@import "@lichess-org/chessground/assets/chessground.cburnett.css";
 @import "tailwindcss";
 
 @theme {
@@ -27,10 +30,30 @@
 
 @source inline("border-green-500 border-orange-400 border-red-500");
 
+/* ── Chessground board sizing ───────────────────────────────── */
+.cg-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: block;
+}
+
+/* ── Darker board (chess.com-style brown) ───────────────────── */
+cg-board {
+  background-color: #f0d9b5;
+  background-image: repeating-conic-gradient(#b58863 0% 25%, #f0d9b5 0% 50%);
+  background-size: 25% 25%;
+}
+
 /* ── Slide in (miss rows) ───────────────────────────────────── */
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(-16px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 .animate-slide-in {
   animation: slideIn 0.2s ease-out forwards;
@@ -38,8 +61,14 @@
 
 /* ── Reveal pop (category/eval after flip) ──────────────────── */
 @keyframes revealPop {
-  from { opacity: 0; transform: scale(0.8) translateY(4px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 .animate-reveal-pop {
   animation: revealPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;

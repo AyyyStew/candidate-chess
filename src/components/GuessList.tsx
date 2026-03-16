@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 import type { Candidate, TopMove } from "../types";
 import MoveRowCard from "./MoveRowCard";
-import { playSuccessJingle, playSuccessSound, playFailureSound } from "../utils/sounds";
+import {
+  playSuccessJingle,
+  playSuccessSound,
+  playFailureSound,
+} from "../utils/sounds";
 
 interface Props {
   candidates: Candidate[];
@@ -10,7 +14,12 @@ interface Props {
   isDone: boolean;
 }
 
-export default function GuessList({ candidates, topMoves, fen, isDone }: Props) {
+export default function GuessList({
+  candidates,
+  topMoves,
+  fen,
+  isDone,
+}: Props) {
   const seenMoves = useRef<Set<string>>(new Set());
 
   // Play hit/miss sounds as guesses resolve
@@ -37,23 +46,31 @@ export default function GuessList({ candidates, topMoves, fen, isDone }: Props) 
 
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="text-xs text-faint uppercase tracking-widest">Your Guesses</p>
+      <p className="text-xs text-faint uppercase tracking-widest">
+        Your Guesses
+      </p>
       <div className="flex flex-col gap-1.5">
-        {candidates.map((c) => {
+        {[...candidates].reverse().map((c) => {
           if (c.status === "pending") {
             return (
               <div
                 key={c.move}
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4 animate-pulse"
-                style={{ borderLeftColor: "var(--color-edge)", background: "var(--color-surface)" }}
+                style={{
+                  borderLeftColor: "var(--color-edge)",
+                  background: "var(--color-surface)",
+                }}
               >
                 <span className="font-semibold text-muted flex-1">{c.san}</span>
-                <span className="text-xs text-faint tracking-widest uppercase">evaluating</span>
+                <span className="text-xs text-faint tracking-widest uppercase">
+                  evaluating
+                </span>
               </div>
             );
           }
           const rankIndex = topMoves.findIndex((m) => m.move === c.move);
-          const rank = c.status === "hit" && rankIndex >= 0 ? rankIndex + 1 : "miss";
+          const rank =
+            c.status === "hit" && rankIndex >= 0 ? rankIndex + 1 : "miss";
           return (
             <MoveRowCard
               key={c.move}
