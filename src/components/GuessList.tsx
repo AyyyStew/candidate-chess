@@ -1,12 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Candidate, TopMove } from "../types";
 import MoveRowCard from "./MoveRowCard";
-import successSound from "../assets/sounds/edited/success.wav";
-import failureSound from "../assets/sounds/edited/failure.wav";
-import { playSuccessJingle } from "../utils/sounds";
-
-const SUCCESS_SOUND = new Audio(successSound);
-const FAILURE_SOUND = new Audio(failureSound);
+import { playSuccessJingle, playSuccessSound, playFailureSound } from "../utils/sounds";
 
 interface Props {
   candidates: Candidate[];
@@ -24,11 +19,9 @@ export default function GuessList({ candidates, topMoves, fen, isDone }: Props) 
       if (c.status === "pending" || seenMoves.current.has(c.move)) return;
       seenMoves.current.add(c.move);
       if (c.status === "hit") {
-        SUCCESS_SOUND.currentTime = 0;
-        SUCCESS_SOUND.play().catch(() => {});
+        playSuccessSound();
       } else if (c.status === "miss") {
-        FAILURE_SOUND.currentTime = 0;
-        FAILURE_SOUND.play().catch(() => {});
+        playFailureSound();
       }
     });
   }, [candidates]);

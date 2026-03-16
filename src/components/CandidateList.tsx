@@ -1,5 +1,6 @@
 import React from "react";
 import { Chess } from "chess.js";
+import { debug } from "../utils/debug";
 import { formatEval } from "../utils/chess";
 import type { Candidate, AnalysisResult, TopMove } from "../types";
 import PvLine from "./PvLine";
@@ -124,7 +125,7 @@ export default function CandidateList({
                 )}
               </div>
               {isDone && c.line && (() => {
-                console.log("[CandidateList] line for", c.san, "sans:", c.line.sans, "startFen:", results!.fen);
+                debug("CandidateList", "line for", c.san, "sans:", c.line.sans, "startFen:", results!.fen);
                 return c.line.sans.length > 0;
               })() && (
                 <div className="mt-1 pl-7">

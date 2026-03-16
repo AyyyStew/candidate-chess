@@ -1,40 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import type { TopMove, Candidate } from "../types";
 import MoveRowCard from "./MoveRowCard";
-import successSound from "../assets/sounds/edited/success.wav";
-import failureSound from "../assets/sounds/edited/failure.wav";
-import { playSuccessJingle } from "../utils/sounds";
+import { playSuccessJingle, playSuccessSound, playFailureSound } from "../utils/sounds";
+import { StrikeIndicator } from "./PipsAndStrikes";
 
-const SUCCESS_SOUND = new Audio(successSound);
-const FAILURE_SOUND = new Audio(failureSound);
-
-interface StrikeIndicatorProps {
-  strikes: number;
-  maxStrikes: number;
-}
-
-function StrikeIndicator({ strikes, maxStrikes }: StrikeIndicatorProps) {
-  return (
-    <div className="flex gap-2 items-center">
-      {Array.from({ length: maxStrikes }).map((_, i) => {
-        const lost = i < strikes;
-        return (
-          <span
-            key={i}
-            className="text-3xl transition-all duration-300"
-            style={{
-              opacity: lost ? 0.12 : 1,
-              transform: lost ? "scale(0.75)" : "scale(1)",
-              filter: lost ? "grayscale(1)" : "none",
-            }}
-          >
-            ❤️
-          </span>
-        );
-      })}
-    </div>
-  );
-}
 
 interface FamilyFeudBoardProps {
   fen: string;
@@ -78,11 +47,9 @@ export default function FamilyFeudBoard({
       seenMoves.current.add(c.move);
       if (c.status === "hit") {
         setRevealedMoves((prev) => new Set([...prev, c.move]));
-        SUCCESS_SOUND.currentTime = 0;
-        SUCCESS_SOUND.play().catch(() => {});
+        playSuccessSound();
       } else if (c.status === "miss") {
-        FAILURE_SOUND.currentTime = 0;
-        FAILURE_SOUND.play().catch(() => {});
+        playFailureSound();
       }
     });
   }, [candidates]);
