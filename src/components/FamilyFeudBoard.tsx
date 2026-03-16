@@ -206,7 +206,7 @@ export default function FamilyFeudBoard({
       {isDone && (
         <button
           onClick={onReset}
-          className="w-full py-3 rounded-xl font-bold text-base bg-interactive hover:bg-interactive-hi transition-colors"
+          className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
         >
           {resetMessage ?? "Start Over"}
         </button>

@@ -6,6 +6,7 @@ import DailyPage from "./pages/DailyPage";
 import GamePage from "./pages/RandomPage";
 import StudyPage from "./pages/StudyPage";
 import PracticePage from "./pages/PracticePage";
+import AboutPage from "./pages/AboutPage";
 import { preload } from "./services/positionService";
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/random" element={<GamePage />} />
           <Route path="/practice" element={<PracticePage />} />
           <Route path="/study" element={<StudyPage />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
       </EngineProvider>
     </div>
