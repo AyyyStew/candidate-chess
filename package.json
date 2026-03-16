@@ -12,9 +12,9 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@lichess-org/chessground": "^10.1.0",
     "chess.js": "^1.4.0",
     "react": "^19.2.0",
-    "react-chessboard": "^4.7.3",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.1",
     "stockfish": "^18.0.5"

@@ -38,7 +38,8 @@ function RandomPageContent() {
     setSession(null);
     try {
       const position = await getPositionByIndex(index);
-      const { analysis } = await coordinatorRef.current!.advanceWithPosition(position);
+      const { analysis } =
+        await coordinatorRef.current!.advanceWithPosition(position);
       board.resetTo(position.fen, position.orientation);
       setSession(createGameSession({ analysis, position }));
     } catch {
@@ -68,7 +69,9 @@ function RandomPageContent() {
   return (
     <main className="max-w-6xl mx-auto px-8 py-8 flex flex-col gap-6">
       {/* Page title */}
-      <h1 className="font-black text-3xl tracking-tight">Random Position</h1>
+      <h1 className="font-black text-xl sm:text-3xl tracking-tight">
+        Random Position
+      </h1>
 
       {/* Full-width position banner */}
       <PositionBanner
@@ -89,8 +92,12 @@ function RandomPageContent() {
             snap={snap}
             onDrop={(from, to) => session?.submitMove(from, to)}
             locked={true}
-            onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
-            onPlayFromPosition={() => navigate("/practice", { state: { fen: board.fen } })}
+            onStudyFromPosition={() =>
+              navigate("/study", { state: { fen: board.fen } })
+            }
+            onPlayFromPosition={() =>
+              navigate("/practice", { state: { fen: board.fen } })
+            }
           />
         }
         panel={<GamePanel snap={snap} onNext={startNext} showHeader={false} />}

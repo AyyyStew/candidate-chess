@@ -1,3 +1,6 @@
+@import "@lichess-org/chessground/assets/chessground.base.css";
+@import "@lichess-org/chessground/assets/chessground.brown.css";
+@import "@lichess-org/chessground/assets/chessground.cburnett.css";
 @import "tailwindcss";
 
 @theme {
@@ -26,6 +29,21 @@
 }
 
 @source inline("border-green-500 border-orange-400 border-red-500");
+
+
+/* ── Chessground board sizing ───────────────────────────────── */
+.cg-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: block;
+}
+
+/* ── Darker board (chess.com-style brown) ───────────────────── */
+cg-board {
+  background-color: #f0d9b5;
+  background-image: repeating-conic-gradient(#b58863 0% 25%, #f0d9b5 0% 50%);
+  background-size: 25% 25%;
+}
 
 /* ── Slide in (miss rows) ───────────────────────────────────── */
 @keyframes slideIn {
@@ -71,3 +89,4 @@
 .flip-card-back {
   transform: rotateX(180deg);
 }
+
