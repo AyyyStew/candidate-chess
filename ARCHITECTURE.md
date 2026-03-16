@@ -69,7 +69,7 @@ User drags a piece
       ├─ Validated with chess.js
       ├─ Compared against topMoves (rank ≤ 5 = hit, else miss)
       ├─ Updates candidates[], strikes, hits
-      └─ Notifies React via onChange → UI re-renders
+      └─ notify() updates cached snapshot → useSessionSnapshot triggers re-render
 
 Game ends when: strikes === 3 OR all top moves found
   → FamilyFeudBoard reveals remaining moves
@@ -121,16 +121,14 @@ Each `EngineInstance` has a queued command system (FIFO per worker) and parses r
 
 ## State Management
 
-This app uses a layered state architecture.
+| Layer               | What it manages                                                     |
+| ------------------- | ------------------------------------------------------------------- |
+| **React Context**   | Stockfish engine pool (expensive, shared globally)                  |
+| **Session objects** | Game/Study session state — imperative JS objects, external to React |
+| **Component state** | Current session instance, modal visibility, settings sliders        |
+| **localStorage**    | Daily stats (streaks, results history)                              |
 
-| Layer               | What it manages                                                            |
-| ------------------- | -------------------------------------------------------------------------- |
-| **React Context**   | Stockfish engine pool (expensive, shared globally)                         |
-| **Session objects** | Game/Study session state — imperative JS objects with `onChange` callbacks |
-| **Component state** | Local UI (snapshots from sessions, modal visibility, settings)             |
-| **localStorage**    | Daily stats (streaks, results history)                                     |
-
-Sessions (`GameSession`, `StudySession`) are plain JS objects — not React state. Pages hold a `useRef` to the session and call `setSnap()` in the `onChange` callback to trigger re-renders when session state changes.
+Sessions are plain JS objects that manage all game logic internally. Pages subscribe to session state via the `useSessionSnapshot(session)` hook (`src/hooks/useSessionSnapshot.ts`), which uses `useSyncExternalStore`. Sessions expose a cached `getSnapshot()` and call `notify()` on every state change — React reads the new snapshot and re-renders.
 
 ---
 

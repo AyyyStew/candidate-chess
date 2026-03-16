@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DailyResultsModal from "../components/DailyResultsModal";
 import StreakDisplay from "../components/StreakDisplay";
@@ -6,7 +7,7 @@ import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
 import { buildFromPvs } from "../engine/engineCoordinator";
-import { createGameSession } from "../sessions/GameSession";
+import { createGameSession, type GameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
 import GameLayout from "../components/GameLayout";
@@ -46,8 +47,8 @@ function DailyPageContent({
   const navigate = useNavigate();
   const board = useBoard();
   const engine = useEnginePool();
-  const sessionRef = useRef(null);
-  const [snap, setSnap] = useState(null);
+  const [session, setSession] = useState<GameSession | null>(null);
+  const snap = useSessionSnapshot(session);
   const [showModal, setShowModal] = useState(false);
   const [record, setRecord] = useState<DailyRecord | null>(existingRecord);
   const hasStartedRef = useRef(false);
@@ -71,10 +72,8 @@ function DailyPageContent({
       analysis.startAnalysis(daily.fen);
     }
 
-    const session = createGameSession({ analysis, position: daily });
-    session.onChange = setSnap;
-    sessionRef.current = session;
-    setSnap(session.getSnapshot());
+    const newSession = createGameSession({ analysis, position: daily });
+    setSession(newSession);
 
     // Results shown inline for already-played dates — no auto-modal
   }, [engine.ready]);
@@ -182,7 +181,7 @@ function DailyPageContent({
                 onDrop={
                   existingRecord
                     ? undefined
-                    : (from, to) => sessionRef.current.submitMove(from, to)
+                    : (from, to) => session?.submitMove(from, to)
                 }
                 locked={true}
                 onStudyFromPosition={() =>
