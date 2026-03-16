@@ -1,5 +1,6 @@
 import { Chess } from "chess.js";
 import { createEnginePool } from "./enginePool";
+import { debug } from "../utils/debug";
 import { createEngineAnalysis } from "./engineAnalysis";
 import type { EngineAnalysis } from "./engineAnalysis";
 import type { Position, TopMove, PositionPV } from "../types";
@@ -82,7 +83,7 @@ export function createEngineCoordinator({
   pool.onReady(() => {
     if (isReady) return;
     isReady = true;
-    console.log("[coordinator] pool ready");
+    debug("coordinator", "pool ready");
     readyCallback?.();
   });
 
@@ -98,7 +99,7 @@ export function createEngineCoordinator({
       );
       preloading = false;
       nextPosition = { position, topMoves, positionEval };
-      console.log("[coordinator] preload done (from pvs):", position.label);
+      debug("coordinator", "preload done (from pvs):", position.label);
       return;
     }
 
@@ -108,7 +109,7 @@ export function createEngineCoordinator({
         preloading = false;
         if (!result) return;
         nextPosition = { position, ...result };
-        console.log("[coordinator] preload done:", position.label);
+        debug("coordinator", "preload done:", position.label);
       });
   }
 
@@ -121,10 +122,7 @@ export function createEngineCoordinator({
     const analysis = createEngineAnalysis({ pool, goCommand });
 
     if (cached) {
-      console.log(
-        "[coordinator] advance using preloaded:",
-        cached.position.label,
-      );
+      debug("coordinator", "advance using preloaded:", cached.position.label);
       analysis.loadPrecomputed(
         cached.position.fen,
         cached.topMoves,
@@ -134,9 +132,7 @@ export function createEngineCoordinator({
     }
 
     const position = await getRandomPosition();
-    console.log(position);
-
-    console.log("[coordinator] advance fallback — fetching position");
+    debug("coordinator", "advance fallback — fetching position", position);
     if (position.pvs && position.pvs.length > 0) {
       const { topMoves, positionEval } = buildFromPvs(
         position.fen,
@@ -146,7 +142,7 @@ export function createEngineCoordinator({
       return { position, analysis, preloaded: true };
     }
 
-    console.log("[coordinator] advance fallback — engine will think");
+    debug("coordinator", "advance fallback — engine will think");
     analysis.startAnalysis(position.fen);
     return { position, analysis, preloaded: false };
   }

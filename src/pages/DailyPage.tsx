@@ -22,8 +22,7 @@ import {
 import type { Position, Candidate } from "../types";
 import { getRank } from "../types";
 import DailyResultsPanel from "../components/DailyResultsPanel";
-
-const RANK_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+import { RANK_EMOJI } from "../constants/daily";
 
 function formatDateString(isoDate: string): string {
   return new Date(isoDate + "T00:00:00").toLocaleDateString("en-US", {
