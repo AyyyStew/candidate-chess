@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
+import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useGameCoordinator } from "../hooks/useGameCoordinator";
-import { createGameSession } from "../sessions/GameSession";
+import { createGameSession, type GameSession } from "../sessions/GameSession";
 import { getPositionByIndex } from "../services/positionService";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
+import GameLayout from "../components/GameLayout";
 import PositionBanner from "../components/PositionBanner";
 
 function RandomPageContent() {
@@ -13,8 +15,8 @@ function RandomPageContent() {
   const [searchParams, setSearchParams] = useSearchParams();
   const board = useBoard();
   const { ready, coordinatorRef } = useGameCoordinator();
-  const sessionRef = useRef(null);
-  const [snap, setSnap] = useState(null);
+  const [session, setSession] = useState<GameSession | null>(null);
+  const snap = useSessionSnapshot(session);
   const hasStartedRef = useRef(false);
 
   const posParam = searchParams.get("pos");
@@ -33,15 +35,12 @@ function RandomPageContent() {
   }, [ready, posParam]);
 
   async function loadByIndex(index: number) {
-    setSnap(null);
+    setSession(null);
     try {
       const position = await getPositionByIndex(index);
       const { analysis } = await coordinatorRef.current!.advanceWithPosition(position);
       board.resetTo(position.fen, position.orientation);
-      const session = createGameSession({ analysis, position });
-      sessionRef.current = session;
-      session.onChange = setSnap;
-      setSnap(session.getSnapshot());
+      setSession(createGameSession({ analysis, position }));
     } catch {
       setSearchParams({}, { replace: true });
       startNext();
@@ -49,17 +48,13 @@ function RandomPageContent() {
   }
 
   async function startNext() {
-    setSnap(null);
+    setSession(null);
     const { position, analysis } = await coordinatorRef.current!.advance();
     board.resetTo(position.fen, position.orientation);
     if (position.sourceIndex !== undefined) {
       setSearchParams({ pos: String(position.sourceIndex) }, { replace: true });
     }
-
-    const session = createGameSession({ analysis, position });
-    sessionRef.current = session;
-    session.onChange = setSnap;
-    setSnap(session.getSnapshot());
+    setSession(createGameSession({ analysis, position }));
   }
 
   if (!snap) {
@@ -84,18 +79,22 @@ function RandomPageContent() {
         pgn={snap.pgn}
       />
 
-      {/* Two-column content */}
-      <div className="flex gap-8">
-        <BoardPanel
-          snap={snap}
-          onDrop={(from, to) => sessionRef.current.submitMove(from, to)}
-          locked={true}
-          onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
-        />
-        <div className="flex-1 flex flex-col gap-5">
-          <GamePanel snap={snap} onNext={startNext} showHeader={false} />
-        </div>
-      </div>
+      <GameLayout
+        snap={snap}
+        activeGame
+        onReset={startNext}
+        resetMessage="Play Another Position?"
+        board={
+          <BoardPanel
+            snap={snap}
+            onDrop={(from, to) => session?.submitMove(from, to)}
+            locked={true}
+            onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
+            onPlayFromPosition={() => navigate("/practice", { state: { fen: board.fen } })}
+          />
+        }
+        panel={<GamePanel snap={snap} onNext={startNext} showHeader={false} />}
+      />
     </main>
   );
 }

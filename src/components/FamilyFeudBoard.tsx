@@ -1,40 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import type { TopMove, Candidate } from "../types";
 import MoveRowCard from "./MoveRowCard";
-import successSound from "../assets/sounds/edited/success.wav";
-import failureSound from "../assets/sounds/edited/failure.wav";
-import { playSuccessJingle } from "../utils/sounds";
+import { playSuccessJingle, playSuccessSound, playFailureSound } from "../utils/sounds";
+import { StrikeIndicator } from "./PipsAndStrikes";
 
-const SUCCESS_SOUND = new Audio(successSound);
-const FAILURE_SOUND = new Audio(failureSound);
-
-interface StrikeIndicatorProps {
-  strikes: number;
-  maxStrikes: number;
-}
-
-function StrikeIndicator({ strikes, maxStrikes }: StrikeIndicatorProps) {
-  return (
-    <div className="flex gap-2 items-center">
-      {Array.from({ length: maxStrikes }).map((_, i) => {
-        const lost = i < strikes;
-        return (
-          <span
-            key={i}
-            className="text-3xl transition-all duration-300"
-            style={{
-              opacity: lost ? 0.12 : 1,
-              transform: lost ? "scale(0.75)" : "scale(1)",
-              filter: lost ? "grayscale(1)" : "none",
-            }}
-          >
-            ❤️
-          </span>
-        );
-      })}
-    </div>
-  );
-}
 
 interface FamilyFeudBoardProps {
   fen: string;
@@ -46,6 +15,9 @@ interface FamilyFeudBoardProps {
   maxStrikes: number;
   onReset: () => void;
   resetMessage?: string;
+  /** Mobile context: hides the header and misses section since GameLayout
+   *  renders StrikesPipsBar and GuessList above/below the board instead. */
+  isMobile?: boolean;
 }
 
 export default function FamilyFeudBoard({
@@ -58,6 +30,7 @@ export default function FamilyFeudBoard({
   maxStrikes,
   onReset,
   resetMessage,
+  isMobile = false,
 }: FamilyFeudBoardProps) {
   const [revealedMoves, setRevealedMoves] = useState<Set<string>>(new Set());
   const seenMoves = useRef<Set<string>>(new Set());
@@ -74,11 +47,9 @@ export default function FamilyFeudBoard({
       seenMoves.current.add(c.move);
       if (c.status === "hit") {
         setRevealedMoves((prev) => new Set([...prev, c.move]));
-        SUCCESS_SOUND.currentTime = 0;
-        SUCCESS_SOUND.play().catch(() => {});
+        playSuccessSound();
       } else if (c.status === "miss") {
-        FAILURE_SOUND.currentTime = 0;
-        FAILURE_SOUND.play().catch(() => {});
+        playFailureSound();
       }
     });
   }, [candidates]);
@@ -106,18 +77,20 @@ export default function FamilyFeudBoard({
   return (
     <div className="flex flex-col gap-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-muted uppercase tracking-widest mb-0.5">
-            Challenge
-          </p>
-          <h3 className="font-black text-xl text-text leading-tight">
-            Find the Top <span className="text-yellow-400">{targetMoves}</span>{" "}
-            Moves
-          </h3>
+      {!isMobile && (
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted uppercase tracking-widest mb-0.5">
+              Challenge
+            </p>
+            <h3 className="font-black text-xl text-text leading-tight">
+              Find the Top <span className="text-yellow-400">{targetMoves}</span>{" "}
+              Moves
+            </h3>
+          </div>
+          <StrikeIndicator strikes={strikes} maxStrikes={maxStrikes} />
         </div>
-        <StrikeIndicator strikes={strikes} maxStrikes={maxStrikes} />
-      </div>
+      )}
 
       {/* Main board */}
       <div className="flex flex-col gap-1.5">
@@ -176,8 +149,8 @@ export default function FamilyFeudBoard({
         })}
       </div>
 
-      {/* Misses */}
-      {missMoves.length > 0 && (
+      {/* Misses — hidden on mobile since GuessList already shows them */}
+      {!isMobile && missMoves.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-xs text-faint uppercase tracking-widest">Misses</p>
           <div className="flex flex-col gap-1.5">
