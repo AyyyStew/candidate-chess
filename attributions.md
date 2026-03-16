@@ -9,3 +9,4 @@ Source games pulled from the LiChess Elite Data base: https://database.nikonoel.
 - Success by Sjonas88 -- https://freesound.org/s/538554/ -- License: Creative Commons 0
 - chess-piece-bounce.ogg by pbimal -- https://freesound.org/s/646781/ -- License: Creative Commons 0
 - Chess Pieces Move (Close) by JJTaynos -- https://freesound.org/s/733927/ -- License: Creative Commons 0
+- Victory Bells Chords Success sound effect by Licorne_En_Fer -- https://freesound.org/s/647709/ -- License: Creative Commons 0

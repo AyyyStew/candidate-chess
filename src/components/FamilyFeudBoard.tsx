@@ -3,6 +3,7 @@ import type { TopMove, Candidate } from "../types";
 import MoveRowCard from "./MoveRowCard";
 import successSound from "../assets/sounds/edited/success.wav";
 import failureSound from "../assets/sounds/edited/failure.wav";
+import { playSuccessJingle } from "../utils/sounds";
 
 const SUCCESS_SOUND = new Audio(successSound);
 const FAILURE_SOUND = new Audio(failureSound);
@@ -60,6 +61,12 @@ export default function FamilyFeudBoard({
 }: FamilyFeudBoardProps) {
   const [revealedMoves, setRevealedMoves] = useState<Set<string>>(new Set());
   const seenMoves = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!isDone) return;
+    const t = setTimeout(playSuccessJingle, 100);
+    return () => clearTimeout(t);
+  }, [isDone]);
 
   useEffect(() => {
     candidates.forEach((c) => {
