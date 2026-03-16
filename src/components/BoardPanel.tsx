@@ -116,8 +116,8 @@ export default function BoardPanel({
   }
 
   return (
-    <div className="sticky top-8 self-start">
-      <div className="flex flex-col gap-2 w-120 shrink-0">
+    <div className="lg:sticky lg:top-8 lg:self-start">
+      <div className="flex flex-col gap-2 w-full lg:w-120 lg:shrink-0">
         <div className="flex gap-2">
           <button
             onClick={() => setShowArrows((a) => !a)}

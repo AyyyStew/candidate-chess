@@ -1,6 +1,7 @@
 import React from "react";
 import FamilyFeudBoard from "./FamilyFeudBoard";
 import type { GameSnapshot } from "../types";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 interface GamePanelProps {
   snap: GameSnapshot;
@@ -15,6 +16,10 @@ export default function GamePanel({
   resetMessage,
   showHeader = true,
 }: GamePanelProps) {
+  const isMobile = useIsMobile();
+  // On mobile the GameLayout renders the full game stack directly;
+  // GamePanel would duplicate FamilyFeudBoard (and its sound effects).
+  if (isMobile) return null;
   const isDone = snap.phase === "done";
   const hitCount = snap.candidates.filter((c) => c.status === "hit").length;
 
