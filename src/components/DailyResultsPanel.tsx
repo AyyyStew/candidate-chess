@@ -36,9 +36,7 @@ export default function DailyResultsPanel({
           ))}
           {Array.from({
             length: Math.max(0, record.target - record.squares.length),
-          }).map((_, i) => (
-            <span key={`e-${i}`}>⬜</span>
-          ))}
+          })}
         </div>
       </div>
 
