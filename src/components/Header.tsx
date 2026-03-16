@@ -22,7 +22,7 @@ export default function Header() {
         to="/"
         className="flex items-center gap-2.5 font-black text-xl tracking-tight hover:opacity-75 transition-opacity"
       >
-        <span className="text-yellow-400 text-2xl">♟</span>
+        <img src="/candidate_chess_logo.svg" alt="Candidate Chess Logo" className="w-8 h-8" />
         <span>Candidate Chess</span>
       </NavLink>
 
