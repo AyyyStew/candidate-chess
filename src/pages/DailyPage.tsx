@@ -58,14 +58,19 @@ function DailyPageContent({
   const winStreak = getWinStreak(today);
 
   useEffect(() => {
-    if (!engine.ready || hasStartedRef.current) return;
+    if (hasStartedRef.current) return;
+
+    const hasPVs = daily.pvs && daily.pvs.length > 0;
+    // If no precomputed PVs, we need the engine to be ready before starting
+    if (!hasPVs && !engine.ready) return;
+
     hasStartedRef.current = true;
 
     const analysis = createEngineAnalysis({
       pool: engine,
       goCommand: "go depth 15",
     });
-    if (daily.pvs && daily.pvs.length > 0) {
+    if (hasPVs) {
       const { topMoves, positionEval } = buildFromPvs(daily.fen, daily.pvs);
       analysis.loadPrecomputed(daily.fen, topMoves, positionEval);
     } else {
