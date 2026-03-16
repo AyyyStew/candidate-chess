@@ -11,7 +11,7 @@ describe("makeCandidate", () => {
     const c = makeCandidate({ move: "e2e4", san: "e4" });
     expect(c.move).toBe("e2e4");
     expect(c.san).toBe("e4");
-    expect(c.pending).toBe(false);
+    expect(c.status).toBe("pending");
   });
   it("throws without move", () => {
     expect(() => makeCandidate({ move: "", san: "e4" })).toThrow();
@@ -23,17 +23,15 @@ describe("makeCandidate", () => {
     const c = makeCandidate({
       move: "e2e4",
       san: "e4",
-      rank: 2,
+      status: "hit",
       eval: 0.5,
-      isHit: true,
     });
-    expect(c.rank).toBe(2);
+    expect(c.status).toBe("hit");
     expect(c.eval).toBe(0.5);
-    expect(c.isHit).toBe(true);
   });
-  it("defaults rank to null", () => {
+  it("defaults status to pending", () => {
     const c = makeCandidate({ move: "e2e4", san: "e4" });
-    expect(c.rank).toBeNull();
+    expect(c.status).toBe("pending");
   });
 });
 

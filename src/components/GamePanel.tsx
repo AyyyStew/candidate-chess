@@ -16,7 +16,7 @@ export default function GamePanel({
   showHeader = true,
 }: GamePanelProps) {
   const isDone = snap.phase === "done";
-  const hitCount = snap.candidates.filter((c) => !c.pending && c.isHit).length;
+  const hitCount = snap.candidates.filter((c) => c.status === "hit").length;
 
   return (
     <div className="flex flex-col gap-5">

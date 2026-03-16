@@ -48,9 +48,15 @@ export default function CandidateList({
           if (isDone && fenAfter) {
             try {
               const g = new Chess(results!.fen);
-              g.move({ from: c.move.slice(0, 2), to: c.move.slice(2, 4), promotion: c.move[4] ?? "q" });
+              g.move({
+                from: c.move.slice(0, 2),
+                to: c.move.slice(2, 4),
+                promotion: c.move[4] ?? "q",
+              });
               fenAfter = g.fen();
-            } catch { /* keep original */ }
+            } catch {
+              /* keep original */
+            }
           }
           return (
             <div
@@ -63,12 +69,14 @@ export default function CandidateList({
               }}
             >
               <div className="flex items-center gap-3">
-                <span className="text-muted text-sm w-4 shrink-0">
-                  {i + 1}
-                </span>
+                <span className="text-muted text-sm w-4 shrink-0">{i + 1}</span>
                 <button
                   className="font-bold text-lg hover:text-blue-400 transition-colors"
-                  onClick={() => isDone && fenAfter ? showPreviewFen(fenAfter) : clearPreview()}
+                  onClick={() =>
+                    isDone && fenAfter
+                      ? showPreviewFen(fenAfter)
+                      : clearPreview()
+                  }
                 >
                   {c.san}
                 </button>
@@ -94,9 +102,16 @@ export default function CandidateList({
                     >
                       {formatEval(c.eval)}
                     </span>
-                    <span className="text-muted text-xs">
-                      {formatEval(c.diffBest)} ΔBest
-                    </span>
+                    {c.diffBest !== undefined && (
+                      <span className="text-muted text-xs">
+                        {formatEval(c.diffBest)} ΔBest
+                      </span>
+                    )}
+                    {c.diffPos !== undefined && (
+                      <span className="text-muted text-xs">
+                        {formatEval(c.diffPos)} ΔPos
+                      </span>
+                    )}
                   </span>
                 )}
                 {!isDone && onRemove && (
@@ -108,10 +123,13 @@ export default function CandidateList({
                   </button>
                 )}
               </div>
-              {isDone && fenAfter && c.line && c.line.sans.length > 0 && (
-                <span className="mt-1 pl-7 text-xs font-mono text-faint">
-                  <PvLine startFen={fenAfter} sans={c.line.sans} />
-                </span>
+              {isDone && c.line && (() => {
+                console.log("[CandidateList] line for", c.san, "sans:", c.line.sans, "startFen:", results!.fen);
+                return c.line.sans.length > 0;
+              })() && (
+                <div className="mt-1 pl-7">
+                  <PvLine startFen={results!.fen} sans={c.line.sans} />
+                </div>
               )}
             </div>
           );

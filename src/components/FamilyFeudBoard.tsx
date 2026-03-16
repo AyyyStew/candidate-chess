@@ -70,22 +70,22 @@ export default function FamilyFeudBoard({
 
   useEffect(() => {
     candidates.forEach((c) => {
-      if (c.pending || seenMoves.current.has(c.move)) return;
+      if (c.status === "pending" || seenMoves.current.has(c.move)) return;
       seenMoves.current.add(c.move);
-      if (c.isHit) {
+      if (c.status === "hit") {
         setRevealedMoves((prev) => new Set([...prev, c.move]));
         SUCCESS_SOUND.currentTime = 0;
         SUCCESS_SOUND.play().catch(() => {});
-      } else if (c.isMiss) {
+      } else if (c.status === "miss") {
         FAILURE_SOUND.currentTime = 0;
         FAILURE_SOUND.play().catch(() => {});
       }
     });
   }, [candidates]);
 
-  const hitMoves = candidates.filter((c) => !c.pending && c.isHit);
-  const missMoves = candidates.filter((c) => !c.pending && c.isMiss);
-  const pending = candidates.some((c) => c.pending);
+  const hitMoves = candidates.filter((c) => c.status === "hit");
+  const missMoves = candidates.filter((c) => c.status === "miss");
+  const pending = candidates.some((c) => c.status === "pending");
   const isLoading = topMoves.length === 0 && !isDone;
 
   type Slot =

@@ -83,7 +83,7 @@ export function createStudySession({
 
     candidates = [
       ...candidates,
-      makeCandidate({ move: uci, san: move.san, pending: false }),
+      makeCandidate({ move: uci, san: move.san }),
     ];
     notify();
     return true;
@@ -106,8 +106,14 @@ export function createStudySession({
     );
 
     const evaluatedCandidates: Candidate[] = evaluated.map((e) => ({
-      ...e,
-      pending: false,
+      move: e.move,
+      san: e.san,
+      status: "hit" as const,
+      eval: e.eval,
+      diffBest: e.diffBest,
+      diffPos: e.diffPos,
+      category: e.category,
+      line: e.line,
     }));
     results = analysis.buildTopMovesResult(evaluatedCandidates);
     phase = "done";

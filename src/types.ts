@@ -38,14 +38,11 @@ export interface EvaluatedMove {
 export interface Candidate {
   move: string;
   san: string;
-  pending: boolean;
+  status: "pending" | "hit" | "miss";
   eval?: number;
   diffBest?: number;
   diffPos?: number;
-  rank?: number | null;
   category?: Category | null;
-  isHit?: boolean;
-  isMiss?: boolean;
   line?: PVLine;
 }
 
@@ -131,16 +128,16 @@ export function makeCandidate(
   return {
     move: data.move,
     san: data.san,
-    pending: data.pending ?? false,
+    status: data.status ?? "pending",
     eval: data.eval,
-    diffBest: data.diffBest,
-    diffPos: data.diffPos,
-    rank: data.rank ?? null,
     category: data.category ?? null,
-    isHit: data.isHit,
-    isMiss: data.isMiss,
     line: data.line,
   };
+}
+
+export function getRank(topMoves: TopMove[], move: string): number | null {
+  const idx = topMoves.findIndex((m) => m.move === move);
+  return idx === -1 ? null : idx + 1;
 }
 
 export function makeAnalysisResult(

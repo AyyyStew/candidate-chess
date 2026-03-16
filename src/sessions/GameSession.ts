@@ -87,7 +87,14 @@ export function createGameSession({
 
     candidates = candidates.map((c) =>
       c.move === uci
-        ? { ...evaluated, pending: false, isHit, isMiss: !isHit }
+        ? {
+            move: evaluated.move,
+            san: evaluated.san,
+            status: isHit ? "hit" : "miss",
+            eval: evaluated.eval,
+            category: evaluated.category,
+            line: evaluated.line,
+          }
         : c,
     );
 
@@ -121,7 +128,7 @@ export function createGameSession({
 
     candidates = [
       ...candidates,
-      makeCandidate({ move: uci, san: move.san, pending: true }),
+      makeCandidate({ move: uci, san: move.san, status: "pending" }),
     ];
     notify();
 
