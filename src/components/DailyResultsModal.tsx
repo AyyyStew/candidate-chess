@@ -189,9 +189,6 @@ export default function DailyResultsModal({
             {squares.map((s, i) => (
               <span key={i}>{s}</span>
             ))}
-            {Array.from({ length: emptySlots }).map((_, i) => (
-              <span key={`e-${i}`}>⬜</span>
-            ))}
           </div>
         </div>
 
