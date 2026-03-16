@@ -37,7 +37,11 @@ interface DailyPageContentProps {
   existingRecord: DailyRecord | null;
 }
 
-function DailyPageContent({ daily, activeDate, existingRecord }: DailyPageContentProps) {
+function DailyPageContent({
+  daily,
+  activeDate,
+  existingRecord,
+}: DailyPageContentProps) {
   const navigate = useNavigate();
   const board = useBoard();
   const engine = useEnginePool();
@@ -55,7 +59,10 @@ function DailyPageContent({ daily, activeDate, existingRecord }: DailyPageConten
     if (!engine.ready || hasStartedRef.current) return;
     hasStartedRef.current = true;
 
-    const analysis = createEngineAnalysis({ pool: engine, goCommand: "go depth 15" });
+    const analysis = createEngineAnalysis({
+      pool: engine,
+      goCommand: "go depth 15",
+    });
     if (daily.pvs && daily.pvs.length > 0) {
       const { topMoves, positionEval } = buildFromPvs(daily.fen, daily.pvs);
       analysis.loadPrecomputed(daily.fen, topMoves, positionEval);
@@ -72,13 +79,16 @@ function DailyPageContent({ daily, activeDate, existingRecord }: DailyPageConten
   }, [engine.ready]);
 
   useEffect(() => {
-    if (snap?.phase !== "done" || existingRecord || activeDate !== today) return;
+    if (snap?.phase !== "done" || existingRecord || activeDate !== today)
+      return;
 
     const resolved = snap.candidates.filter((c: Candidate) => !c.pending);
     const hits = resolved.filter((c: Candidate) => c.isHit).length;
     const squares = resolved.map((c: Candidate) => {
-      if (!c.isHit) return "🟥";
-      return c.rank != null && c.rank >= 1 && c.rank <= 5 ? RANK_EMOJI[c.rank - 1] : "🟩";
+      if (!c.isHit) return "❌";
+      return c.rank != null && c.rank >= 1 && c.rank <= 5
+        ? RANK_EMOJI[c.rank - 1]
+        : "🟩";
     });
     const storedCandidates = resolved.map((c: Candidate) => ({
       san: c.san,
@@ -88,13 +98,15 @@ function DailyPageContent({ daily, activeDate, existingRecord }: DailyPageConten
       eval: c.eval ?? null,
     }));
 
-    const answers = snap.liveTopMoves.slice(0, snap.targetMoves).map((m: TopMove, i: number) => ({
-      san: m.san,
-      isHit: true,
-      rank: i + 1,
-      category: m.category ?? null,
-      eval: m.eval ?? null,
-    }));
+    const answers = snap.liveTopMoves
+      .slice(0, snap.targetMoves)
+      .map((m: TopMove, i: number) => ({
+        san: m.san,
+        isHit: true,
+        rank: i + 1,
+        category: m.category ?? null,
+        eval: m.eval ?? null,
+      }));
 
     const newRecord: DailyRecord = {
       date: activeDate,
@@ -128,8 +140,13 @@ function DailyPageContent({ daily, activeDate, existingRecord }: DailyPageConten
         {/* Page title */}
         <div className="flex items-baseline justify-between">
           <div className="flex items-baseline gap-4">
-            <h1 className="font-black text-3xl tracking-tight">Daily Challenge</h1>
-            <StreakDisplay participationStreak={participationStreak} winStreak={winStreak} />
+            <h1 className="font-black text-3xl tracking-tight">
+              Daily Challenge
+            </h1>
+            <StreakDisplay
+              participationStreak={participationStreak}
+              winStreak={winStreak}
+            />
           </div>
           <div className="flex items-center gap-3">
             {existingRecord && (
@@ -140,7 +157,9 @@ function DailyPageContent({ daily, activeDate, existingRecord }: DailyPageConten
                 View results
               </button>
             )}
-            <span className="text-sm text-muted">{formatDateString(activeDate)}</span>
+            <span className="text-sm text-muted">
+              {formatDateString(activeDate)}
+            </span>
           </div>
         </div>
 
@@ -162,9 +181,15 @@ function DailyPageContent({ daily, activeDate, existingRecord }: DailyPageConten
           <div className="flex gap-8">
             <BoardPanel
               snap={snap}
-              onDrop={existingRecord ? undefined : (from, to) => sessionRef.current.submitMove(from, to)}
+              onDrop={
+                existingRecord
+                  ? undefined
+                  : (from, to) => sessionRef.current.submitMove(from, to)
+              }
               locked={true}
-              onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
+              onStudyFromPosition={() =>
+                navigate("/study", { state: { fen: board.fen } })
+              }
             />
             <div className="flex-1 flex flex-col gap-5">
               {record ? (
@@ -203,7 +228,9 @@ export default function DailyPage() {
   const dateParam = searchParams.get("date");
   const todayString = new Date().toISOString().split("T")[0];
   const activeDate =
-    dateParam && isValidDate(dateParam) && dateParam <= todayString ? dateParam : todayString;
+    dateParam && isValidDate(dateParam) && dateParam <= todayString
+      ? dateParam
+      : todayString;
 
   useEffect(() => {
     if (dateParam) {
@@ -233,7 +260,9 @@ export default function DailyPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
         {redirectReason && (
-          <p className="text-sm text-muted">{redirectReason} Showing today's challenge.</p>
+          <p className="text-sm text-muted">
+            {redirectReason} Showing today's challenge.
+          </p>
         )}
         <p className="text-muted animate-pulse text-lg">Loading...</p>
       </div>
@@ -243,13 +272,23 @@ export default function DailyPage() {
   const existingRecord = getDailyRecord(activeDate);
 
   return (
-    <BoardProvider key={activeDate} initialFen={daily.fen} initialOrientation={daily.orientation}>
+    <BoardProvider
+      key={activeDate}
+      initialFen={daily.fen}
+      initialOrientation={daily.orientation}
+    >
       {redirectReason && (
         <div className="max-w-6xl mx-auto px-8 pt-6">
-          <p className="text-sm text-muted">{redirectReason} Showing today's challenge.</p>
+          <p className="text-sm text-muted">
+            {redirectReason} Showing today's challenge.
+          </p>
         </div>
       )}
-      <DailyPageContent daily={daily} activeDate={activeDate} existingRecord={existingRecord} />
+      <DailyPageContent
+        daily={daily}
+        activeDate={activeDate}
+        existingRecord={existingRecord}
+      />
     </BoardProvider>
   );
 }
