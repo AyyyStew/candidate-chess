@@ -157,7 +157,8 @@ export default function BoardPanel({
       events: { after: handleAfter },
     },
     drawable: {
-      enabled: false,
+      enabled: true,
+      eraseOnClick: false,
       autoShapes: buildAutoShapes(),
       brushes: CUSTOM_BRUSHES,
     },

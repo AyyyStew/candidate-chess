@@ -14,10 +14,14 @@ export default function ChessgroundBoard({ config, apiRef }: Props) {
 
   useEffect(() => {
     if (!elRef.current) return;
-    const api = Chessground(elRef.current, config);
+    const el = elRef.current;
+    const suppressContext = (e: MouseEvent) => e.preventDefault();
+    el.addEventListener("contextmenu", suppressContext);
+    const api = Chessground(el, config);
     internalRef.current = api;
     if (apiRef) apiRef.current = api;
     return () => {
+      el.removeEventListener("contextmenu", suppressContext);
       api.destroy();
       internalRef.current = null;
       if (apiRef) apiRef.current = null;
