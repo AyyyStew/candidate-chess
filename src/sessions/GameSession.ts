@@ -4,7 +4,7 @@ import type { Candidate, GameSnapshot, AnalysisResult } from "../types";
 import type { EngineAnalysis } from "../engine/engineAnalysis";
 import type { Position } from "../types";
 
-const MAX_STRIKES = 3;
+const MAX_STRIKES = 5;
 
 interface GameSessionOptions {
   analysis: EngineAnalysis;
