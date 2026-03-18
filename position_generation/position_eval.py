@@ -53,28 +53,23 @@ def worker(task_queue, result_queue, engine_path, depth, multipv, threads_per_wo
         result_queue.put(("error", None))
 
 
-# ── resume helpers ────────────────────────────────────────────────────────────
+# ── cache helpers ─────────────────────────────────────────────────────────────
 
 
-def load_existing_fens(output_file):
-    seen = set()
+def load_eval_cache(output_file):
+    """Returns {id: position} for all previously evaluated positions."""
+    cache = {}
     if not os.path.exists(output_file):
-        return seen
+        return cache
     with open(output_file, "r") as f:
         for line in f:
             if line.strip():
                 try:
-                    seen.add(json.loads(line)["fen"])
-                except json.JSONDecodeError:
+                    pos = json.loads(line)
+                    cache[pos["id"]] = pos
+                except (json.JSONDecodeError, KeyError):
                     pass
-    return seen
-
-
-def count_existing_output(output_file):
-    if not os.path.exists(output_file):
-        return 0
-    with open(output_file, "r") as f:
-        return sum(1 for line in f if line.strip())
+    return cache
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
@@ -90,21 +85,30 @@ def run(
     threads_per_worker=2,
     hash_per_worker=1024,
 ):
-    already_done = load_existing_fens(output_file)
-    already_kept = count_existing_output(output_file)
+    raw_cache = load_eval_cache(output_file)
+    cache = {
+        id: pos for id, pos in raw_cache.items()
+        if pos.get("eval", {}).get("depth") == depth
+        and len(pos.get("eval", {}).get("pvs", [])) >= multipv
+    }
 
     with open(input_file) as f:
         all_positions = [json.loads(line) for line in f if line.strip()]
 
-    remaining = [p for p in all_positions if p["fen"] not in already_done]
+    remaining = [p for p in all_positions if p["id"] not in cache]
     total = len(remaining)
 
     print(f"Input:        {len(all_positions)} positions")
-    print(f"Already done: {already_kept} (skipping)")
+    print(f"Cached:       {len(cache)} (skipping)")
     print(f"Remaining:    {total}. Starting {n_workers} workers...\n")
 
     if total == 0:
-        print("Nothing to do.")
+        print("All positions cached — rebuilding output file.")
+        with open(output_file, "w") as out:
+            for pos in all_positions:
+                if pos["id"] in cache:
+                    out.write(json.dumps(cache[pos["id"]]) + "\n")
+        print(f"Written: {len(all_positions)} positions.")
         return
 
     task_queue = Queue()
@@ -128,31 +132,38 @@ def run(
     processed = 0
     start = time.time()
 
-    with open(output_file, "a") as out:
-        while processed < total:
-            status, result = result_queue.get()
-            processed += 1
-            if status == "keep":
-                out.write(json.dumps(result) + "\n")
-                out.flush()
-                kept += 1
-            else:
-                skipped += 1
+    while processed < total:
+        status, result = result_queue.get()
+        processed += 1
+        if status == "keep":
+            cache[result["id"]] = result
+            kept += 1
+        else:
+            skipped += 1
 
-            elapsed = time.time() - start
-            rate = processed / elapsed if elapsed > 0 else 0
-            eta = (total - processed) / rate if rate > 0 else 0
-            print(
-                f"  {processed}/{total} | {rate:.1f} pos/s | ETA {eta:.0f}s | kept {kept} skipped {skipped}",
-                end="\r",
-            )
+        elapsed = time.time() - start
+        rate = processed / elapsed if elapsed > 0 else 0
+        eta = (total - processed) / rate if rate > 0 else 0
+        print(
+            f"  {processed}/{total} | {rate:.1f} pos/s | ETA {eta:.0f}s | kept {kept} skipped {skipped}",
+            end="\r",
+        )
 
     for p in workers:
         p.join(timeout=5)
         if p.is_alive():
             p.terminate()
 
-    print(f"\nDone. Kept {kept} new | Skipped {skipped} | Total in file {already_kept + kept}")
+    # Rebuild output from current filter input — only positions that still pass
+    # the filter are written, pulling eval results from cache.
+    with open(output_file, "w") as out:
+        written = 0
+        for pos in all_positions:
+            if pos["id"] in cache:
+                out.write(json.dumps(cache[pos["id"]]) + "\n")
+                written += 1
+
+    print(f"\nDone. New: {kept} | Skipped: {skipped} | Written: {written}")
     print(f"Saved to {output_file}")
 
 

@@ -6,6 +6,7 @@ from datetime import date, timedelta
 
 def slim(pos):
     return {
+        "id": pos["id"],
         "fen": pos["fen"],
         "tag": pos["tag"],
         "eval": {

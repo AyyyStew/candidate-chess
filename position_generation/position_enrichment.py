@@ -1,5 +1,6 @@
 import json
 import chess
+import chess.polyglot
 from collections import Counter
 
 
@@ -119,6 +120,7 @@ def enrich(pos):
     category, balance, spreads = classify_category(pvs, pos["side_to_move"])
     features = position_features(pos["fen"])
 
+    pos["id"] = f"{chess.polyglot.zobrist_hash(chess.Board(pos['fen'])):016x}"
     pos["phase"] = phase
     pos["category"] = category
     pos["balance"] = balance
