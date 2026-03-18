@@ -1,9 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import type { TopMove, Candidate } from "../types";
 import MoveRowCard from "./MoveRowCard";
-import { playSuccessJingle, playSuccessSound, playFailureSound } from "../utils/sounds";
+import {
+  playSuccessJingle,
+  playSuccessSound,
+  playFailureSound,
+} from "../utils/sounds";
 import { StrikeIndicator } from "./PipsAndStrikes";
-
+import { getMoveCategory } from "../utils/chess";
 
 interface FamilyFeudBoardProps {
   fen: string;
@@ -84,8 +88,8 @@ export default function FamilyFeudBoard({
               Challenge
             </p>
             <h3 className="font-black text-xl text-text leading-tight">
-              Find the Top <span className="text-yellow-400">{targetMoves}</span>{" "}
-              Moves
+              Find the Top{" "}
+              <span className="text-yellow-400">{targetMoves}</span> Moves
             </h3>
           </div>
           <StrikeIndicator strikes={strikes} maxStrikes={maxStrikes} />
@@ -152,20 +156,71 @@ export default function FamilyFeudBoard({
       {/* Misses — hidden on mobile since GuessList already shows them */}
       {!isMobile && missMoves.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-faint uppercase tracking-widest">Misses</p>
+          <div className="flex items-center gap-1.5 group relative">
+            <p className="text-xs text-faint uppercase tracking-widest">
+              Misses
+            </p>
+            <span className="text-xs text-faint/40 leading-none">ⓘ</span>
+            {/* Tooltip — visible on hover of the misses header */}
+            <div className="pointer-events-none absolute bottom-full left-0 mb-2 w-72 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+              <div className="rounded-lg border border-surface-hi bg-surface p-3 shadow-xl text-xs text-muted leading-relaxed">
+                <p className="font-semibold text-label mb-1">
+                  About miss evaluations
+                </p>
+                <p>
+                  Evaluations for missed moves are estimated by your browser's
+                  local engine and may not perfectly match the server's
+                  pre-computed analysis, which runs at a higher depth on native
+                  hardware.
+                </p>
+                <p className="mt-1.5">
+                  If a missed move appeared suspiciously strong, its eval is
+                  capped to the weakest pre-computed top move and marked with{" "}
+                  <span className="font-mono text-label">&gt;</span> or{" "}
+                  <span className="font-mono text-label">&lt;</span> to indicate
+                  the true ranking is likely worse.
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="flex flex-col gap-1.5">
-            {missMoves.map((c) => (
-              <MoveRowCard
-                key={c.move}
-                rank="miss"
-                san={c.san}
-                eval={c.eval ?? 0}
-                category={c.category ?? null}
-                pvLine={c.line}
-                startFen={fen}
-                showLine={isDone}
-              />
-            ))}
+            {(() => {
+              const floorEval = topMoves[topMoves.length - 1]?.eval ?? null;
+              const isBlackToMove = fen.includes(" b ");
+              const positionEval = topMoves[0]?.rawEval ?? 0;
+              const bestEval = topMoves[0]?.rawEval ?? 0;
+              const capSign: "<" | ">" = isBlackToMove ? ">" : "<";
+              return missMoves.map((c) => {
+                const missEval = c.eval ?? 0;
+                const isPrecomputed = topMoves.some((m) => m.move === c.move);
+                const appearsTooGood =
+                  floorEval !== null &&
+                  (isBlackToMove ? missEval < floorEval : missEval > floorEval);
+                const shouldCap = !isPrecomputed && appearsTooGood;
+                const displayEval = shouldCap ? floorEval : missEval;
+                const displayCategory = shouldCap
+                  ? getMoveCategory(
+                      positionEval,
+                      floorEval!,
+                      isBlackToMove,
+                      bestEval,
+                    )
+                  : (c.category ?? null);
+                return (
+                  <MoveRowCard
+                    key={c.move}
+                    rank="miss"
+                    san={c.san}
+                    eval={displayEval}
+                    evalCapSign={shouldCap ? capSign : undefined}
+                    category={displayCategory}
+                    pvLine={c.line}
+                    startFen={fen}
+                    showLine={isDone}
+                  />
+                );
+              });
+            })()}
           </div>
         </div>
       )}

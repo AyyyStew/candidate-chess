@@ -5,6 +5,7 @@ import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useGameCoordinator } from "../hooks/useGameCoordinator";
 import { createGameSession, type GameSession } from "../sessions/GameSession";
 import { getPositionById } from "../services/positionService";
+import { debug } from "../utils/debug";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
 import GameLayout from "../components/GameLayout";
@@ -38,6 +39,7 @@ function RandomPageContent() {
     setSession(null);
     try {
       const position = await getPositionById(id);
+      debug("RandomPage", position);
       const { analysis } =
         await coordinatorRef.current!.advanceWithPosition(position);
       board.resetTo(position.fen, position.orientation);

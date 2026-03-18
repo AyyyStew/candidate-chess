@@ -10,6 +10,8 @@ export interface MoveRowCardProps {
   san: string;
   category: Category | null;
   eval: number | null;
+  /** When set, prefixes the eval display with this sign to indicate it's capped. */
+  evalCapSign?: "<" | ">";
   /** true → ✓  false → —  undefined → no indicator */
   isHit?: boolean;
   /** Show a placeholder instead of the move (unrevealed slot). */
@@ -28,20 +30,36 @@ interface MissRowProps {
   pvLineSlot: ReactNode;
   category: Category | null;
   evalScore: number | null;
+  evalCapSign?: "<" | ">";
 }
 
-function MissRow({ san, pvLineSlot, category, evalScore }: MissRowProps) {
+function MissRow({
+  san,
+  pvLineSlot,
+  category,
+  evalScore,
+  evalCapSign,
+}: MissRowProps) {
   return (
     <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 bg-red-950/40 border border-red-900/50">
       <span className="text-red-400 font-bold text-sm w-5 shrink-0">✕</span>
-      {pvLineSlot ?? <span className="font-semibold text-label flex-1">{san}</span>}
+      {pvLineSlot ?? (
+        <span className="font-semibold text-label flex-1">{san}</span>
+      )}
       {category && (
-        <span className="text-xs font-medium shrink-0" style={{ color: category.color }}>
+        <span
+          className="text-xs font-medium shrink-0"
+          style={{ color: category.color }}
+        >
           {category.icon} {category.label}
         </span>
       )}
       {evalScore != null && (
-        <span className="text-xs text-faint tabular-nums shrink-0">{formatEval(evalScore)}</span>
+        <span className="text-xs text-faint tabular-nums shrink-0">
+          {evalCapSign
+            ? `${evalCapSign}${formatEval(evalScore)}`
+            : formatEval(evalScore)}
+        </span>
       )}
     </div>
   );
@@ -55,10 +73,17 @@ function HiddenRow({ rank }: HiddenRowProps) {
   return (
     <div
       className="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4"
-      style={{ borderLeftColor: "var(--color-edge)", background: "var(--color-surface)" }}
+      style={{
+        borderLeftColor: "var(--color-edge)",
+        background: "var(--color-surface)",
+      }}
     >
-      <span className="text-yellow-400/50 font-bold text-sm w-5 shrink-0">{rank}</span>
-      <span className="font-black text-xl text-muted/30 tracking-widest flex-1">· · ·</span>
+      <span className="text-yellow-400/50 font-bold text-sm w-5 shrink-0">
+        {rank}
+      </span>
+      <span className="font-black text-xl text-muted/30 tracking-widest flex-1">
+        · · ·
+      </span>
     </div>
   );
 }
@@ -125,14 +150,19 @@ function RevealedRow({
           </div>
         </div>
       ) : (
-        pvLineSlot ?? <span className="font-semibold text-text flex-1">{san}</span>
+        (pvLineSlot ?? (
+          <span className="font-semibold text-text flex-1">{san}</span>
+        ))
       )}
 
       {/* Category */}
       {isRevealed && category && (
         <span
           className={`text-xs font-medium shrink-0 ${animate ? "animate-reveal-pop" : ""}`}
-          style={{ color: category.color, ...(animate ? { animationDelay: "400ms" } : {}) }}
+          style={{
+            color: category.color,
+            ...(animate ? { animationDelay: "400ms" } : {}),
+          }}
         >
           {category.icon} {category.label}
         </span>
@@ -149,11 +179,13 @@ function RevealedRow({
       )}
 
       {/* Hit indicator */}
-      {isRevealed && isHit !== undefined && (
-        isHit
-          ? <span className="text-xs text-green-400 font-medium shrink-0">✓</span>
-          : <span className="text-xs text-faint shrink-0">—</span>
-      )}
+      {isRevealed &&
+        isHit !== undefined &&
+        (isHit ? (
+          <span className="text-xs text-green-400 font-medium shrink-0">✓</span>
+        ) : (
+          <span className="text-xs text-faint shrink-0">—</span>
+        ))}
     </div>
   );
 }
@@ -165,6 +197,7 @@ export default function MoveRowCard({
   san,
   category,
   eval: evalScore,
+  evalCapSign,
   isHit,
   hidden = false,
   animate = false,
@@ -188,11 +221,26 @@ export default function MoveRowCard({
   const isRevealed = !hidden && flipped;
 
   // Inline helper (not a component — avoids remounting PvLine on every render)
-  const pvLineSlot = pvLine && pvLine.sans.length > 0 && startFen
-    ? <PvLine startFen={startFen} sans={pvLine.sans} inline locked={!showLine} />
-    : null;
+  const pvLineSlot =
+    pvLine && pvLine.sans.length > 0 && startFen ? (
+      <PvLine
+        startFen={startFen}
+        sans={pvLine.sans}
+        inline
+        locked={!showLine}
+      />
+    ) : null;
 
-  if (isMiss) return <MissRow san={san} pvLineSlot={pvLineSlot} category={category} evalScore={evalScore} />;
+  if (isMiss)
+    return (
+      <MissRow
+        san={san}
+        pvLineSlot={pvLineSlot}
+        category={category}
+        evalScore={evalScore}
+        evalCapSign={evalCapSign}
+      />
+    );
   if (hidden) return <HiddenRow rank={rank as number} />;
   return (
     <RevealedRow
