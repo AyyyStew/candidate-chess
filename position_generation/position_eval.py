@@ -59,16 +59,18 @@ def worker(task_queue, result_queue, engine_path, depth, multipv, threads_per_wo
 def load_eval_cache(output_file):
     """Returns {id: position} for all previously evaluated positions."""
     cache = {}
-    if not os.path.exists(output_file):
-        return cache
-    with open(output_file, "r") as f:
-        for line in f:
-            if line.strip():
-                try:
-                    pos = json.loads(line)
-                    cache[pos["id"]] = pos
-                except (json.JSONDecodeError, KeyError):
-                    pass
+    files_to_load = [output_file, output_file + ".progress"]
+    for path in files_to_load:
+        if not os.path.exists(path):
+            continue
+        with open(path, "r") as f:
+            for line in f:
+                if line.strip():
+                    try:
+                        pos = json.loads(line)
+                        cache[pos["id"]] = pos
+                    except (json.JSONDecodeError, KeyError):
+                        pass
     return cache
 
 
@@ -132,22 +134,26 @@ def run(
     processed = 0
     start = time.time()
 
-    while processed < total:
-        status, result = result_queue.get()
-        processed += 1
-        if status == "keep":
-            cache[result["id"]] = result
-            kept += 1
-        else:
-            skipped += 1
+    progress_file = output_file + ".progress"
+    with open(progress_file, "a") as progress_out:
+        while processed < total:
+            status, result = result_queue.get()
+            processed += 1
+            if status == "keep":
+                cache[result["id"]] = result
+                progress_out.write(json.dumps(result) + "\n")
+                progress_out.flush()
+                kept += 1
+            else:
+                skipped += 1
 
-        elapsed = time.time() - start
-        rate = processed / elapsed if elapsed > 0 else 0
-        eta = (total - processed) / rate if rate > 0 else 0
-        print(
-            f"  {processed}/{total} | {rate:.1f} pos/s | ETA {eta:.0f}s | kept {kept} skipped {skipped}",
-            end="\r",
-        )
+            elapsed = time.time() - start
+            rate = processed / elapsed if elapsed > 0 else 0
+            eta = (total - processed) / rate if rate > 0 else 0
+            print(
+                f"  {processed}/{total} | {rate:.1f} pos/s | ETA {eta:.0f}s | kept {kept} skipped {skipped}",
+                end="\r",
+            )
 
     for p in workers:
         p.join(timeout=5)
@@ -162,6 +168,9 @@ def run(
             if pos["id"] in cache:
                 out.write(json.dumps(cache[pos["id"]]) + "\n")
                 written += 1
+
+    if os.path.exists(progress_file):
+        os.remove(progress_file)
 
     print(f"\nDone. New: {kept} | Skipped: {skipped} | Written: {written}")
     print(f"Saved to {output_file}")

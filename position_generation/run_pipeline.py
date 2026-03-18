@@ -21,41 +21,41 @@ from deploy_positions import run as deploy
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
 ENGINE_PATH = r"C:\Users\alexs\Desktop\stockfish\stockfish-windows-x86-64-avx2.exe"
-PGN_DIR     = "./LichessEliteDatabase"
+PGN_DIR = "./LichessEliteDatabase"
 
-EXTRACT_OUTPUT   = "training_positions.jsonl"
-ENRICH_OUTPUT    = "training_positions_enriched.jsonl"
-FILTER_OUTPUT    = "training_positions_filtered.jsonl"
-EVAL_OUTPUT      = "training_positions_evaluated.jsonl"
+EXTRACT_OUTPUT = "training_positions.jsonl"
+ENRICH_OUTPUT = "training_positions_enriched.jsonl"
+FILTER_OUTPUT = "training_positions_filtered.jsonl"
+EVAL_OUTPUT = "training_positions_evaluated.jsonl"
 CHUNK_OUTPUT_DIR = "positions"
-DEPLOY_DST       = "../public/positions"
+DEPLOY_DST = "../public/positions"
 
 # ── Engine ────────────────────────────────────────────────────────────────────
 
-N_WORKERS          = 7
-THREADS_PER_WORKER = 2
-EXTRACTOR_HASH     = 512   # MB per worker
-EVAL_HASH          = 1024  # MB per worker
+N_WORKERS = 14
+THREADS_PER_WORKER = 1
+EXTRACTOR_HASH = 512  # MB per worker
+EVAL_HASH = 512  # MB per worker
 
 # ── Extractor ─────────────────────────────────────────────────────────────────
 
-TARGET          = None  # set to int to cap total positions collected
+TARGET = None  # set to int to cap total positions collected
 TARGET_PER_FILE = 200
 
-DEPTH           = 16
+DEPTH = 16
 EXTRACT_MULTIPV = 5
-PV_LINE_MOVES   = 10
+PV_LINE_MOVES = 20
 
-SAMPLE_EVERY_N_MIN  = 2
-SAMPLE_EVERY_N_MAX  = 10
-MIN_MOVE_NUMBER     = 5
-MAX_MOVE_NUMBER     = 50
-MIN_PIECE_COUNT     = 8
-GAME_SAMPLE_RATE    = 0.25
+SAMPLE_EVERY_N_MIN = 2
+SAMPLE_EVERY_N_MAX = 10
+MIN_MOVE_NUMBER = 5
+MAX_MOVE_NUMBER = 50
+MIN_PIECE_COUNT = 8
+GAME_SAMPLE_RATE = 0.25
 MIN_GAMES_TO_SAMPLE = 200
 PREFETCH_QUEUE_SIZE = 2
 WORKER_JOIN_TIMEOUT = 5
-MATE_CHECK_TOP_N    = 3
+MATE_CHECK_TOP_N = 3
 
 VIABILITY_THRESHOLDS = {
     "max_position_cp": 900,
@@ -67,20 +67,21 @@ VIABILITY_THRESHOLDS = {
 
 # ── Deep eval ─────────────────────────────────────────────────────────────────
 
-EVAL_MULTIPV = 10
+EVAL_MULTIPV = 20
+DEPTH_MULTIPV = 20
 
 # ── Filter ────────────────────────────────────────────────────────────────────
 
-REJECT_BALANCE        = {"losing"}
-LOCKED_BLOCKED_MIN    = 6
-LOCKED_TENSION_FLOOR  = 0
+REJECT_BALANCE = {"losing"}
+LOCKED_BLOCKED_MIN = 6
+LOCKED_TENSION_FLOOR = 0
 MIN_TACTICAL_ACTIVITY = 2
 
 # ── Chunking ──────────────────────────────────────────────────────────────────
 
 GENERAL_CHUNK_SIZE = 500
-SEED               = 42
-DAILY_YEARS        = 5
+SEED = 42
+DAILY_YEARS = 5
 
 
 # ── Steps ─────────────────────────────────────────────────────────────────────
@@ -138,7 +139,7 @@ def step_eval():
         output_file=EVAL_OUTPUT,
         engine_path=ENGINE_PATH,
         multipv=EVAL_MULTIPV,
-        depth=DEPTH,
+        depth=DEPTH_MULTIPV,
         n_workers=N_WORKERS,
         threads_per_worker=THREADS_PER_WORKER,
         hash_per_worker=EVAL_HASH,
@@ -164,11 +165,15 @@ def step_deploy():
 
 STEPS = [
     ("extract", step_extract, "Extract & evaluate positions from PGNs"),
-    ("enrich",  step_enrich,  "Enrich with metadata"),
-    ("filter",  step_filter,  "Filter poor positions"),
-    ("eval",    step_eval,    "Deep evaluation (MultiPV=10)"),
-    ("chunk",   step_chunk,   "Chunk into JSON files"),
-    ("deploy",  step_deploy,  "Deploy to public/positions/"),
+    ("enrich", step_enrich, "Enrich with metadata"),
+    ("filter", step_filter, "Filter poor positions"),
+    (
+        "eval",
+        step_eval,
+        f"Deep evaluation (depth={DEPTH_MULTIPV}, MultiPV={EVAL_MULTIPV})",
+    ),
+    ("chunk", step_chunk, "Chunk into JSON files"),
+    ("deploy", step_deploy, "Deploy to public/positions/"),
 ]
 
 
