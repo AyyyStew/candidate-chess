@@ -2,8 +2,6 @@ import json
 import chess
 from collections import Counter
 
-INPUT_FILE = "training_positions.jsonl"
-OUTPUT_FILE = "training_positions_enriched.jsonl"
 
 # ── classifiers ───────────────────────────────────────────────────────────────
 
@@ -70,13 +68,10 @@ def position_features(fen):
     white_pawns = board.pieces(chess.PAWN, chess.WHITE)
     black_pawns = board.pieces(chess.PAWN, chess.BLACK)
 
-    # Count pawns directly blocked on both sides
     white_blocked = sum(1 for sq in white_pawns if sq + 8 in black_pawns)
     black_blocked = sum(1 for sq in black_pawns if sq - 8 in white_pawns)
     blocked_pawns = white_blocked + black_blocked
 
-    # Pawn tension: how many pawn x pawn captures exist on the board.
-    # Zero tension + high blocked count = truly locked structure.
     pawn_tension = 0
     for sq in white_pawns:
         for cap_sq in board.attacks(sq):
@@ -115,9 +110,6 @@ def tag_position(pos):
         return "general"
 
 
-# ── enrich ────────────────────────────────────────────────────────────────────
-
-
 def enrich(pos):
     pvs = pos["eval"]["pvs"]
     if not all("cp" in pv for pv in pvs[:5]):
@@ -140,11 +132,14 @@ def enrich(pos):
 # ── main ──────────────────────────────────────────────────────────────────────
 
 
-def run():
+def run(
+    input_file="training_positions.jsonl",
+    output_file="training_positions_enriched.jsonl",
+):
     positions = []
     skipped = 0
 
-    with open(INPUT_FILE) as f:
+    with open(input_file) as f:
         for line in f:
             if not line.strip():
                 continue
@@ -176,11 +171,11 @@ def run():
     print(f"  Category: {dict(Counter(p['category'] for p in daily))}")
     print(f"  Balance:  {dict(Counter(p['balance'] for p in daily))}")
 
-    with open(OUTPUT_FILE, "w") as f:
+    with open(output_file, "w") as f:
         for pos in positions:
             f.write(json.dumps(pos) + "\n")
 
-    print(f"\nSaved to {OUTPUT_FILE}")
+    print(f"\nSaved to {output_file}")
 
 
 if __name__ == "__main__":

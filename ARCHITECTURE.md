@@ -224,11 +224,7 @@ The positions in `public/positions/` are produced offline by a Python pipeline i
    Filters to positions with at least 5 viable moves within tight cp spread.
    Output: training_positions.jsonl
 
-2. position_eval.py
-   Re-analyzes each position at depth 16, MultiPV=10 for richer data.
-   Output: training_positions_evaluated.jsonl
-
-3. position_enrichment.py
+2. position_enrichment.py
    Adds metadata from the stored PVs (no engine needed):
    - Phase: middlegame / early endgame / endgame (by piece count)
    - Category: dominant / complex / balanced / crushing / defending (by cp spread)
@@ -237,9 +233,14 @@ The positions in `public/positions/` are produced offline by a Python pipeline i
    - Tag: "daily" (high activity, equal/better positions) or "general"
    Output: training_positions_enriched.jsonl
 
-4. position_filter.py
+3. position_filter.py
    Drops poor puzzles: losing positions, locked pawn structures, low tactical activity.
    Output: training_positions_filtered.jsonl
+
+4. position_eval.py
+   Re-analyzes the filtered set at depth 16, MultiPV=10 for richer data.
+   Runs on the smaller filtered set so engine time is not wasted on rejected positions.
+   Output: training_positions_evaluated.jsonl
 
 5. chunking.py
    Slims each position to app-required fields, shuffles both pools,

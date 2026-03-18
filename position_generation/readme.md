@@ -38,20 +38,9 @@ Output: `training_positions.jsonl`
 
 ---
 
-### 2. Deep Evaluation (`position_eval.py`)
+### 2. Enrichment (`position_enrichment.py`)
 
-Re-analyses each position from the extractor output using Stockfish at depth 16 with
-MultiPV=10, replacing the shallow 5-PV eval with a full 10-PV eval. Runs 7 parallel
-workers (2 threads, 1024MB hash each) with the same task queue pattern as the
-extractor. Positions where fewer than 5 PVs have centipawn scores are dropped.
-
-Output: `training_positions_evaluated.jsonl`
-
----
-
-### 3. Enrichment (`position_enrichment.py`)
-
-Adds metadata to each evaluated position. No engine required — runs entirely on the
+Adds metadata to each extracted position. No engine required — runs entirely on the
 stored PV data and python-chess board analysis.
 
 **Phase** — based on piece count
@@ -87,7 +76,7 @@ Output: `training_positions_enriched.jsonl`
 
 ---
 
-### 4. Filtering (`position_filter.py`)
+### 3. Filtering (`position_filter.py`)
 
 Heuristic pass over the enriched dataset to remove positions that make poor puzzles.
 No engine required — runs on the enriched metadata.
@@ -101,6 +90,18 @@ No engine required — runs on the enriched metadata.
 Thresholds are constants at the top of the script.
 
 Output: `training_positions_filtered.jsonl`
+
+---
+
+### 4. Deep Evaluation (`position_eval.py`)
+
+Re-analyses the filtered set using Stockfish at depth 16 with MultiPV=10, replacing
+the shallow 5-PV eval with a full 10-PV eval. Running after the filter means engine
+time is only spent on positions that will actually be used. Runs 7 parallel workers
+(2 threads, 1024MB hash each). Positions where fewer than 5 PVs have centipawn
+scores are dropped. Resumable — skips FENs already present in the output file.
+
+Output: `training_positions_evaluated.jsonl`
 
 ---
 
@@ -131,6 +132,29 @@ positions/
     001.json     (500 positions)
     ...
 ```
+
+## Running the Pipeline
+
+Run all steps in order:
+
+```bash
+python run_pipeline.py
+```
+
+Start from a specific step (skips earlier ones — useful when resuming):
+
+```bash
+python run_pipeline.py --from enrich
+python run_pipeline.py --from eval
+```
+
+Run a single step only:
+
+```bash
+python run_pipeline.py --only filter
+```
+
+---
 
 ## Environment
 

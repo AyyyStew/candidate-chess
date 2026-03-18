@@ -1,21 +1,11 @@
 import json
+import os
 import chess
 import chess.engine
 import time
 from multiprocessing import Process, Queue
 
-INPUT_FILE = "training_positions.jsonl"
-OUTPUT_FILE = "training_positions_evaluated.jsonl"
-
-# --- Config ---
-ENGINE_PATH = r"C:\Users\alexs\Desktop\stockfish\stockfish-windows-x86-64-avx2.exe"
-MULTIPV = 10
-DEPTH = 16
-N_WORKERS = 7
-THREADS_PER_WORKER = 2
-HASH_PER_WORKER = 1024
-
-# ── helpers ───────────────────────────────────────────────────────────────────
+STOP_SIGNAL = None
 
 
 def parse_pvs(info):
@@ -36,13 +26,11 @@ def parse_pvs(info):
 
 # ── worker ────────────────────────────────────────────────────────────────────
 
-STOP_SIGNAL = None
 
-
-def worker(task_queue, result_queue):
+def worker(task_queue, result_queue, engine_path, depth, multipv, threads_per_worker, hash_per_worker):
     try:
-        with chess.engine.SimpleEngine.popen_uci(ENGINE_PATH) as engine:
-            engine.configure({"Threads": THREADS_PER_WORKER, "Hash": HASH_PER_WORKER})
+        with chess.engine.SimpleEngine.popen_uci(engine_path) as engine:
+            engine.configure({"Threads": threads_per_worker, "Hash": hash_per_worker})
             while True:
                 pos = task_queue.get()
                 if pos is STOP_SIGNAL:
@@ -51,13 +39,13 @@ def worker(task_queue, result_queue):
                 try:
                     board = chess.Board(pos["fen"])
                     info = engine.analyse(
-                        board, chess.engine.Limit(depth=DEPTH), multipv=MULTIPV
+                        board, chess.engine.Limit(depth=depth), multipv=multipv
                     )
                     pvs = parse_pvs(info)
                     if not all("cp" in pv for pv in pvs[:5]):
                         result_queue.put(("skip", None))
                     else:
-                        pos["eval"] = {"depth": DEPTH, "pvs": pvs}
+                        pos["eval"] = {"depth": depth, "pvs": pvs}
                         result_queue.put(("keep", pos))
                 except Exception:
                     result_queue.put(("error", None))
@@ -65,62 +53,107 @@ def worker(task_queue, result_queue):
         result_queue.put(("error", None))
 
 
+# ── resume helpers ────────────────────────────────────────────────────────────
+
+
+def load_existing_fens(output_file):
+    seen = set()
+    if not os.path.exists(output_file):
+        return seen
+    with open(output_file, "r") as f:
+        for line in f:
+            if line.strip():
+                try:
+                    seen.add(json.loads(line)["fen"])
+                except json.JSONDecodeError:
+                    pass
+    return seen
+
+
+def count_existing_output(output_file):
+    if not os.path.exists(output_file):
+        return 0
+    with open(output_file, "r") as f:
+        return sum(1 for line in f if line.strip())
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 
-def run():
-    with open(INPUT_FILE) as f:
+def run(
+    input_file="training_positions_filtered.jsonl",
+    output_file="training_positions_evaluated.jsonl",
+    engine_path=r"C:\Users\alexs\Desktop\stockfish\stockfish-windows-x86-64-avx2.exe",
+    multipv=10,
+    depth=16,
+    n_workers=7,
+    threads_per_worker=2,
+    hash_per_worker=1024,
+):
+    already_done = load_existing_fens(output_file)
+    already_kept = count_existing_output(output_file)
+
+    with open(input_file) as f:
         all_positions = [json.loads(line) for line in f if line.strip()]
 
-    total = len(all_positions)
-    print(f"Loaded {total} positions. Starting {N_WORKERS} workers...\n")
+    remaining = [p for p in all_positions if p["fen"] not in already_done]
+    total = len(remaining)
+
+    print(f"Input:        {len(all_positions)} positions")
+    print(f"Already done: {already_kept} (skipping)")
+    print(f"Remaining:    {total}. Starting {n_workers} workers...\n")
+
+    if total == 0:
+        print("Nothing to do.")
+        return
 
     task_queue = Queue()
     result_queue = Queue()
 
     workers = []
-    for _ in range(N_WORKERS):
-        p = Process(target=worker, args=(task_queue, result_queue))
+    for _ in range(n_workers):
+        p = Process(
+            target=worker,
+            args=(task_queue, result_queue, engine_path, depth, multipv, threads_per_worker, hash_per_worker),
+        )
         p.start()
         workers.append(p)
 
-    for pos in all_positions:
+    for pos in remaining:
         task_queue.put(pos)
     task_queue.put(STOP_SIGNAL)
 
-    results = []
+    kept = 0
     skipped = 0
     processed = 0
     start = time.time()
 
-    while processed < total:
-        status, result = result_queue.get()
-        processed += 1
-        if status == "keep":
-            results.append(result)
-        else:
-            skipped += 1
+    with open(output_file, "a") as out:
+        while processed < total:
+            status, result = result_queue.get()
+            processed += 1
+            if status == "keep":
+                out.write(json.dumps(result) + "\n")
+                out.flush()
+                kept += 1
+            else:
+                skipped += 1
 
-        elapsed = time.time() - start
-        rate = processed / elapsed if elapsed > 0 else 0
-        eta = (total - processed) / rate if rate > 0 else 0
-        print(
-            f"  {processed}/{total} | {rate:.1f} pos/s | ETA {eta:.0f}s | kept {len(results)} skipped {skipped}",
-            end="\r",
-        )
+            elapsed = time.time() - start
+            rate = processed / elapsed if elapsed > 0 else 0
+            eta = (total - processed) / rate if rate > 0 else 0
+            print(
+                f"  {processed}/{total} | {rate:.1f} pos/s | ETA {eta:.0f}s | kept {kept} skipped {skipped}",
+                end="\r",
+            )
 
     for p in workers:
         p.join(timeout=5)
         if p.is_alive():
             p.terminate()
 
-    print(f"\nDone. Kept {len(results)} | Skipped {skipped}")
-
-    with open(OUTPUT_FILE, "w") as f:
-        for pos in results:
-            f.write(json.dumps(pos) + "\n")
-
-    print(f"Saved to {OUTPUT_FILE}")
+    print(f"\nDone. Kept {kept} new | Skipped {skipped} | Total in file {already_kept + kept}")
+    print(f"Saved to {output_file}")
 
 
 if __name__ == "__main__":

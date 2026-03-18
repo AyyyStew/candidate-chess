@@ -1,18 +1,18 @@
 import os
 import shutil
 
-SRC = "./positions"
-DST = "../public/positions"
 
-if not os.path.exists(SRC):
-    print(f"Source not found: {SRC}")
-    exit(1)
+def run(src="./positions", dst="../public/positions"):
+    if not os.path.exists(src):
+        print(f"Source not found: {src}")
+        return
+    if os.path.exists(dst):
+        shutil.rmtree(dst)
+        print(f"Cleared {dst}")
+    shutil.copytree(src, dst)
+    total = sum(len(files) for _, _, files in os.walk(dst))
+    print(f"Copied {total} files to {dst}")
 
-if os.path.exists(DST):
-    shutil.rmtree(DST)
-    print(f"Cleared {DST}")
 
-shutil.copytree(SRC, DST)
-
-total = sum(len(files) for _, _, files in os.walk(DST))
-print(f"Copied {total} files to {DST}")
+if __name__ == "__main__":
+    run()

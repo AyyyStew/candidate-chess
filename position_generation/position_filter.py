@@ -1,30 +1,8 @@
 import json
 from collections import Counter
 
-INPUT_FILE = "training_positions_enriched.jsonl"
-OUTPUT_FILE = "training_positions_filtered.jsonl"
 
-# ── thresholds ────────────────────────────────────────────────────────────────
-
-# Drop positions where the side to move is this far behind.
-# "losing" = best_cp < -300, "worse" = -300 to -100.
-REJECT_BALANCE = {"losing"}
-
-# A pawn structure is considered locked when blocked_pawns (both sides combined)
-# is at or above this value AND pawn_tension is at or below the tension floor.
-# Positions with active pawn breaks (tension > LOCKED_TENSION_FLOOR) are kept
-# even if many pawns face each other.
-LOCKED_BLOCKED_MIN = 6
-LOCKED_TENSION_FLOOR = 0
-
-# Minimum combined checks + captures available to the side to move.
-# Ensures there is something happening tactically.
-MIN_TACTICAL_ACTIVITY = 2
-
-# ── filter ────────────────────────────────────────────────────────────────────
-
-
-def passes_filter(pos):
+def passes_filter(pos, reject_balance, locked_blocked_min, locked_tension_floor, min_tactical_activity):
     balance = pos.get("balance", "")
     features = pos.get("features", {})
 
@@ -33,13 +11,13 @@ def passes_filter(pos):
     blocked = features.get("blocked_pawns", 0)
     tension = features.get("pawn_tension", 0)
 
-    if balance in REJECT_BALANCE:
+    if balance in reject_balance:
         return False, "losing"
 
-    if blocked >= LOCKED_BLOCKED_MIN and tension <= LOCKED_TENSION_FLOOR:
+    if blocked >= locked_blocked_min and tension <= locked_tension_floor:
         return False, "locked_pawns"
 
-    if captures + checks < MIN_TACTICAL_ACTIVITY:
+    if captures + checks < min_tactical_activity:
         return False, "low_activity"
 
     return True, "ok"
@@ -48,17 +26,29 @@ def passes_filter(pos):
 # ── main ──────────────────────────────────────────────────────────────────────
 
 
-def run():
+def run(
+    input_file="training_positions_enriched.jsonl",
+    output_file="training_positions_filtered.jsonl",
+    reject_balance=None,
+    locked_blocked_min=6,
+    locked_tension_floor=0,
+    min_tactical_activity=2,
+):
+    if reject_balance is None:
+        reject_balance = {"losing"}
+
     kept = []
     reject_reasons = Counter()
 
-    with open(INPUT_FILE) as f:
+    with open(input_file) as f:
         for line in f:
             if not line.strip():
                 continue
             try:
                 pos = json.loads(line)
-                ok, reason = passes_filter(pos)
+                ok, reason = passes_filter(
+                    pos, reject_balance, locked_blocked_min, locked_tension_floor, min_tactical_activity
+                )
                 if ok:
                     kept.append(pos)
                 else:
@@ -79,11 +69,11 @@ def run():
     print(f"  Category: {dict(Counter(p['category'] for p in kept))}")
     print(f"  Tag:      {dict(Counter(p['tag'] for p in kept))}")
 
-    with open(OUTPUT_FILE, "w") as f:
+    with open(output_file, "w") as f:
         for pos in kept:
             f.write(json.dumps(pos) + "\n")
 
-    print(f"\nSaved to {OUTPUT_FILE}")
+    print(f"\nSaved to {output_file}")
 
 
 if __name__ == "__main__":

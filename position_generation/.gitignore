@@ -1,1 +1,3 @@
 /positions
+venv/
+__pycache__/
