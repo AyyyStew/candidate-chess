@@ -198,6 +198,6 @@ def run(config_path: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default=os.path.join(os.path.dirname(__file__), "config.toml"))
+    parser.add_argument("--config", default=os.environ.get("PIPELINE_CONFIG", os.path.join(os.path.dirname(__file__), "config.toml")))
     args = parser.parse_args()
     run(args.config)

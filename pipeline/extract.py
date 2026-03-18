@@ -7,28 +7,24 @@ evaluation, applies coarse filter, and writes survivors to the DB.
 Usage:
     python extract.py
     python extract.py --config /path/to/config.toml
+
+Thread model:
+    producer   — PGN → pos_queue
+    dispatcher — pos_queue → apply_async → future_queue
+    main       — future_queue → in_flight → future.ready() → DB
+
+The main thread never calls any blocking C code, so Ctrl+C always fires.
 """
 
 import argparse
-import collections
 import glob
 import os
+import queue
 import random
 import signal
 import time
 import tomllib
-from threading import Thread
-
-from celery.exceptions import TimeoutError as CeleryTimeoutError
-
-_interrupted = False
-
-def _handle_sigint(sig, frame):
-    global _interrupted
-    _interrupted = True
-    print("\n\nCtrl+C received — finishing in-flight tasks then stopping...")
-
-signal.signal(signal.SIGINT, _handle_sigint)
+from threading import Event, Lock, Thread
 
 import chess
 import chess.pgn
@@ -38,8 +34,8 @@ from service.tasks import evaluate
 from store import db
 from filter import default_coarse_filters, run_filters
 
-# How many eval tasks to keep in flight at once
-WINDOW_SIZE = 64
+WINDOW_SIZE    = 64
+TASK_TIMEOUT_S = 60  # revoke a task if it hasn't returned within this many seconds
 
 
 def load_config(path: str) -> dict:
@@ -47,21 +43,19 @@ def load_config(path: str) -> dict:
         return tomllib.load(f)
 
 
-def stream_positions_from_pgn(pgn_path: str, cfg: dict, seen_ids: set):
-    """Generator — streams positions one at a time without loading the full file."""
-    game_sample_rate = cfg["game_sample_rate"]
-
+def stream_positions(pgn_path: str, cfg: dict, seen_ids: set, seen_lock: Lock):
+    """Yield candidate position dicts from a single PGN file."""
     with open(pgn_path, "r", encoding="utf-8", errors="ignore") as f:
         while True:
             try:
                 game = chess.pgn.read_game(f)
             except Exception:
-                continue
+                break  # cursor undefined after a parse error — stop reading this file
 
             if game is None:
                 break
 
-            if random.random() > game_sample_rate:
+            if random.random() > cfg["game_sample_rate"]:
                 continue
 
             try:
@@ -73,56 +67,80 @@ def stream_positions_from_pgn(pgn_path: str, cfg: dict, seen_ids: set):
                     board.push(move)
                     move_index += 1
 
-                    if move_index == next_sample:
-                        move_num = board.fullmove_number
-                        piece_count = bin(int(board.occupied)).count("1")
+                    if move_index != next_sample:
+                        continue
 
-                        in_range = (
-                            cfg["min_move_number"] <= move_num <= cfg["max_move_number"]
-                            and piece_count >= cfg["min_piece_count"]
-                        )
+                    next_sample += random.randint(cfg["sample_every_n_min"], cfg["sample_every_n_max"])
 
-                        if in_range:
-                            pos_id = f"{chess.polyglot.zobrist_hash(board):016x}"
-                            if pos_id not in seen_ids:
-                                yield {
-                                    "id": pos_id,
-                                    "fen": board.fen(),
-                                    "move_number": move_num,
-                                    "piece_count": piece_count,
-                                    "side_to_move": "white" if board.turn == chess.WHITE else "black",
-                                    "source_game": {
-                                        "white": game.headers.get("White", "?"),
-                                        "black": game.headers.get("Black", "?"),
-                                        "white_elo": game.headers.get("WhiteElo", "?"),
-                                        "black_elo": game.headers.get("BlackElo", "?"),
-                                        "opening": game.headers.get("Opening", "?"),
-                                        "eco": game.headers.get("ECO", "?"),
-                                        "date": game.headers.get("UTCDate", "?"),
-                                    },
-                                }
+                    move_num = board.fullmove_number
+                    piece_count = bin(int(board.occupied)).count("1")
 
-                        next_sample += random.randint(cfg["sample_every_n_min"], cfg["sample_every_n_max"])
+                    if not (
+                        cfg["min_move_number"] <= move_num <= cfg["max_move_number"]
+                        and piece_count >= cfg["min_piece_count"]
+                    ):
+                        continue
 
+                    pos_id = f"{chess.polyglot.zobrist_hash(board):016x}"
+                    with seen_lock:
+                        if pos_id in seen_ids:
+                            continue
+
+                    yield {
+                        "id": pos_id,
+                        "fen": board.fen(),
+                        "move_number": move_num,
+                        "piece_count": piece_count,
+                        "side_to_move": "white" if board.turn == chess.WHITE else "black",
+                        "source_game": {
+                            "white": game.headers.get("White", "?"),
+                            "black": game.headers.get("Black", "?"),
+                            "white_elo": game.headers.get("WhiteElo", "?"),
+                            "black_elo": game.headers.get("BlackElo", "?"),
+                            "opening": game.headers.get("Opening", "?"),
+                            "eco": game.headers.get("ECO", "?"),
+                            "date": game.headers.get("UTCDate", "?"),
+                        },
+                    }
             except Exception:
                 continue
 
 
-def _producer(pgn_files: list, cfg: dict, seen_ids: set, queue: collections.deque, stop: list):
-    """Background thread: parses PGNs and appends positions to the queue."""
+def _producer(pgn_files, cfg, seen_ids, seen_lock, pos_queue, cancel, done):
+    """Thread 1: parse PGNs → pos_queue."""
     for pgn_path in pgn_files:
-        if stop[0]:
+        if cancel.is_set():
             break
         filename = os.path.basename(pgn_path)
-        print(f"\n[producer] starting {filename} | queue={len(queue)} in_flight≈{len(queue)}")
+        print(f"\n[producer] {filename}")
         count = 0
-        for pos in stream_positions_from_pgn(pgn_path, cfg, seen_ids):
-            while len(queue) > WINDOW_SIZE * 4 and not stop[0]:
-                time.sleep(0.05)
-            queue.append(pos)
+        for pos in stream_positions(pgn_path, cfg, seen_ids, seen_lock):
+            if cancel.is_set():
+                break
+            pos_queue.put(pos)  # blocks on backpressure — fine, this is a daemon thread
             count += 1
-        print(f"\n[producer] done {filename} | yielded {count} candidates | queue={len(queue)}")
-    stop[0] = True  # signal producer done
+        print(f"\n[producer] {filename} done — {count} candidates")
+    done.set()
+
+
+def _dispatcher(pos_queue, future_queue, depth, multipv, pv_line_moves,
+                cancel, producer_done, done):
+    """Thread 2: pos_queue → apply_async → future_queue.
+
+    apply_async can block indefinitely on broker hiccups. Keeping it here means
+    the main thread is never stuck and Ctrl+C always works.
+    """
+    while not cancel.is_set():
+        try:
+            pos = pos_queue.get(timeout=0.1)
+        except queue.Empty:
+            if producer_done.is_set():
+                break
+            continue
+        # This may block — that is intentional; it's isolated to this thread.
+        future = evaluate.apply_async(args=[pos["fen"], depth, multipv, pv_line_moves])
+        future_queue.put((pos, future, time.time()))
+    done.set()
 
 
 def run(config_path: str):
@@ -140,84 +158,157 @@ def run(config_path: str):
 
     existing = db.get_by_status(db_path, db.STATUS_EXTRACTED)
     seen_ids = {p["id"] for p in existing}
-    print(f"Existing extracted positions: {len(seen_ids)}")
+    seen_lock = Lock()
+    print(f"Existing positions: {len(seen_ids)}")
 
     pgn_files = sorted(glob.glob(os.path.join(pgn_dir, "*.pgn")))
     print(f"PGN files: {len(pgn_files)}\n")
 
+    # Apply socket timeouts to the Celery app so that broker and result-backend
+    # Redis calls never block indefinitely.  Without this, apply_async and
+    # future.ready() can hang for minutes on a flaky connection.
+    _socket_timeout = extract_cfg.get("broker_socket_timeout", 10)
+    evaluate.app.conf.update({
+        "broker_transport_options": {
+            "socket_timeout": _socket_timeout,
+            "socket_connect_timeout": _socket_timeout,
+        },
+        "redis_socket_timeout": _socket_timeout,
+        "redis_socket_connect_timeout": _socket_timeout,
+    })
+
     coarse_filters = default_coarse_filters(extract_cfg)
-    depth = extract_cfg["depth"]
-    multipv = extract_cfg["multipv"]
-    pv_line_moves = extract_cfg.get("pv_line_moves", 10)
-    target_per_file = extract_cfg.get("target_per_file")
+    depth        = extract_cfg["depth"]
+    multipv      = extract_cfg["multipv"]
+    pv_line_moves = extract_cfg.get("pv_line_moves", 10)  # moves per PV line; default 10
 
-    # Shared state between main thread and producer
-    candidate_queue: collections.deque = collections.deque()
-    stop = [False]
+    cancel          = Event()
+    producer_done   = Event()
+    dispatcher_done = Event()
 
-    producer = Thread(target=_producer, args=(pgn_files, extract_cfg, seen_ids, candidate_queue, stop), daemon=True)
-    producer.start()
+    def _sigint(*_):
+        print("\n\nCtrl+C — stopping...")
+        cancel.set()
 
-    # Sliding window: keep WINDOW_SIZE tasks in flight at all times
-    in_flight: collections.deque = collections.deque()  # (pos, async_result)
+    signal.signal(signal.SIGINT, _sigint)
 
+    pos_queue    = queue.Queue(maxsize=WINDOW_SIZE * 4)
+    future_queue = queue.Queue(maxsize=WINDOW_SIZE * 4)
+
+    Thread(
+        target=_producer,
+        args=(pgn_files, extract_cfg, seen_ids, seen_lock, pos_queue, cancel, producer_done),
+        daemon=True,
+    ).start()
+
+    Thread(
+        target=_dispatcher,
+        args=(pos_queue, future_queue, depth, multipv, pv_line_moves,
+              cancel, producer_done, dispatcher_done),
+        daemon=True,
+    ).start()
+
+    # in_flight: list of (pos, future, dispatch_time)
+    in_flight: list[tuple] = []
     total_kept = 0
     total_discarded = 0
-    start = time.time()
+    start_time = time.time()
 
-    while not _interrupted:
-        # Fill the window
-        while len(in_flight) < WINDOW_SIZE and (candidate_queue or not stop[0]):
-            if _interrupted:
-                break
-            if candidate_queue:
-                pos = candidate_queue.popleft()
-                future = evaluate.apply_async(args=[pos["fen"], depth, multipv, pv_line_moves])
-                in_flight.append((pos, future))
-            else:
-                time.sleep(0.01)
-
-        if not in_flight:
-            break
-
-        # Collect the oldest result — retry on timeout, discard on real errors
-        pos, future = in_flight.popleft()
-        eval_result = None
-        while not _interrupted:
-            try:
-                eval_result = future.get(timeout=2)
-                break
-            except CeleryTimeoutError:
-                continue  # worker busy, keep waiting — do NOT drop the task
-            except Exception:
-                total_discarded += 1
-                break
-
-        if eval_result is None:
-            continue
-
-        pos["eval"] = eval_result
-        passed, _ = run_filters(pos, coarse_filters)
-
-        if passed:
-            pos["status"] = db.STATUS_EXTRACTED
-            db.upsert(db_path, pos)
-            seen_ids.add(pos["id"])
-            total_kept += 1
-        else:
-            total_discarded += 1
-
-        elapsed = time.time() - start
+    def _print_status(note: str = ""):
+        elapsed = time.time() - start_time
         rate = (total_kept + total_discarded) / elapsed if elapsed > 0 else 0
+        oldest = f"{max(time.time() - t for _, _, t in in_flight):.1f}s" if in_flight else "-"
         print(
-            f"  kept {total_kept} | discarded {total_discarded} | {rate:.2f} pos/s | in flight {len(in_flight)}",
+            f"  kept {total_kept} | discarded {total_discarded} | {rate:.2f} pos/s"
+            f" | in_flight {len(in_flight)} | queue {future_queue.qsize()} | oldest {oldest}"
+            + (f" | {note}" if note else ""),
             end="\r",
         )
 
-    if _interrupted:
-        print("\n\nInterrupted — revoking in-flight tasks...")
-        stop[0] = True
-        for _, future in in_flight:
+    # Watchdog: reports if the main loop stops advancing (shouldn't happen now,
+    # but kept for peace of mind)
+    _phase = ["init"]
+    _phase_since = [time.time()]
+
+    def _set_phase(name: str):
+        _phase[0] = name
+        _phase_since[0] = time.time()
+
+    def _watchdog():
+        while not cancel.is_set():
+            time.sleep(1)
+            stuck = time.time() - _phase_since[0]
+            if stuck > 5:
+                print(f"\n[watchdog] stuck in '{_phase[0]}' for {stuck:.1f}s", flush=True)
+
+    Thread(target=_watchdog, daemon=True).start()
+
+    while not cancel.is_set():
+        # Fill in_flight from the future_queue
+        _set_phase("fill")
+        while len(in_flight) < WINDOW_SIZE and not cancel.is_set():
+            try:
+                item = future_queue.get_nowait()
+                in_flight.append(item)
+            except queue.Empty:
+                break
+
+        if not in_flight:
+            if dispatcher_done.is_set() and future_queue.empty():
+                break  # all done
+            _set_phase("sleep/wait")
+            time.sleep(0.05)
+            continue
+
+        # Scan all in-flight tasks and collect whichever are ready.
+        # Non-FIFO eliminates head-of-line blocking — one slow task no longer
+        # stalls the 60+ completed ones behind it.
+        _set_phase("scan")
+        collected = 0
+        still_waiting = []
+        for pos, future, dispatch_time in in_flight:
+            try:
+                ready = future.ready()
+            except Exception:
+                ready = False
+
+            if not ready:
+                if time.time() - dispatch_time > TASK_TIMEOUT_S:
+                    future.revoke()
+                    total_discarded += 1
+                else:
+                    still_waiting.append((pos, future, dispatch_time))
+                continue
+
+            try:
+                eval_result = future.get()
+            except Exception:
+                total_discarded += 1
+                continue
+
+            pos["eval"] = eval_result
+            passed, _ = run_filters(pos, coarse_filters)
+            if passed:
+                pos["status"] = db.STATUS_EXTRACTED
+                _set_phase("db.upsert")
+                db.upsert(db_path, pos)
+                _set_phase("scan")
+                with seen_lock:
+                    seen_ids.add(pos["id"])
+                total_kept += 1
+            else:
+                total_discarded += 1
+            collected += 1
+
+        in_flight = still_waiting
+        _set_phase("sleep")
+        if collected == 0:
+            time.sleep(0.05)  # nothing ready — yield so Ctrl+C fires
+        _print_status()
+
+    if cancel.is_set():
+        print("\n\nCancelled — revoking in-flight tasks...")
+        for _, future, _ in in_flight:
             future.revoke()
 
     print(f"\n\nDone. Kept: {total_kept} | Discarded: {total_discarded}")
@@ -226,6 +317,6 @@ def run(config_path: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default=os.path.join(os.path.dirname(__file__), "config.toml"))
+    parser.add_argument("--config", default=os.environ.get("PIPELINE_CONFIG", os.path.join(os.path.dirname(__file__), "config.toml")))
     args = parser.parse_args()
     run(args.config)
