@@ -61,8 +61,7 @@ export interface PositionPV {
 }
 
 export interface Position {
-  id: number;
-  sourceIndex?: number;
+  id: string;
   fen: string;
   label: string;
   event: string;
@@ -159,8 +158,7 @@ export function makePosition(
   if (!data.fen) throw new Error("Position requires fen");
   if (!data.label) throw new Error("Position requires label");
   return {
-    id: data.id ?? 0,
-    sourceIndex: data.sourceIndex,
+    id: data.id ?? "",
     fen: data.fen,
     label: data.label,
     event: data.event ?? "",

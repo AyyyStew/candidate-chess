@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useGameCoordinator } from "../hooks/useGameCoordinator";
 import { createGameSession, type GameSession } from "../sessions/GameSession";
-import { getPositionByIndex } from "../services/positionService";
+import { getPositionById } from "../services/positionService";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
 import GameLayout from "../components/GameLayout";
@@ -26,7 +26,7 @@ function RandomPageContent() {
     if (posParam !== null) {
       if (!hasStartedRef.current) {
         hasStartedRef.current = true;
-        loadByIndex(parseInt(posParam, 10));
+        loadById(posParam);
       }
     } else {
       hasStartedRef.current = true;
@@ -34,10 +34,10 @@ function RandomPageContent() {
     }
   }, [ready, posParam]);
 
-  async function loadByIndex(index: number) {
+  async function loadById(id: string) {
     setSession(null);
     try {
-      const position = await getPositionByIndex(index);
+      const position = await getPositionById(id);
       const { analysis } =
         await coordinatorRef.current!.advanceWithPosition(position);
       board.resetTo(position.fen, position.orientation);
@@ -52,9 +52,7 @@ function RandomPageContent() {
     setSession(null);
     const { position, analysis } = await coordinatorRef.current!.advance();
     board.resetTo(position.fen, position.orientation);
-    if (position.sourceIndex !== undefined) {
-      setSearchParams({ pos: String(position.sourceIndex) }, { replace: true });
-    }
+    setSearchParams({ pos: position.id }, { replace: true });
     setSession(createGameSession({ analysis, position }));
   }
 

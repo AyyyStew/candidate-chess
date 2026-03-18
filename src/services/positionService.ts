@@ -10,6 +10,7 @@ interface RawPV {
 }
 
 interface RawPosition {
+  id: string;
   fen: string;
   tag: "daily" | "general";
   daily_date?: string;
@@ -26,13 +27,10 @@ interface RawPosition {
   };
 }
 
-let positionCounter = 0;
-
-function toPosition(raw: RawPosition, sourceIndex?: number): Position {
+function toPosition(raw: RawPosition): Position {
   const sideToMove = raw.fen.split(" ")[1];
   return makePosition({
-    id: positionCounter++,
-    sourceIndex,
+    id: raw.id,
     fen: raw.fen,
     label: `${raw.game.white} (${raw.game.white_elo}) vs ${raw.game.black} (${raw.game.black_elo})`,
     event: raw.game.date ?? "",
@@ -81,7 +79,9 @@ async function loadNextGeneralChunk(): Promise<void> {
   }
 }
 
-export async function getDailyPosition(date?: string): Promise<Position | null> {
+export async function getDailyPosition(
+  date?: string,
+): Promise<Position | null> {
   const positions = await loadDailyChunk();
   const target = date ?? getTodayString();
   const raw = positions.find((p) => p.daily_date === target) ?? null;
@@ -96,16 +96,17 @@ export async function getRandomPosition(): Promise<Position> {
     loadNextGeneralChunk();
   }
   const index = Math.floor(Math.random() * generalPool.length);
-  return toPosition(generalPool[index], index);
+  return toPosition(generalPool[index]);
 }
 
-export async function getPositionByIndex(globalIndex: number): Promise<Position> {
-  while (generalPool.length <= globalIndex && currentChunk < GENERAL_CHUNK_COUNT) {
+export async function getPositionById(id: string): Promise<Position> {
+  while (true) {
+    const raw = generalPool.find((p) => p.id === id);
+    if (raw) return toPosition(raw);
+    if (currentChunk >= GENERAL_CHUNK_COUNT)
+      throw new Error(`No position with id ${id}`);
     await loadNextGeneralChunk();
   }
-  const raw = generalPool[globalIndex];
-  if (!raw) throw new Error(`No position at index ${globalIndex}`);
-  return toPosition(raw, globalIndex);
 }
 
 export async function preload(): Promise<void> {
