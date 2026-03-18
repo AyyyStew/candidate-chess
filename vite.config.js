@@ -7,4 +7,7 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 export default defineConfig({
   plugins: [react(), tailwindcss(), cloudflare()],
   test: { environment: "node" },
+  optimizeDeps: {
+    exclude: ["hono"],
+  },
 });

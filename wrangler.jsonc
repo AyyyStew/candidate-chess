@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "candidate-chess",
+  "main": "src/worker/index.ts",
   "compatibility_date": "2025-09-27",
   "observability": {
     "enabled": true
@@ -10,5 +11,12 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "candidate-chess-db",
+      "database_id": "8e2b3330-2123-4b84-b23d-3b5dc8e7ec1f"
+    }
   ]
 }
