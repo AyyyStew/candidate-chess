@@ -47,6 +47,7 @@ export default function BoardPanel({
   const [showArrows, setShowArrows] = useState(true);
   const board = useBoard();
   const apiRef = useRef<Api | null>(null);
+  const cgConfigRef = useRef<object>({});
 
   const {
     boardOrientation,
@@ -117,7 +118,7 @@ export default function BoardPanel({
         playMoveSound();
       } else {
         playBounceSound();
-        apiRef.current?.set({ fen: board.fen });
+        apiRef.current?.set(cgConfigRef.current);
       }
       return;
     }
@@ -134,6 +135,11 @@ export default function BoardPanel({
         playBounceSound();
       }
       onDrop?.(orig, dest);
+      // Always explicitly reset with full config — if parent state doesn't
+      // change (same move dragged twice), the sync effect won't fire and the
+      // piece would stay stuck at the destination. Partial set (fen only)
+      // would wipe movable.dests, making the board non-interactive.
+      apiRef.current?.set(cgConfigRef.current);
     }
   }
 
@@ -162,9 +168,11 @@ export default function BoardPanel({
       autoShapes: buildAutoShapes(),
       brushes: CUSTOM_BRUSHES,
     },
+    premovable: { enabled: false },
     animation: { enabled: true },
     highlight: { lastMove: true, check: false },
   };
+  cgConfigRef.current = cgConfig;
 
   return (
     <div className="lg:sticky lg:top-8 lg:self-start">
