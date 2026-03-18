@@ -86,6 +86,9 @@ export default function DailyResultsPanel({
                 san={c.san}
                 category={c.category}
                 eval={c.eval}
+                pvLine={c.line}
+                startFen={record.fen}
+                showLine={true}
               />
             ))}
           </div>
