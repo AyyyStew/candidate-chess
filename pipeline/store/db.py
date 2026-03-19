@@ -4,10 +4,9 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 
 # Possible status values
-STATUS_EXTRACTED = "extracted"
-STATUS_ENRICHED  = "enriched"
-STATUS_EVALUATED = "evaluated"
-STATUS_DISCARDED = "discarded"
+STATUS_EXTRACTED          = "extracted"           # saved from extract, not yet enriched
+STATUS_FINE_FILTER_PASSED = "fine_filter_passed"  # passed enrich fine filter
+STATUS_FINE_FILTER_FAILED = "fine_filter_failed"  # failed enrich fine filter
 
 
 def init(db_path: str):
@@ -70,6 +69,13 @@ def upsert_many(db_path: str, positions: list[dict]):
                 data       = excluded.data,
                 updated_at = excluded.updated_at
         """, rows)
+
+
+def get_all(db_path: str) -> list[dict]:
+    """Return all positions regardless of status."""
+    with _connect(db_path) as conn:
+        rows = conn.execute("SELECT data FROM positions").fetchall()
+    return [json.loads(row["data"]) for row in rows]
 
 
 def get_by_status(db_path: str, status: str) -> list[dict]:

@@ -123,7 +123,7 @@ def tag_position(pos: dict) -> str:
 
 
 def enrich(pos: dict) -> dict | None:
-    pvs = pos.get("eval", {}).get("pvs", [])
+    pvs = max(pos.get("evals", []), key=lambda e: e.get("depth", 0), default={}).get("pvs", [])
     if not all("cp" in pv for pv in pvs[:5]):
         return None
 
@@ -150,8 +150,8 @@ def run(config_path: str):
 
     db.init(db_path)
 
-    positions = db.get_by_status(db_path, db.STATUS_EXTRACTED)
-    print(f"Extracted positions to enrich: {len(positions)}")
+    positions = db.get_all(db_path)
+    print(f"Positions to enrich: {len(positions)}")
 
     fine_filters = default_fine_filters()
 
@@ -168,10 +168,10 @@ def run(config_path: str):
 
         passed, reason = run_filters(result, fine_filters)
         if passed:
-            result["status"] = db.STATUS_ENRICHED
+            result["status"] = db.STATUS_FINE_FILTER_PASSED
             enriched.append(result)
         else:
-            result["status"] = db.STATUS_DISCARDED
+            result["status"] = db.STATUS_FINE_FILTER_FAILED
             result["discard_reason"] = reason
             discarded.append(result)
             reject_reasons[reason] += 1

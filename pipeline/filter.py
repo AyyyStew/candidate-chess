@@ -27,7 +27,7 @@ def coarse_viable(
     multipv: int = 5,
 ):
     def _filter(pos: dict) -> tuple[bool, str]:
-        pvs = pos.get("eval", {}).get("pvs", [])
+        pvs = pos.get("evals", [{}])[0].get("pvs", [])
 
         if len(pvs) < multipv:
             return False, "pvs"

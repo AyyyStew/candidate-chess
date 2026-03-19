@@ -36,6 +36,26 @@ def load_config(path: str) -> dict:
         return tomllib.load(f)
 
 
+def _needs_eval(pos: dict, depth: int, multipv: int) -> bool:
+    """Return True if no existing eval entry covers depth >= requested and multipv >= requested."""
+    for entry in pos.get("evals", []):
+        if entry.get("depth", 0) >= depth and entry.get("multipv", 0) >= multipv:
+            return False
+    return True
+
+
+def _merge_eval(evals: list, new_entry: dict) -> list:
+    """Add new_entry and drop any existing entries it strictly dominates.
+
+    Entry A is dominated by B when B.depth >= A.depth and B.multipv >= A.multipv —
+    meaning B is at least as deep and covers at least as many lines.
+    """
+    d, m = new_entry["depth"], new_entry["multipv"]
+    kept = [e for e in evals if not (e.get("depth", 0) <= d and e.get("multipv", 0) <= m)]
+    kept.append(new_entry)
+    return kept
+
+
 def _dispatcher(positions, future_queue, depth, multipv, pv_line_moves, cancel, done):
     """Thread 1: positions list → apply_async → future_queue."""
     for pos in positions:
@@ -72,9 +92,10 @@ def run(config_path: str):
         }
     )
 
-    positions = db.get_by_status(db_path, db.STATUS_ENRICHED)
+    all_positions = db.get_by_status(db_path, db.STATUS_FINE_FILTER_PASSED)
+    positions = [p for p in all_positions if _needs_eval(p, depth, multipv)]
     total = len(positions)
-    print(f"Enriched positions to evaluate: {total}")
+    print(f"Fine filter passed: {len(all_positions)} | Needing eval at depth={depth} multipv={multipv}: {total}")
 
     if not positions:
         print("Nothing to do.")
@@ -210,8 +231,7 @@ def run(config_path: str):
                 total_failed += 1
                 continue
 
-            pos["eval"] = eval_result
-            pos["status"] = db.STATUS_EVALUATED
+            pos["evals"] = _merge_eval(pos.get("evals", []), eval_result)
             to_write.append(pos)
             collected += 1
 

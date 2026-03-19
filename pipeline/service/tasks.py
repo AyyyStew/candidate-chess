@@ -52,6 +52,6 @@ def evaluate(self, fen: str, depth: int, multipv: int, pv_line_moves: int = 10):
         board = chess.Board(fen)
         info = _engine.analyse(board, chess.engine.Limit(depth=depth), multipv=multipv)
         pvs = _parse_pvs(info, pv_line_moves)
-        return {"depth": depth, "pvs": pvs}
+        return {"depth": depth, "multipv": multipv, "pvs": pvs}
     except Exception as exc:
         raise self.retry(exc=exc, countdown=2)

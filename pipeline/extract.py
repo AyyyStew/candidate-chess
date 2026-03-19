@@ -312,7 +312,7 @@ def run(config_path: str):
                 total_discarded += 1
                 continue
 
-            pos["eval"] = eval_result
+            pos["evals"] = [eval_result]
             passed, _ = run_filters(pos, coarse_filters)
             if passed:
                 pos["status"] = db.STATUS_EXTRACTED
