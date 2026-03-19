@@ -11,7 +11,7 @@ Usage:
 Thread model:
     producer   — PGN → pos_queue
     dispatcher — pos_queue → apply_async → future_queue
-    main       — future_queue → in_flight → future.ready() → DB
+    main       — future_queue → in_flight → MGET → DB
 
 The main thread never calls any blocking C code, so Ctrl+C always fires.
 """
@@ -156,8 +156,8 @@ def run(config_path: str):
         random.seed(seed)
         print(f"Random seed: {seed}")
 
-    existing = db.get_by_status(db_path, db.STATUS_EXTRACTED)
-    seen_ids = {p["id"] for p in existing}
+    existing = db.query(db_path, "SELECT id FROM positions")
+    seen_ids = {row["id"] for row in existing}
     seen_lock = Lock()
     print(f"Existing positions: {len(seen_ids)}")
 
