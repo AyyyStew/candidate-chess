@@ -214,13 +214,22 @@ def run(config_path: str):
     total_discarded = 0
     start_time = time.time()
 
+    # Last-cycle timing (seconds)
+    _t_scan   = 0.0
+    _t_upsert = 0.0
+    _t_fill   = 0.0
+
     def _print_status(note: str = ""):
         elapsed = time.time() - start_time
         rate = (total_kept + total_discarded) / elapsed if elapsed > 0 else 0
         oldest = f"{max(time.time() - t for _, _, t in in_flight):.1f}s" if in_flight else "-"
+        scan_ms   = f"{_t_scan*1000:.0f}"
+        upsert_ms = f"{_t_upsert*1000:.0f}"
+        fill_ms   = f"{_t_fill*1000:.0f}"
         print(
             f"  kept {total_kept} | discarded {total_discarded} | {rate:.2f} pos/s"
             f" | in_flight {len(in_flight)} | fq {future_queue.qsize()} | pq {pos_queue.qsize()} | oldest {oldest}"
+            f" | scan {scan_ms}ms upsert {upsert_ms}ms fill {fill_ms}ms"
             + (f" | {note}" if note else ""),
             end="\r",
         )
@@ -246,12 +255,14 @@ def run(config_path: str):
     while not cancel.is_set():
         # Fill in_flight from the future_queue
         _set_phase("fill")
+        _t0 = time.time()
         while len(in_flight) < WINDOW_SIZE and not cancel.is_set():
             try:
                 item = future_queue.get_nowait()
                 in_flight.append(item)
             except queue.Empty:
                 break
+        _t_fill = time.time() - _t0
 
         if not in_flight:
             if dispatcher_done.is_set() and future_queue.empty():
@@ -260,28 +271,39 @@ def run(config_path: str):
             time.sleep(0.05)
             continue
 
-        # Scan all in-flight tasks and collect whichever are ready.
-        # Non-FIFO eliminates head-of-line blocking — one slow task no longer
-        # stalls the 60+ completed ones behind it.
+        # Bulk-check all in-flight tasks with one Redis MGET call.
         _set_phase("scan")
+        _t0 = time.time()
         collected = 0
         still_waiting = []
-        for pos, future, dispatch_time in in_flight:
-            try:
-                ready = future.ready()
-            except Exception:
-                ready = False
+        to_write = []
 
-            if not ready:
-                if time.time() - dispatch_time > TASK_TIMEOUT_S:
+        backend = evaluate.app.backend
+        id_to_item = {future.id: (pos, future, dispatch_time) for pos, future, dispatch_time in in_flight}
+        try:
+            keys = [backend.get_key_for_task(tid) for tid in id_to_item]
+            raw_values = backend.mget(keys)
+            results_map = backend._mget_to_results(raw_values, list(id_to_item.keys()))
+        except Exception:
+            results_map = {}
+
+        now = time.time()
+        for task_id, (pos, future, dispatch_time) in id_to_item.items():
+            if task_id not in results_map:
+                if now - dispatch_time > TASK_TIMEOUT_S:
                     future.revoke()
                     total_discarded += 1
                 else:
                     still_waiting.append((pos, future, dispatch_time))
                 continue
 
+            meta = results_map[task_id]
+            if meta.get("status") != "SUCCESS":
+                total_discarded += 1
+                continue
+
             try:
-                eval_result = future.get()
+                eval_result = meta["result"]
             except Exception:
                 total_discarded += 1
                 continue
@@ -290,15 +312,24 @@ def run(config_path: str):
             passed, _ = run_filters(pos, coarse_filters)
             if passed:
                 pos["status"] = db.STATUS_EXTRACTED
-                _set_phase("db.upsert")
-                db.upsert(db_path, pos)
-                _set_phase("scan")
-                with seen_lock:
-                    seen_ids.add(pos["id"])
+                to_write.append(pos)
                 total_kept += 1
             else:
                 total_discarded += 1
             collected += 1
+
+        _t_scan = time.time() - _t0
+
+        if to_write:
+            _set_phase("db.upsert")
+            _tu = time.time()
+            db.upsert_many(db_path, to_write)
+            _t_upsert = time.time() - _tu
+            with seen_lock:
+                for pos in to_write:
+                    seen_ids.add(pos["id"])
+        else:
+            _t_upsert = 0.0
 
         in_flight = still_waiting
         _set_phase("sleep")
