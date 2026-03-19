@@ -1,4 +1,4 @@
-# Runs eval workers only — no Redis, no runner.
+# Runs eval workers only — no Redis.
 # Deploy this on any machine on the LAN to add more eval capacity.
 #
 # Usage:
@@ -8,12 +8,8 @@
 
 services:
   worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    extends:
+      file: docker-compose.yml
+      service: worker
     environment:
-      PIPELINE_CONFIG: /app/config.docker.toml
       REDIS_HOST: ${REDIS_HOST}
-    volumes:
-      - ./config.docker.toml:/app/config.docker.toml:ro
-    restart: unless-stopped
