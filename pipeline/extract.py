@@ -100,6 +100,7 @@ def stream_positions(pgn_path: str, cfg: dict, seen_ids: set, seen_lock: Lock):
                             "opening": game.headers.get("Opening", "?"),
                             "eco": game.headers.get("ECO", "?"),
                             "date": game.headers.get("UTCDate", "?"),
+                            "pgn": str(game),
                         },
                     }
             except Exception:
@@ -114,11 +115,14 @@ def _producer(pgn_files, cfg, seen_ids, seen_lock, pos_queue, cancel, done):
         filename = os.path.basename(pgn_path)
         print(f"\n[producer] {filename}")
         count = 0
+        target = cfg.get("target_per_file")
         for pos in stream_positions(pgn_path, cfg, seen_ids, seen_lock):
             if cancel.is_set():
                 break
             pos_queue.put(pos)  # blocks on backpressure — fine, this is a daemon thread
             count += 1
+            if target and count >= target:
+                break
         print(f"\n[producer] {filename} done — {count} candidates")
     done.set()
 
