@@ -2,7 +2,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "0.0.0.0:6379:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -28,7 +28,7 @@ services:
     volumes:
       - ./config.docker.toml:/app/config.docker.toml:ro
       - ${PGN_DIR:-../position_generation/LichessEliteDatabase}:/data/pgns:ro
-      - ./output:/data
+      - pipeline_db:/data
     depends_on:
       - redis
     profiles: ["tools"]
@@ -37,3 +37,4 @@ services:
 
 volumes:
   redis_data:
+  pipeline_db:

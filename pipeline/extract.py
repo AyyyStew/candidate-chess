@@ -34,7 +34,7 @@ from service.tasks import evaluate
 from store import db
 from filter import default_coarse_filters, run_filters
 
-WINDOW_SIZE    = 64
+WINDOW_SIZE    = 512
 TASK_TIMEOUT_S = 60  # revoke a task if it hasn't returned within this many seconds
 
 
