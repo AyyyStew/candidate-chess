@@ -10,7 +10,7 @@ hash_mb = 256
 
 [extract]
 # seed = 42  # uncomment for reproducible sampling
-depth = 10
+depth = 7
 multipv = 5
 sample_every_n_min = 2
 sample_every_n_max = 10

@@ -220,7 +220,7 @@ def run(config_path: str):
         oldest = f"{max(time.time() - t for _, _, t in in_flight):.1f}s" if in_flight else "-"
         print(
             f"  kept {total_kept} | discarded {total_discarded} | {rate:.2f} pos/s"
-            f" | in_flight {len(in_flight)} | queue {future_queue.qsize()} | oldest {oldest}"
+            f" | in_flight {len(in_flight)} | fq {future_queue.qsize()} | pq {pos_queue.qsize()} | oldest {oldest}"
             + (f" | {note}" if note else ""),
             end="\r",
         )
