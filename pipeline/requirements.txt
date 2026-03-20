@@ -1,4 +1,0 @@
-celery[redis]
-chess
-tqdm
-tomllib; python_version < "3.11"
