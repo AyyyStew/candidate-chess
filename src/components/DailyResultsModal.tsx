@@ -113,12 +113,12 @@ export default function DailyResultsModal({
           .map((c) => candidateToSquare(c, snap.liveTopMoves))
       : []);
 
-  const shareUrl = window.location.href;
+  const shareUrl = window.location.origin;
   const shareDate = new Date(activeDate + "T00:00:00").toLocaleDateString(
     "en-US",
-    { month: "short", day: "numeric" },
+    { month: "short", day: "numeric", year: "numeric" },
   );
-  const shareText = `CandidateChess Daily – ${shareDate}\n${hits}/${target} candidate moves ${squares.join("")}\n${shareUrl}`;
+  const shareText = `CandidateChess Daily – ${shareDate} \n${hits}/${target} candidate moves ${squares.join("")}\n${shareUrl}`;
 
   function handleShare() {
     navigator.clipboard.writeText(shareText).then(() => {
