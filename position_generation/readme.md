@@ -1,174 +1,165 @@
-# Chess Position Dataset Pipeline
+# Chess Position Pipeline
 
-A data pipeline that extracts, evaluates, and categorizes chess positions from the
-Lichess Elite Database for use in a Family Feud-style chess candidate move training app.
-
----
-
-## Source Data
-
-**Lichess Elite Database** — https://database.nikonoel.fr
+Extracts candidate chess positions from PGN files, evaluates them with Stockfish via a distributed Celery/Redis worker cluster, enriches them with features, and stores results in SQLite.
 
 ---
 
-## Pipeline Overview
-
-### 1. Position Extraction (`position_extractor.py`)
-
-Streams PGN files and samples positions from each game using a random move interval
-(2-10 moves between samples). Filters to moves 5-50 with at least 8 pieces remaining
-to stay out of opening theory and trivial endgames. The full PGN of each source game
-is stored alongside the position metadata.
-
-Runs 7 parallel Stockfish workers (AVX2, 2 threads each) that stay alive across
-files via a shared task queue. A background extraction thread pre-fetches the next
-file while workers evaluate the current one. Progress is saved after each file so
-the run is resumable.
-
-Each position is evaluated at depth 16 with MultiPV=5 and must pass a viability
-filter to be kept:
-
-- At least 5 moves with centipawn scores (no forced mates in top 3)
-- Position not already decided (best move within ±900cp)
-- Move 2-3 within 150cp of best
-- Move 4 within 200cp of best
-- Move 5 within 300cp of best
-
-Output: `training_positions.jsonl`
-
----
-
-### 2. Enrichment (`position_enrichment.py`)
-
-Adds metadata to each extracted position. No engine required — runs entirely on the
-stored PV data and python-chess board analysis.
-
-**Phase** — based on piece count
-
-- Middlegame: >20 pieces
-- Early endgame: 10-20 pieces
-- Endgame: <10 pieces
-
-**Category** — based on centipawn spread between moves
-
-- `dominant` — spread_1_2 ≥ 75cp, clear best move
-- `complex` — spread_1_2 25-75cp, slight preference
-- `balanced` — spread_1_2 <25cp, all moves close
-- `crushing` — best move >+300cp
-- `defending` — best move <-300cp
-
-**Balance** — evaluation of best move from side to move
-`winning / better / equal / worse / losing`
-
-**Position features** — computed via python-chess
-
-- `mobility` — number of legal moves
-- `captures` — captures available
-- `checks` — checks available
-- `blocked_pawns` — locked pawn structure indicator
-
-**Tag** — intended use case
-
-- `daily` — mobility >30, captures >1, move <25, blocked pawns <3, balance = equal/better/winning
-- `general` — everything else
-
-Output: `training_positions_enriched.jsonl`
-
----
-
-### 3. Filtering (`position_filter.py`)
-
-Heuristic pass over the enriched dataset to remove positions that make poor puzzles.
-No engine required — runs on the enriched metadata.
-
-**Rules (all must pass):**
-
-- `balance != "losing"` — drops positions where the side to move is below −300cp
-- Not locked pawn structure: rejected when `blocked_pawns ≥ 6` AND `pawn_tension == 0` (pawns frozen with no breaks available)
-- `captures + checks ≥ 2` — minimum tactical activity for the side to move
-
-Thresholds are constants at the top of the script.
-
-Output: `training_positions_filtered.jsonl`
-
----
-
-### 4. Deep Evaluation (`position_eval.py`)
-
-Re-analyses the filtered set using Stockfish at depth 16 with MultiPV=10, replacing
-the shallow 5-PV eval with a full 10-PV eval. Running after the filter means engine
-time is only spent on positions that will actually be used. Runs 7 parallel workers
-(2 threads, 1024MB hash each). Positions where fewer than 5 PVs have centipawn
-scores are dropped. Resumable — skips FENs already present in the output file.
-
-Output: `training_positions_evaluated.jsonl`
-
----
-
-### 5. Chunking (`chunking.py`)
-
-Slims each position to fields needed by the React app, shuffles both pools
-(seed=42 for reproducibility), assigns calendar dates to daily positions
-starting January 1 2026, then splits into static JSON files.
-
-**Slim fields kept:**
-
-- `fen` — position
-- `tag` — daily or general
-- `eval.pvs` — top 5 moves with best_move, cp, line
-- `game` — white, black, white_elo, black_elo, date
-- `daily_date` — assigned calendar date (daily positions only)
-
-**Output structure:**
+## How It Works
 
 ```
-positions/
-  daily/
-    2026.json    (~365 positions)
-    2027.json    (~365 positions)
-    ...
-  general/
-    000.json     (500 positions)
-    001.json     (500 positions)
-    ...
+PGN files → extract.py → [Redis/Celery workers] → SQLite DB
+                                                        ↓
+                                                   enrich.py  (local, no workers)
+                                                        ↓
+                                              eval.py → [Redis/Celery workers] → SQLite DB
 ```
+
+The pipeline scripts (`extract.py`, `enrich.py`, `eval.py`) run **locally on your machine**. Docker is only used for Redis and the Stockfish eval workers.
+
+### Pipeline Steps
+
+**1. extract** — reads PGN files, samples positions, runs a cheap Stockfish eval (depth 10, multipv 5), applies a coarse filter to reject already-decided or boring positions, saves survivors to the DB with `STATUS_EXTRACTED`.
+
+**2. enrich** — pure local processing, no workers or Redis needed. Reads extracted positions, computes features (mobility, captures, pawn tension, phase), classifies each position (category, balance, tag), applies fine filters, saves as `STATUS_ENRICHED` or `STATUS_DISCARDED`.
+
+**3. eval** — runs a deep Stockfish eval (depth 20, multipv 20) on all enriched positions via the worker cluster. Saves results as `STATUS_EVALUATED`.
+
+### Position Statuses
+
+| Status      | Meaning                                                |
+| ----------- | ------------------------------------------------------ |
+| `extracted` | Passed coarse filter, cheap eval attached              |
+| `enriched`  | Passed fine filter, features + classification attached |
+| `discarded` | Failed fine filter (kept in DB with discard reason)    |
+| `evaluated` | Deep eval complete, ready for use                      |
+
+### Architecture
+
+- **Redis** — Celery broker and result backend, runs in Docker
+- **Workers** — Docker containers running Stockfish (one process per concurrency slot). Can run on multiple machines on the same LAN.
+- **extract.py / eval.py** — three-thread model: dispatcher sends tasks to Redis, main thread polls results via a single Redis MGET per cycle.
+
+- **filter.py** — coarse and fine filter definitions used by extract and enrich respectively.
+
+---
+
+## Setup
+
+### Main Machine
+
+```bash
+cd pipeline
+
+# Start Redis + worker
+docker-compose up -d
+
+# Verify workers are running
+docker-compose logs -f worker
+```
+
+### Other Machine on Lan
+
+Requirements:
+
+- Docker installed
+- CPU must support AVX2
+- Can reach the main machine's Redis on port 6379
+
+```bash
+cd pipeline
+
+# Set the main machine's IP
+export REDIS_HOST=X.X.X.X
+
+docker compose -f docker-compose.worker.yml up -d
+```
+
+`docker-compose.worker.yml` extends the `worker` service from `docker-compose.yml` and adds `REDIS_HOST`.
+
+---
 
 ## Running the Pipeline
 
-Run all steps in order:
+Pipeline scripts run locally. Make sure Redis and at least one worker are up first.
 
 ```bash
-python run_pipeline.py
+cd pipeline
+
+python extract.py
+python enrich.py
+python eval.py
 ```
 
-Start from a specific step (skips earlier ones — useful when resuming):
+Steps must run in order: `extract` → `enrich` → `eval`. Each step is idempotent — re-running skips already-processed positions.
+
+The DB is written to `./positions.db` by default (set in `config.toml`).
+
+### Database
 
 ```bash
-python run_pipeline.py --from enrich
-python run_pipeline.py --from eval
-```
+# Count positions by status
+python -c "from store import db; print(db.count_by_status('./positions.db'))"
 
-Run a single step only:
-
-```bash
-python run_pipeline.py --only filter
+# Wipe DB and Redis for a clean run
+rm positions.db
+docker volume rm pipeline_redis_data
 ```
 
 ---
 
-## Environment
+## Configuration
 
-- Python 3.x
-- python-chess
-- Stockfish 18 AVX2 (Windows)
-- Source: Lichess Elite Database
+Two config files:
+
+- `config.toml` — used when running scripts locally (default)
+- `config.docker.toml` — used inside worker containers (paths point to `/data`, Redis host is `redis`)
+
+Scripts pick up config via `PIPELINE_CONFIG` env var, defaulting to `config.toml`.
+
+### Key extract settings
+
+| Key                      | Default | Description                               |
+| ------------------------ | ------- | ----------------------------------------- |
+| `depth`                  | 10      | Stockfish search depth for coarse eval    |
+| `multipv`                | 5       | Number of PV lines to evaluate            |
+| `target_per_file`        | 200     | Max positions sampled per PGN file        |
+| `game_sample_rate`       | 0.25    | Fraction of games to sample               |
+| `sample_every_n_min/max` | 2/10    | Random move interval between samples      |
+| `min_move_number`        | 5       | Ignore positions before this move         |
+| `max_move_number`        | 50      | Ignore positions after this move          |
+| `min_piece_count`        | 8       | Skip near-empty endgames                  |
+| `max_position_cp`        | 900     | Reject positions that are already decided |
+
+### Key eval settings
+
+| Key       | Default | Description                          |
+| --------- | ------- | ------------------------------------ |
+| `depth`   | 20      | Stockfish search depth for deep eval |
+| `multipv` | 20      | Number of PV lines                   |
+
+### Worker settings
+
+| Key           | Description                                          |
+| ------------- | ---------------------------------------------------- |
+| `concurrency` | Number of parallel Stockfish processes per container |
+| `threads`     | Stockfish internal threads per process (keep at 1)   |
+| `hash_mb`     | Stockfish hash table size in MB per process          |
 
 ---
 
-## Notes
+## Coarse Filter (extract)
 
-- position_extraction is resumable via `progress.json` — tracks completed files and total kept
-- Daily positions are shuffled before date assignment so positions from different
-  years are distributed evenly across the calendar
-- Dataset covers ~8 years of daily puzzles (through ~2034)
-- Configs are in the scripts themselves. Make sure to change them if you run them
+Defined in `filter.py`, applied after cheap eval. A position passes if:
+
+- At least `multipv` PV lines returned
+- No mate in the top 3 lines
+- Best move score within `max_position_cp` centipawns of equal
+- Score drop between consecutive moves stays within spread thresholds (`move2_cp` through `move5_cp`)
+
+## Fine Filter (enrich)
+
+Defined in `filter.py`, applied after feature extraction. Rejects:
+
+- Losing positions (`balance = losing`)
+- Locked pawn structures (≥6 blocked pawns, no tension)
+- Low tactical activity (captures + checks < 2)
