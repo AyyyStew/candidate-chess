@@ -27,7 +27,7 @@ export default function GuessList({
     candidates.forEach((c) => {
       if (c.status === "pending" || seenMoves.current.has(c.move)) return;
       seenMoves.current.add(c.move);
-      if (c.status === "hit") {
+      if (c.status === "hit" || c.status === "hidden_gem") {
         playSuccessSound();
       } else if (c.status === "miss") {
         playFailureSound();
@@ -78,6 +78,7 @@ export default function GuessList({
               san={c.san}
               eval={c.eval ?? null}
               category={c.category ?? null}
+              hiddenGem={c.status === "hidden_gem"}
               isHit={c.status === "hit"}
               pvLine={c.line}
               startFen={fen}

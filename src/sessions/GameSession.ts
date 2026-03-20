@@ -89,15 +89,28 @@ export function createGameSession({
     const evaluated = await analysis.evaluateMove(uci, san);
     const isHit = evaluated.rank !== null && evaluated.rank <= targetMoves;
 
+    let isHiddenGem = false;
+    if (!isHit) {
+      const topMoves = analysis.getTopMoves();
+      const floorEval = topMoves[targetMoves - 1]?.eval ?? null;
+      const isBlackToMove = position.fen.includes(" b ");
+      const isPrecomputed = topMoves.some((m) => m.move === evaluated.move);
+      const missEval = evaluated.eval ?? 0;
+      const appearsTooGood =
+        floorEval !== null &&
+        (isBlackToMove ? missEval < floorEval : missEval > floorEval);
+      isHiddenGem = !isPrecomputed && appearsTooGood;
+    }
+
     if (isHit) hits++;
-    else strikes++;
+    else if (!isHiddenGem) strikes++;
 
     candidates = candidates.map((c) =>
       c.move === uci
         ? {
             move: evaluated.move,
             san: evaluated.san,
-            status: isHit ? "hit" : "miss",
+            status: isHit ? "hit" : isHiddenGem ? "hidden_gem" : "miss",
             eval: evaluated.eval,
             category: evaluated.category,
             line: evaluated.line,

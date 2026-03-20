@@ -38,7 +38,7 @@ export interface EvaluatedMove {
 export interface Candidate {
   move: string;
   san: string;
-  status: "pending" | "hit" | "miss";
+  status: "pending" | "hit" | "miss" | "hidden_gem";
   eval?: number;
   diffBest?: number;
   diffPos?: number;
