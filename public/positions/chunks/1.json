@@ -78763,5 +78763,132 @@
       "pawn_tension": 2
     },
     "complexity": ["rich"]
+  },
+  {
+    "id": "19781e1c97b9cee5",
+    "fen": "rn2k2r/pb2ppb1/5n1p/qPp3p1/2B1P3/2N3B1/2PQNPPP/1R3RK1 b kq - 5 15",
+    "move_number": 15,
+    "piece_count": 28,
+    "side_to_move": "black",
+    "source_game": {
+      "white": "jeboydavid",
+      "black": "matetechnique",
+      "white_elo": "2446",
+      "black_elo": "2228",
+      "date": "2016.01.21",
+      "eco": "B07",
+      "opening": "Pirc Defense: Byrne Variation",
+      "pgn": "[Event \"Rated Blitz game\"]\n[Date \"????.??.??\"]\n[Round \"?\"]\n[White \"jeboydavid\"]\n[Black \"matetechnique\"]\n[Result \"1-0\"]\n[WhiteTitle \"IM\"]\n[WhiteElo \"2446\"]\n[BlackElo \"2228\"]\n[ECO \"B07\"]\n[Opening \"Pirc Defense: Byrne Variation\"]\n[TimeControl \"180+0\"]\n[UTCDate \"2016.01.21\"]\n[UTCTime \"17:33:06\"]\n[Termination \"Normal\"]\n[WhiteRatingDiff \"+5\"]\n[BlackRatingDiff \"-5\"]\n\n1. e4 d6 2. d4 Nf6 3. Nc3 g6 4. Bg5 h6 5. Bf4 g5 6. Bg3 c6 7. a4 Qa5 8. Qd2\nb5 9. b4 Qxb4 10. Rb1 Qa5 11. axb5 c5 12. dxc5 dxc5 13. Bc4 Bb7 14. Nge2\nBg7 15. O-O O-O 16. Ra1 Qb6 17. Na4 Nxe4 18. Nxb6 Nxd2 19. Nxa8 Nxf1 20.\nRxa7 Nxg3 21. Rxb7 Nxe2+ 22. Bxe2 Be5 23. Nc7 1-0"
+    },
+    "status": "fine_filter_passed",
+    "tag": "daily",
+    "evals": [
+      {
+        "depth": 20,
+        "multipv": 20,
+        "pvs": [
+          {
+            "cp": -268,
+            "line": "e7e6 f2f4 g5f4 g3f4 b8d7 b5b6 f6e4 c3e4 a5d2 e4d2",
+            "best_move": "e7e6"
+          },
+          {
+            "cp": -280,
+            "line": "e8g8 e4e5 f6g4 e5e6 f7f5 b1a1 a5d8 d2d8 f8d8 a1d1",
+            "best_move": "e8g8"
+          },
+          {
+            "cp": -359,
+            "line": "a5d8 d2d8 e8d8 c4f7 e7e5 g3e5 b8d7 f1d1 d8e7 f7d5",
+            "best_move": "a5d8"
+          },
+          {
+            "cp": -366,
+            "line": "f6d7 f2f4 g5g4 e4e5 d7b6 c4d3 c5c4 d3f5 e7e6 b1a1",
+            "best_move": "f6d7"
+          },
+          {
+            "cp": -387,
+            "line": "a7a6 g3b8 e8g8 b8e5 f6e4 c3e4 a5d2 e4d2 g7e5 b5a6",
+            "best_move": "a7a6"
+          },
+          {
+            "cp": -389,
+            "line": "b8d7 e4e5 e8g8 e5f6 d7f6 b1a1 a5b6 d2e3 e7e6 c3a4",
+            "best_move": "b8d7"
+          },
+          {
+            "cp": -394,
+            "line": "f6e4 c3e4 a5d2 e4d2 e8g8 f1d1 b8d7 g3c7 e7e6 c4d3",
+            "best_move": "f6e4"
+          },
+          {
+            "cp": -412,
+            "line": "b7e4 c3e4 a5d2 e4d2 b8d7 f1d1 d7b6 g3e5 e8g8 c4d3",
+            "best_move": "b7e4"
+          },
+          {
+            "cp": -428,
+            "line": "h6h5 d2g5 e8f8 e4e5 h5h4 e5f6 g7f6 g5f5 h4g3 f2g3",
+            "best_move": "h6h5"
+          },
+          {
+            "cp": -428,
+            "line": "h8f8 f1d1 f6e4 c3e4 a5d2 e4d2 b8d7 g3c7 d7b6 e2g3",
+            "best_move": "h8f8"
+          },
+          {
+            "cp": -442,
+            "line": "a5b6 e4e5 b8d7 e5f6 d7f6 f1d1 e8g8 c3a4 b6d8 d2e3",
+            "best_move": "a5b6"
+          },
+          {
+            "cp": -446,
+            "line": "b8a6 b5a6 b7a6 c4a6 a5a6 e4e5 f6h5 c3d5 a6c6 e5e6",
+            "best_move": "b8a6"
+          },
+          {
+            "cp": -454,
+            "line": "b8c6 b5c6 b7c6 f2f4 a8d8 d2e3 g5f4 g3f4 e8g8 h2h3",
+            "best_move": "b8c6"
+          },
+          {
+            "cp": -457,
+            "line": "a5a3 e4e5 b8d7 e5f6 d7f6 g3c7 a8c8 b1b3 a3b3 c2b3",
+            "best_move": "a5a3"
+          },
+          {
+            "cp": -459,
+            "line": "f6h5 c4d5 a5d8 f1d1 b7d5 d2d5 b8d7 g3c7 d8c8 d5c6",
+            "best_move": "f6h5"
+          },
+          {
+            "cp": -467,
+            "line": "f6h7 c4d5 a5d8 f1d1 b7d5 d2d5 b8d7 d5b7 f7f5 g3c7",
+            "best_move": "f6h7"
+          },
+          {
+            "cp": -479,
+            "line": "f6g4 c4d5 g7c3 e2c3 b7d5 d2d5 e8g8 d5a8 a5c3 a8a7",
+            "best_move": "f6g4"
+          },
+          {
+            "cp": -487,
+            "line": "g5g4 e4e5 f6h7 c4d5 a5b6 f1d1 b8d7 c3a4 b7d5 d2d5",
+            "best_move": "g5g4"
+          },
+          {
+            "cp": -488,
+            "line": "b7c8 e4e5 f6g4 d2d5 e8g8 d5a8 g4e5 g3e5 g7e5 b5b6",
+            "best_move": "b7c8"
+          },
+          {
+            "cp": -494,
+            "line": "e7e5 d2d6 a5d8 d6e5 d8e7 e5e7 e8e7 f2f4 g5f4 e2f4",
+            "best_move": "e7e5"
+          }
+        ]
+      }
+    ]
   }
 ]
