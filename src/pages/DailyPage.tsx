@@ -21,9 +21,8 @@ import {
   type DailyRecord,
 } from "../services/dailyStatsService";
 import type { Position, Candidate } from "../types";
-import { getRank } from "../types";
+import { candidateToSquare } from "../utils/daily";
 import DailyResultsPanel from "../components/DailyResultsPanel";
-import { RANK_EMOJI } from "../constants/daily";
 
 function formatDateString(isoDate: string): string {
   return new Date(isoDate + "T00:00:00").toLocaleDateString("en-US", {
@@ -91,13 +90,9 @@ function DailyPageContent({
       (c: Candidate) => c.status !== "pending",
     );
     const hits = resolved.filter((c: Candidate) => c.status === "hit").length;
-    const squares = resolved.map((c: Candidate) => {
-      if (c.status !== "hit") return "❌";
-      const rank = getRank(snap.liveTopMoves, c.move);
-      return rank != null && rank >= 1 && rank <= 5
-        ? RANK_EMOJI[rank - 1]
-        : "🟩";
-    });
+    const squares = resolved.map((c: Candidate) =>
+      candidateToSquare(c, snap.liveTopMoves),
+    );
 
     const newRecord: DailyRecord = {
       date: activeDate,

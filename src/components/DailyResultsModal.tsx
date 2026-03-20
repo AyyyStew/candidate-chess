@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { GameSnapshot } from "../types";
-import { getRank } from "../types";
 import type { DailyRecord } from "../services/dailyStatsService";
 import StreakDisplay from "./StreakDisplay";
-import { RANK_EMOJI } from "../constants/daily";
+import { candidateToSquare } from "../utils/daily";
 
 interface DailyResultsModalProps {
   activeDate: string;
@@ -111,16 +110,9 @@ export default function DailyResultsModal({
     (snap
       ? snap.candidates
           .filter((c) => c.status !== "pending")
-          .map((c) => {
-            if (c.status !== "hit") return "❌";
-            const rank = getRank(snap.liveTopMoves, c.move);
-            return rank != null && rank >= 1 && rank <= 5
-              ? RANK_EMOJI[rank - 1]
-              : "🟩";
-          })
+          .map((c) => candidateToSquare(c, snap.liveTopMoves))
       : []);
 
-  const emptySlots = Math.max(0, target - squares.length);
   const shareUrl = window.location.href;
   const shareDate = new Date(activeDate + "T00:00:00").toLocaleDateString(
     "en-US",
@@ -184,7 +176,7 @@ export default function DailyResultsModal({
               / {target} moves found
             </span>
           </div>
-          <div className="flex gap-2 text-2xl">
+          <div className="flex flex-wrap gap-2 text-2xl">
             {squares.map((s, i) => (
               <span key={i}>{s}</span>
             ))}
