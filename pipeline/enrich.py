@@ -12,20 +12,19 @@ Usage:
 import argparse
 import io
 import os
+import time
 import tomllib
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
+from functools import lru_cache
 
 import chess
-
 import chess.pgn
 import chess.polyglot
 from tqdm import tqdm
 
 from store import db
 from filter import default_fine_filters, run_filters
-from utils.cook import cook as cook_puzzle
-from utils.model import Puzzle
 
 
 def load_config(path: str) -> dict:
@@ -62,49 +61,54 @@ def _classify_phase_from_board(board: chess.Board) -> str:
     return "opening"
 
 
+@lru_cache(maxsize=512)
+def _pgn_phase_plies(pgn_str: str) -> tuple[int | None, int | None] | None:
+    """
+    Replay a PGN once and return (middle_ply, end_ply). Result is cached per
+    unique PGN string so multiple positions from the same game pay this cost once.
+    Returns None on parse failure.
+    """
+    try:
+        game = chess.pgn.read_game(io.StringIO(pgn_str))
+        if game is None:
+            return None
+        board = game.board()
+        middle_ply = None
+        end_ply = None
+        for i, move in enumerate(game.mainline_moves()):
+            if middle_ply is None:
+                if _majors_and_minors(board) <= 10 or _backrank_sparse(board):
+                    middle_ply = i
+            else:
+                if _majors_and_minors(board) <= 6:
+                    end_ply = i
+                    break
+            board.push(move)
+        return middle_ply, end_ply
+    except Exception:
+        return None
+
+
 def classify_phase(pos: dict) -> str:
     """
-    Replay the source PGN to find the game phase at the position's ply.
-
-    Transition rules (from Lichess Divider):
-      middlegame starts at the first ply where majors_and_minors <= 10
-        OR the back rank is sparse (pieces developed).
-      endgame starts at the first ply (after midgame) where majors_and_minors <= 6.
+    Map the position's ply to opening / middlegame / endgame using the
+    Lichess Divider algorithm. Falls back to a board-only estimate when
+    no source PGN is available or parsing fails.
     """
     pgn_str = pos.get("source_game", {}).get("pgn", "")
     move_number = pos["move_number"]
     side = pos["side_to_move"]
-    # ply 0 = initial position before any moves
     target_ply = (move_number - 1) * 2 + (0 if side == "white" else 1)
 
     if pgn_str:
-        try:
-            game = chess.pgn.read_game(io.StringIO(pgn_str))
-            if game is not None:
-                board = game.board()
-                boards = [board.copy()]
-                for move in game.mainline_moves():
-                    board.push(move)
-                    boards.append(board.copy())
-
-                middle_ply = None
-                end_ply = None
-                for i, b in enumerate(boards):
-                    if middle_ply is None:
-                        if _majors_and_minors(b) <= 10 or _backrank_sparse(b):
-                            middle_ply = i
-                    else:
-                        if _majors_and_minors(b) <= 6:
-                            end_ply = i
-                            break
-
-                if end_ply is not None and target_ply >= end_ply:
-                    return "endgame"
-                if middle_ply is not None and target_ply >= middle_ply:
-                    return "middlegame"
-                return "opening"
-        except Exception:
-            pass
+        result = _pgn_phase_plies(pgn_str)
+        if result is not None:
+            middle_ply, end_ply = result
+            if end_ply is not None and target_ply >= end_ply:
+                return "endgame"
+            if middle_ply is not None and target_ply >= middle_ply:
+                return "middlegame"
+            return "opening"
 
     return _classify_phase_from_board(chess.Board(pos["fen"]))
 
@@ -143,75 +147,6 @@ def classify_complexity(pvs: list, features: dict) -> list[str]:
         tags.append("active")
 
     return tags
-
-
-# ── tactics via lichess cook ─────────────────────────────────────────────────
-# Tags produced by cook() that aren't useful at the position level.
-_EXCLUDED_TAGS = {
-    "mate", "mateIn1", "mateIn2", "mateIn3", "mateIn4", "mateIn5",
-    "oneMove", "short", "long", "veryLong",
-}
-
-
-def build_puzzle(pos: dict, pv: dict) -> Puzzle | None:
-    """
-    Build a lichess-compatible Puzzle from a position + single PV.
-
-    Prepends the move that led TO this position so the game tree matches
-    the lichess convention: opponent move first, pov moves at mainline[1::2].
-    Falls back to a direct build with field override when no prior move exists.
-    """
-    line = pv.get("line", "")
-    cp = pv.get("cp", 0)
-    if not line:
-        return None
-
-    pgn_str = pos.get("source_game", {}).get("pgn", "")
-    move_number = pos["move_number"]
-    side = pos["side_to_move"]
-    target_ply = (move_number - 1) * 2 + (0 if side == "white" else 1)
-
-    try:
-        if pgn_str and target_ply > 0:
-            src_game = chess.pgn.read_game(io.StringIO(pgn_str))
-            if src_game is None:
-                return None
-            src_moves = list(src_game.mainline_moves())
-            if target_ply - 1 >= len(src_moves):
-                return None
-
-            board = src_game.board()
-            for m in src_moves[:target_ply - 1]:
-                board.push(m)
-            preceding_move = src_moves[target_ply - 1]
-
-            # Snapshot as clean FEN — from_board() replays the move stack,
-            # so passing the original board would include all historical moves.
-            new_game = chess.pgn.Game.from_board(chess.Board(board.fen()))
-            node = new_game.add_main_variation(preceding_move)
-            board.push(preceding_move)
-        else:
-            board = chess.Board(pos["fen"])
-            new_game = chess.pgn.Game.from_board(board)
-            node = new_game
-
-        for uci in line.split():
-            move = chess.Move.from_uci(uci)
-            if move not in board.legal_moves:
-                break
-            node = node.add_main_variation(move)
-            board.push(move)
-
-        puzzle = Puzzle(id=pos["id"], game=new_game, cp=cp)
-
-        # Fallback: no prior move means pov is inverted by __post_init__ — fix it
-        if not (pgn_str and target_ply > 0):
-            puzzle.pov = chess.WHITE if side == "white" else chess.BLACK
-            puzzle.mainline = [new_game] + list(new_game.mainline())  # type: ignore[list-item]
-
-        return puzzle
-    except Exception:
-        return None
 
 
 # ── enrichment logic ────────────────────────────────────────────────────────
@@ -317,20 +252,15 @@ def enrich(pos: dict) -> dict | None:
     if len(cp_pvs) < 2:
         return None
 
+    t0 = time.perf_counter()
     phase = classify_phase(pos)
+    t_phase = time.perf_counter() - t0
+
+    t0 = time.perf_counter()
     category, balance, spreads = classify_category(cp_pvs, pos["side_to_move"])
     features = position_features(pos["fen"])
     complexity = classify_complexity(cp_pvs, features)
-
-    # Tag each PV line using lichess cook, aggregate to position level
-    all_tags: set[str] = set()
-    for pv in pvs:
-        puzzle = build_puzzle(pos, pv)
-        pv_tags = [t for t in cook_puzzle(puzzle) if t not in _EXCLUDED_TAGS] if puzzle else []
-        pv["tactics"] = pv_tags
-        all_tags.update(pv_tags)
-
-    position_tactics = sorted(all_tags)
+    t_classify = time.perf_counter() - t0
 
     pos["phase"] = phase
     pos["eco"] = pos.get("source_game", {}).get("eco", "?")
@@ -340,8 +270,8 @@ def enrich(pos: dict) -> dict | None:
     pos["spreads"] = spreads
     pos["features"] = features
     pos["complexity"] = complexity
-    pos["tactics"] = position_tactics
     pos["tag"] = tag_position({**pos, "balance": balance, "features": features})
+    pos["_timings"] = {"phase": t_phase, "classify": t_classify}
 
     return pos
 
@@ -366,6 +296,7 @@ def run(config_path: str):
     discarded = []
     skipped_positions = []
     reject_reasons: Counter = Counter()
+    timing_totals: Counter = Counter()
 
     with ProcessPoolExecutor(max_workers=workers) as executor:
         results = tqdm(
@@ -379,6 +310,10 @@ def run(config_path: str):
                 skipped_positions.append(pos)
                 continue
 
+            timings = result.pop("_timings", {})
+            for k, v in timings.items():
+                timing_totals[k] += v
+
             passed, reason = run_filters(result, fine_filters)
             if passed:
                 result["status"] = db.STATUS_FINE_FILTER_PASSED
@@ -391,6 +326,16 @@ def run(config_path: str):
 
     db.upsert_many(db_path, enriched)
     db.upsert_many(db_path, discarded)
+
+    processed = len(enriched) + len(discarded)
+    if processed > 0 and timing_totals:
+        t_total = sum(timing_totals.values())
+        print("\n── Timing breakdown (total wall, all workers) ──")
+        for step, t in sorted(timing_totals.items(), key=lambda x: -x[1]):
+            pct = 100 * t / t_total
+            avg_ms = 1000 * t / processed
+            print(f"  {step:<12} {t:6.1f}s  {pct:5.1f}%  avg {avg_ms:.1f}ms/pos")
+        print(f"  {'TOTAL':<12} {t_total:6.1f}s  100.0%")
 
     skipped = len(skipped_positions)
     total = len(enriched) + len(discarded) + skipped
@@ -416,12 +361,10 @@ def run(config_path: str):
         complexity_counts = Counter(
             tag for p in enriched for tag in p.get("complexity", [])
         )
-        tactics_counts = Counter(t for p in enriched for t in p.get("tactics", []))
         print(f"\nTags:       {dict(tags)}")
         print(f"Phase:      {dict(phases)}")
         print(f"Balance:    {dict(balances)}")
         print(f"Complexity: {dict(complexity_counts)}")
-        print(f"Tactics:    {dict(tactics_counts)}")
 
     print(f"\n{db.count_by_status(db_path)}")
 
