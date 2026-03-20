@@ -24,6 +24,8 @@ from tqdm import tqdm
 
 from store import db
 from filter import default_fine_filters, run_filters
+from utils.cook import cook as cook_puzzle
+from utils.model import Puzzle
 
 
 def load_config(path: str) -> dict:
@@ -143,177 +145,73 @@ def classify_complexity(pvs: list, features: dict) -> list[str]:
     return tags
 
 
-# ── tactics detection ────────────────────────────────────────────────────────
-# Each detector checks a single board state from the perspective of board.turn.
-# tag_pv_tactics() walks the full PV line and runs all detectors at each step,
-# recording the depth at which each tactic first appears.
-
-
-def _slider_attacks_ray(piece_type: int, from_sq: int, to_sq: int) -> bool:
-    """True if piece_type can attack along the geometric ray from from_sq to to_sq."""
-    ff, fr = chess.square_file(from_sq), chess.square_rank(from_sq)
-    tf, tr = chess.square_file(to_sq), chess.square_rank(to_sq)
-    on_rank_or_file = ff == tf or fr == tr
-    on_diagonal = abs(ff - tf) == abs(fr - tr) and ff != tf
-    if piece_type == chess.ROOK:
-        return on_rank_or_file
-    if piece_type == chess.BISHOP:
-        return on_diagonal
-    if piece_type == chess.QUEEN:
-        return on_rank_or_file or on_diagonal
-    return False
-
-
-_PIECE_VALUE = {
-    chess.PAWN: 1,
-    chess.KNIGHT: 3,
-    chess.BISHOP: 3,
-    chess.ROOK: 5,
-    chess.QUEEN: 9,
-    chess.KING: 99,
+# ── tactics via lichess cook ─────────────────────────────────────────────────
+# Tags produced by cook() that aren't useful at the position level.
+_EXCLUDED_TAGS = {
+    "mate", "mateIn1", "mateIn2", "mateIn3", "mateIn4", "mateIn5",
+    "oneMove", "short", "long", "veryLong",
 }
 
 
-def _detect_fork(board: chess.Board) -> bool:
+def build_puzzle(pos: dict, pv: dict) -> Puzzle | None:
     """
-    A piece attacks 2+ enemy pieces each worth >= the forking piece.
-    Filters out a queen "attacking" two pawns, which is not a real fork.
-    """
-    color = board.turn
-    for sq in chess.scan_forward(board.occupied_co[color] & ~board.kings):
-        forker_val = _PIECE_VALUE.get(board.piece_type_at(sq), 0)
-        valuable_targets = [
-            esq
-            for esq in chess.SquareSet(board.attacks(sq)) & board.occupied_co[not color]
-            if _PIECE_VALUE.get(board.piece_type_at(esq), 0) >= forker_val
-        ]
-        if len(valuable_targets) >= 2:
-            return True
-    return False
+    Build a lichess-compatible Puzzle from a position + single PV.
 
-
-def _detect_pin(board: chess.Board) -> bool:
-    """Any enemy piece is pinned to its king."""
-    enemy_color = not board.turn
-    for sq in chess.scan_forward(board.occupied_co[enemy_color] & ~board.kings):
-        if board.is_pinned(enemy_color, sq):
-            return True
-    return False
-
-
-def _detect_hanging(board: chess.Board) -> bool:
-    """An enemy piece worth >= a minor piece is attacked and not defended."""
-    color = board.turn
-    minor_or_above = {chess.KNIGHT, chess.BISHOP, chess.ROOK, chess.QUEEN, chess.KING}
-    for sq in chess.scan_forward(board.occupied_co[not color]):
-        if board.piece_type_at(sq) not in minor_or_above:
-            continue
-        if board.is_attacked_by(color, sq) and not board.is_attacked_by(not color, sq):
-            return True
-    return False
-
-
-def _detect_skewer(board: chess.Board) -> bool:
-    """
-    A sliding piece attacks a high-value enemy piece with another enemy
-    piece behind it on the same ray.
-    """
-    color = board.turn
-    high_value = {chess.QUEEN, chess.ROOK, chess.KING}
-    sliders = (
-        board.pieces(chess.ROOK, color)
-        | board.pieces(chess.BISHOP, color)
-        | board.pieces(chess.QUEEN, color)
-    )
-    for attacker_sq in sliders:
-        for victim_sq in board.attacks(attacker_sq) & board.occupied_co[not color]:
-            if board.piece_type_at(victim_sq) not in high_value:
-                continue
-            # Temporarily remove the victim; if the attacker now hits another
-            # enemy piece, there was a piece hiding behind the victim.
-            victim_piece = board.remove_piece_at(victim_sq)
-            hits_behind = bool(
-                board.attacks(attacker_sq) & board.occupied_co[not color]
-            )
-            board.set_piece_at(victim_sq, victim_piece)
-            if hits_behind:
-                return True
-    return False
-
-
-def _detect_discovered_attack(board: chess.Board) -> bool:
-    """
-    Moving any piece reveals a sliding piece that attacks a high-value enemy
-    (rook, queen, or king). Ignores reveals onto pawns/minors — too common.
-    """
-    color = board.turn
-    high_value = {chess.ROOK, chess.QUEEN, chess.KING}
-    sliders = (
-        board.pieces(chess.ROOK, color)
-        | board.pieces(chess.BISHOP, color)
-        | board.pieces(chess.QUEEN, color)
-    )
-    for move in board.legal_moves:
-        from_sq = move.from_square
-        own_sliders = sliders & ~chess.BB_SQUARES[from_sq]
-        for slider_sq in own_sliders:
-            slider_type = board.piece_type_at(slider_sq)
-            for enemy_sq in chess.scan_forward(
-                board.occupied_co[not color] & ~chess.BB_SQUARES[move.to_square]
-            ):
-                if board.piece_type_at(enemy_sq) not in high_value:
-                    continue
-                between = chess.between(slider_sq, enemy_sq)
-                if not (between & chess.BB_SQUARES[from_sq]):
-                    continue
-                if between & board.occupied & ~chess.BB_SQUARES[from_sq]:
-                    continue
-                if not _slider_attacks_ray(slider_type, slider_sq, enemy_sq):
-                    continue
-                return True
-    return False
-
-
-_TACTIC_DETECTORS: dict = {
-    "fork": _detect_fork,
-    "pin": _detect_pin,
-    "hanging": _detect_hanging,
-    "skewer": _detect_skewer,
-    "discovered_attack": _detect_discovered_attack,
-}
-
-
-def _detect_all_tactics(board: chess.Board) -> set[str]:
-    return {name for name, fn in _TACTIC_DETECTORS.items() if fn(board)}
-
-
-def tag_pv_tactics(fen: str, pv: dict) -> list[dict]:
-    """
-    Walk the full PV line and detect tactics at every step.
-
-    Returns a list of {"type": str, "depth": int} entries — one per
-    (tactic, depth) pair found. Depth 0 = the root position itself.
-    The same tactic can appear at multiple depths.
+    Prepends the move that led TO this position so the game tree matches
+    the lichess convention: opponent move first, pov moves at mainline[1::2].
+    Falls back to a direct build with field override when no prior move exists.
     """
     line = pv.get("line", "")
+    cp = pv.get("cp", 0)
     if not line:
-        return []
+        return None
 
-    board = chess.Board(fen)
-    found = []
+    pgn_str = pos.get("source_game", {}).get("pgn", "")
+    move_number = pos["move_number"]
+    side = pos["side_to_move"]
+    target_ply = (move_number - 1) * 2 + (0 if side == "white" else 1)
 
-    for tactic in _detect_all_tactics(board):
-        found.append({"type": tactic, "depth": 0})
+    try:
+        if pgn_str and target_ply > 0:
+            src_game = chess.pgn.read_game(io.StringIO(pgn_str))
+            if src_game is None:
+                return None
+            src_moves = list(src_game.mainline_moves())
+            if target_ply - 1 >= len(src_moves):
+                return None
 
-    for depth, uci in enumerate(line.split(), start=1):
-        try:
-            board.push(chess.Move.from_uci(uci))
-        except Exception:
-            break
-        for tactic in _detect_all_tactics(board):
-            found.append({"type": tactic, "depth": depth})
+            board = src_game.board()
+            for m in src_moves[:target_ply - 1]:
+                board.push(m)
+            preceding_move = src_moves[target_ply - 1]
 
-    return found
+            # Snapshot as clean FEN — from_board() replays the move stack,
+            # so passing the original board would include all historical moves.
+            new_game = chess.pgn.Game.from_board(chess.Board(board.fen()))
+            node = new_game.add_main_variation(preceding_move)
+            board.push(preceding_move)
+        else:
+            board = chess.Board(pos["fen"])
+            new_game = chess.pgn.Game.from_board(board)
+            node = new_game
+
+        for uci in line.split():
+            move = chess.Move.from_uci(uci)
+            if move not in board.legal_moves:
+                break
+            node = node.add_main_variation(move)
+            board.push(move)
+
+        puzzle = Puzzle(id=pos["id"], game=new_game, cp=cp)
+
+        # Fallback: no prior move means pov is inverted by __post_init__ — fix it
+        if not (pgn_str and target_ply > 0):
+            puzzle.pov = chess.WHITE if side == "white" else chess.BLACK
+            puzzle.mainline = [new_game] + list(new_game.mainline())  # type: ignore[list-item]
+
+        return puzzle
+    except Exception:
+        return None
 
 
 # ── enrichment logic ────────────────────────────────────────────────────────
@@ -409,16 +307,6 @@ def tag_position(pos: dict) -> str:
     return "general"
 
 
-# Max PV depth at which each tactic is surfaced to the position level.
-# Hanging is only meaningful right now (depth 0); structural tactics can develop.
-TACTIC_POSITION_DEPTHS: dict[str, int] = {
-    "fork": 5,
-    "pin": 5,
-    "skewer": 5,
-    "discovered_attack": 5,
-    "hanging": 0,
-}
-
 
 def enrich(pos: dict) -> dict | None:
     best_eval = max(pos.get("evals", []), key=lambda e: e.get("depth", 0), default={})
@@ -434,21 +322,15 @@ def enrich(pos: dict) -> dict | None:
     features = position_features(pos["fen"])
     complexity = classify_complexity(cp_pvs, features)
 
-    # Annotate every PV with full-depth tactics, but only surface shallow ones
-    # at the position level (depth <= TACTIC_POSITION_DEPTH = clean signal)
-    all_tactics: list[dict] = []
+    # Tag each PV line using lichess cook, aggregate to position level
+    all_tags: set[str] = set()
     for pv in pvs:
-        pv_tactics = tag_pv_tactics(pos["fen"], pv)
-        pv["tactics"] = pv_tactics
-        all_tactics.extend(pv_tactics)
+        puzzle = build_puzzle(pos, pv)
+        pv_tags = [t for t in cook_puzzle(puzzle) if t not in _EXCLUDED_TAGS] if puzzle else []
+        pv["tactics"] = pv_tags
+        all_tags.update(pv_tags)
 
-    position_tactics = sorted(
-        {
-            t["type"]
-            for t in all_tactics
-            if t["depth"] <= TACTIC_POSITION_DEPTHS.get(t["type"], 5)
-        }
-    )
+    position_tactics = sorted(all_tags)
 
     pos["phase"] = phase
     pos["eco"] = pos.get("source_game", {}).get("eco", "?")
