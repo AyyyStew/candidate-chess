@@ -15,8 +15,10 @@ See the [README](./README.md) for a full feature overview.
 | Chess logic | chess.js                            |
 | Board UI    | react-chessboard                    |
 | Engine      | Stockfish 18 (WASM via Web Workers) |
-| Persistence | localStorage (daily stats only)     |
-| Backend     | None — fully client-side            |
+| Persistence | localStorage (daily stats) + D1     |
+| Backend     | Cloudflare Workers + Hono           |
+| Database    | Cloudflare D1 (SQLite) + Drizzle    |
+| Auth        | Google + Lichess OAuth via arctic   |
 
 ---
 
@@ -253,6 +255,21 @@ The positions in `public/positions/` are produced offline by a Python pipeline i
 ```
 
 The dataset covers ~8 years of daily puzzles. Extraction is resumable via `progress.json`.
+
+---
+
+## Backend
+
+The backend is a Cloudflare Worker (`src/worker/`) sitting in front of the static assets. Only `/api/*` requests are routed to the worker — everything else is served directly from the asset CDN.
+
+See [src/worker/readme.md](src/worker/readme.md) for full API documentation.
+
+**Key design decisions:**
+- D1 (SQLite) for all persistent data — puzzle stats, user solves, auth sessions
+- Sessions stored in D1 with a token in an HTTP-only cookie (30-day expiry)
+- Weekly cron job cleans up expired sessions
+- Telemetry is bot-protected via Cloudflare Turnstile + origin check
+- Puzzle aggregate stats and per-user solve history are separate concerns — anonymous solves update `puzzle_stats`, logged-in solves also write to `user_solves`
 
 ---
 
