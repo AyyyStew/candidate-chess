@@ -43,11 +43,11 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-10 bg-surface border-b border-edge-hi shadow-lg shadow-black/40">
-      <div className="grid grid-cols-2 md:grid-cols-3 items-center px-8 py-4">
+      <div className="flex items-center justify-between px-8 py-4 gap-4">
         {/* Left: logo */}
         <NavLink
           to="/"
-          className="flex items-center gap-2.5 font-black text-xl tracking-loose hover:opacity-75 transition-opacity"
+          className="flex flex-1 shrink-0 items-center gap-2.5 font-black text-xl tracking-loose hover:opacity-75 transition-opacity"
         >
           <img
             src="/candidate_chess_logo.svg"
@@ -58,7 +58,7 @@ export default function Header() {
         </NavLink>
 
         {/* Center: game modes (desktop) */}
-        <nav className="hidden md:flex items-center justify-center gap-3">
+        <nav className="hidden md:flex flex-1 items-center justify-center gap-3">
           {navLinks.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} end className={navLinkClass}>
               {label}
@@ -68,7 +68,7 @@ export default function Header() {
         </nav>
 
         {/* Right: GitHub + About + Auth (desktop) + hamburger (mobile) */}
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex flex-1 items-center justify-end gap-2">
           <div className="hidden md:flex items-center gap-2">
             {!loading && (
               <>
