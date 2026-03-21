@@ -8,6 +8,8 @@ import GamePage from "./pages/RandomPage";
 import StudyPage from "./pages/StudyPage";
 import PracticePage from "./pages/PracticePage";
 import AboutPage from "./pages/AboutPage";
+import LoginPage from "./pages/LoginPage";
+import ProfilePage from "./pages/ProfilePage";
 import { preload } from "./services/positionService";
 import { trackVisit, initPuzzleTurnstile } from "./services/api";
 
@@ -80,6 +82,8 @@ export default function App() {
             <Route path="/practice" element={<PracticePage />} />
             <Route path="/study" element={<StudyPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </EngineProvider>
       </div>

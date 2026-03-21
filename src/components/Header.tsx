@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import LoginModal from "./LoginModal";
 
 const navLinks = [
   { to: "/", label: "Daily" },
@@ -26,8 +25,8 @@ const mobileNavLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="sticky top-0 z-10 bg-surface border-b border-edge-hi shadow-lg shadow-black/40">
@@ -80,20 +79,15 @@ export default function Header() {
               <>
                 <div className="w-0.5 h-5 bg-edge-hi rounded-full mx-2" />
                 {user ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-label">
-                      {user.displayName}
-                    </span>
-                    <button
-                      onClick={logout}
-                      className="px-2 py-1.5 text-sm font-semibold text-muted hover:text-label transition-all"
-                    >
-                      Sign out
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => navigate("/profile")}
+                    className="px-2 py-1.5 text-sm font-semibold text-label hover:text-accent transition-all"
+                  >
+                    {user.displayName}
+                  </button>
                 ) : (
                   <button
-                    onClick={() => setLoginOpen(true)}
+                    onClick={() => navigate("/login")}
                     className="px-2 py-1.5 text-sm font-semibold text-muted hover:text-label transition-all"
                   >
                     Sign in
@@ -168,34 +162,24 @@ export default function Header() {
             <>
               <hr className="border-edge-hi my-1" />
               {user ? (
-                <>
-                  <span className="px-4 py-1 text-xs text-muted">
-                    {user.displayName}
-                  </span>
-                  <button
-                    onClick={logout}
-                    className="px-4 py-3 rounded-lg text-sm font-semibold text-muted hover:text-label hover:bg-surface-hi transition-all text-left"
-                  >
-                    Sign out
-                  </button>
-                </>
+                <NavLink
+                  to="/profile"
+                  className="px-4 py-3 rounded-lg text-sm font-semibold text-label hover:text-accent hover:bg-surface-hi transition-all"
+                >
+                  {user.displayName}
+                </NavLink>
               ) : (
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setLoginOpen(true);
-                  }}
+                <NavLink
+                  to="/login"
                   className="px-4 py-3 rounded-lg text-sm font-semibold bg-accent text-white hover:opacity-90 transition-opacity text-left"
                 >
                   Sign in
-                </button>
+                </NavLink>
               )}
             </>
           )}
         </nav>
       )}
-
-      {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
     </header>
   );
 }
