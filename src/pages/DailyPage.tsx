@@ -20,6 +20,8 @@ import {
   getWinStreak,
   type DailyRecord,
 } from "../services/dailyStatsService";
+import { trackPuzzleVisit, trackPuzzleSolve, saveSolve } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 import type { Position, Candidate } from "../types";
 import { candidateToSquare } from "../utils/daily";
 import DailyResultsPanel from "../components/DailyResultsPanel";
@@ -46,15 +48,21 @@ function DailyPageContent({
   const navigate = useNavigate();
   const board = useBoard();
   const engine = useEnginePool();
+  const { user } = useAuth();
   const [session, setSession] = useState<GameSession | null>(null);
   const snap = useSessionSnapshot(session);
   const [showModal, setShowModal] = useState(false);
   const [record, setRecord] = useState<DailyRecord | null>(existingRecord);
   const hasStartedRef = useRef(false);
+  const startTimeRef = useRef(Date.now());
 
   const today = new Date().toISOString().split("T")[0];
   const participationStreak = getParticipationStreak(today);
   const winStreak = getWinStreak(today);
+
+  useEffect(() => {
+    trackPuzzleVisit(daily.id);
+  }, [daily.id]);
 
   useEffect(() => {
     if (hasStartedRef.current) return;
@@ -107,9 +115,24 @@ function DailyPageContent({
     saveDailyResult(newRecord);
     setRecord(newRecord);
 
+    const timeMs = Date.now() - startTimeRef.current;
+    const guesses = resolved.map((c: Candidate) => c.move).join(",");
+    const solveData = {
+      strikesAllowed: snap.maxStrikes,
+      strikesUsed: snap.strikes,
+      movesFound: hits,
+      totalMoves: snap.targetMoves,
+      guesses,
+      timeMs,
+    };
+    trackPuzzleSolve(daily.id, solveData);
+    if (user) {
+      saveSolve(daily.id, solveData);
+    }
+
     const t = setTimeout(() => setShowModal(true), 800);
     return () => clearTimeout(t);
-  }, [snap?.phase]);
+  }, [snap?.phase, user]);
 
   const boardSnap = useMemo(
     () =>
