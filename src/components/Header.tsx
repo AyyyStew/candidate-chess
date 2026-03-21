@@ -1,17 +1,29 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import {
+  CalendarDays,
+  Shuffle,
+  BookOpen,
+  Wrench,
+  GraduationCap,
+  LogIn,
+  UserRound,
+  Menu,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 
-const navLinks = [
-  { to: "/", label: "Daily" },
-  { to: "/random", label: "Random" },
-  { to: "/library", label: "Library" },
-  { to: "/practice", label: "Practice" },
-  { to: "/study", label: "Study" },
+const navLinks: { to: string; label: string; icon: LucideIcon }[] = [
+  { to: "/", label: "Daily", icon: CalendarDays },
+  { to: "/random", label: "Random", icon: Shuffle },
+  { to: "/library", label: "Library", icon: BookOpen },
+  { to: "/custom", label: "Custom", icon: Wrench },
+  { to: "/study", label: "Study", icon: GraduationCap },
 ];
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `px-2 py-1.5 text-sm font-semibold transition-all border-b-2 ${
+  `flex items-center gap-1.5 px-2 py-1.5 text-sm font-semibold leading-none transition-all border-b-2 ${
     isActive
       ? "border-accent text-label"
       : "border-transparent text-muted hover:text-label hover:border-edge-hi"
@@ -35,7 +47,7 @@ export default function Header() {
         {/* Left: logo */}
         <NavLink
           to="/"
-          className="flex items-center gap-2.5 font-black text-xl tracking-tight hover:opacity-75 transition-opacity"
+          className="flex items-center gap-2.5 font-black text-xl tracking-loose hover:opacity-75 transition-opacity"
         >
           <img
             src="/candidate_chess_logo.svg"
@@ -46,10 +58,11 @@ export default function Header() {
         </NavLink>
 
         {/* Center: game modes (desktop) */}
-        <nav className="hidden md:flex items-center justify-center gap-1">
-          {navLinks.map(({ to, label }) => (
+        <nav className="hidden md:flex items-center justify-center gap-3">
+          {navLinks.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} end className={navLinkClass}>
               {label}
+              <Icon size={14} />
             </NavLink>
           ))}
         </nav>
@@ -62,16 +75,18 @@ export default function Header() {
                 {user ? (
                   <button
                     onClick={() => navigate("/profile")}
-                    className="px-2 py-1.5 text-sm font-semibold text-label hover:text-accent transition-all"
+                    className="flex items-center gap-1.5 px-2 py-1.5 text-sm font-semibold text-label hover:text-accent transition-all"
                   >
                     {user.displayName}
+                    <UserRound size={14} />
                   </button>
                 ) : (
                   <button
                     onClick={() => navigate("/login")}
-                    className="px-2 py-1.5 text-sm font-semibold text-muted hover:text-label transition-all"
+                    className="flex items-center gap-1.5 px-2 py-1.5 text-sm font-semibold text-muted hover:text-label transition-all"
                   >
                     Sign in
+                    <LogIn size={14} />
                   </button>
                 )}
               </>
@@ -84,34 +99,7 @@ export default function Header() {
             aria-label="Toggle menu"
             onClick={() => setMenuOpen((o) => !o)}
           >
-            {menuOpen ? (
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            ) : (
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            )}
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
@@ -122,9 +110,12 @@ export default function Header() {
           className="md:hidden flex flex-col gap-1 px-6 pt-3 pb-5 border-t border-edge-hi"
           onClick={() => setMenuOpen(false)}
         >
-          {navLinks.map(({ to, label }) => (
+          {navLinks.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} end className={mobileNavLinkClass}>
-              {label}
+              <span className="flex items-center gap-2">
+                <Icon size={15} />
+                {label}
+              </span>
             </NavLink>
           ))}
           {!loading && (
@@ -133,15 +124,17 @@ export default function Header() {
               {user ? (
                 <NavLink
                   to="/profile"
-                  className="px-4 py-3 rounded-lg text-sm font-semibold text-label hover:text-accent hover:bg-surface-hi transition-all"
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold text-label hover:text-accent hover:bg-surface-hi transition-all"
                 >
+                  <UserRound size={15} />
                   {user.displayName}
                 </NavLink>
               ) : (
                 <NavLink
                   to="/login"
-                  className="px-4 py-3 rounded-lg text-sm font-semibold bg-accent text-white hover:opacity-90 transition-opacity text-left"
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold bg-accent text-white hover:opacity-90 transition-opacity"
                 >
+                  <LogIn size={15} />
                   Sign in
                 </NavLink>
               )}

@@ -7,7 +7,7 @@ import Footer from "./components/Footer";
 import DailyPage from "./pages/DailyPage";
 import GamePage from "./pages/RandomPage";
 import StudyPage from "./pages/StudyPage";
-import PracticePage from "./pages/PracticePage";
+import CustomPage from "./pages/CustomPage";
 import AboutPage from "./pages/AboutPage";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -85,7 +85,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<DailyPage />} />
             <Route path="/random" element={<GamePage />} />
-            <Route path="/practice" element={<PracticePage />} />
+            <Route path="/custom" element={<CustomPage />} />
             <Route path="/study" element={<StudyPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/login" element={<LoginPage />} />

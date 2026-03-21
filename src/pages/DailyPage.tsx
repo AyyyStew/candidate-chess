@@ -332,7 +332,7 @@ function DailyPageContent({
                   navigate("/study", { state: { fen: board.fen } })
                 }
                 onPlayFromPosition={() =>
-                  navigate("/practice", { state: { fen: board.fen } })
+                  navigate("/custom", { state: { fen: board.fen } })
                 }
               />
             }

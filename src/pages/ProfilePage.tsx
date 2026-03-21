@@ -2,6 +2,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { deleteAccount } from "../services/api";
+import {
+  UserRound,
+  Mail,
+  CalendarDays,
+  Flame,
+  LogOut,
+  LogIn,
+  Trash2,
+  X,
+} from "lucide-react";
 
 export default function ProfilePage() {
   const { user, loading, logout } = useAuth();
@@ -10,6 +20,7 @@ export default function ProfilePage() {
   const [deleteInput, setDeleteInput] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   if (loading) {
     return (
@@ -26,8 +37,9 @@ export default function ProfilePage() {
           <p className="text-sm text-muted">You are not signed in.</p>
           <button
             onClick={() => navigate("/login")}
-            className="px-4 py-3 rounded-lg bg-accent text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 px-4 py-3 rounded-lg bg-accent text-white font-semibold text-sm hover:opacity-90 transition-opacity"
           >
+            <LogIn size={15} />
             Sign in
           </button>
         </div>
@@ -36,6 +48,7 @@ export default function ProfilePage() {
   }
 
   async function handleLogout() {
+    setLoggingOut(true);
     await logout();
     navigate("/");
   }
@@ -60,7 +73,8 @@ export default function ProfilePage() {
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-muted font-semibold uppercase tracking-wide">
+            <span className="flex items-center gap-1 text-xs text-muted font-semibold uppercase tracking-wide">
+              <UserRound size={11} />
               Name
             </span>
             <span className="text-sm font-semibold text-label">
@@ -68,7 +82,8 @@ export default function ProfilePage() {
             </span>
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-muted font-semibold uppercase tracking-wide">
+            <span className="flex items-center gap-1 text-xs text-muted font-semibold uppercase tracking-wide">
+              <Mail size={11} />
               Email
             </span>
             <span className="text-sm text-label">{user.email}</span>
@@ -76,7 +91,8 @@ export default function ProfilePage() {
           <div className="h-px bg-edge-hi" />
           <div className="flex gap-4">
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-muted font-semibold uppercase tracking-wide">
+              <span className="flex items-center gap-1 text-xs text-muted font-semibold uppercase tracking-wide">
+                <CalendarDays size={11} />
                 Participation streak
               </span>
               <span className="text-sm font-semibold text-label">
@@ -84,7 +100,8 @@ export default function ProfilePage() {
               </span>
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-muted font-semibold uppercase tracking-wide">
+              <span className="flex items-center gap-1 text-xs text-muted font-semibold uppercase tracking-wide">
+                <Flame size={11} />
                 Win streak
               </span>
               <span className="text-sm font-semibold text-label">
@@ -96,16 +113,19 @@ export default function ProfilePage() {
 
         <button
           onClick={handleLogout}
-          className="px-4 py-3 rounded-lg border border-edge-hi bg-surface-hi hover:bg-surface text-sm font-semibold text-muted hover:text-label transition-all text-left"
+          disabled={loggingOut}
+          className="flex items-center gap-2 px-4 py-3 rounded-lg bg-interactive hover:bg-interactive-hi text-sm font-semibold text-label transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Sign out
+          <LogOut size={15} />
+          {loggingOut ? "Signing out…" : "Sign out"}
         </button>
 
         {!showDeleteConfirm ? (
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="px-4 py-3 rounded-lg border border-edge-hi text-sm font-semibold text-muted hover:text-red-500 hover:border-red-500 transition-all text-left"
+            className="flex items-center gap-2 px-4 py-3 rounded-lg bg-interactive hover:bg-red-600 text-sm font-semibold text-muted hover:text-white transition-all"
           >
+            <Trash2 size={15} />
             Delete account
           </button>
         ) : (
@@ -132,8 +152,9 @@ export default function ProfilePage() {
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteInput !== "DELETE" || deleting}
-                className="flex-1 px-3 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 flex-1 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
+                <Trash2 size={14} />
                 {deleting ? "Deleting…" : "Delete my account"}
               </button>
               <button
@@ -142,8 +163,9 @@ export default function ProfilePage() {
                   setDeleteInput("");
                   setDeleteError(false);
                 }}
-                className="px-3 py-2 rounded-lg border border-edge-hi text-sm font-semibold text-muted hover:text-label transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-interactive hover:bg-interactive-hi text-sm font-semibold text-muted hover:text-label transition-colors"
               >
+                <X size={14} />
                 Cancel
               </button>
             </div>

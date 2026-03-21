@@ -20,7 +20,7 @@ function extractPgnMeta(pgn: string): { label: string; event: string } {
   return { label, event };
 }
 
-function PracticePageContent() {
+function CustomPageContent() {
   const navigate = useNavigate();
   const board = useBoard();
   const engine = useEnginePool();
@@ -45,6 +45,7 @@ function PracticePageContent() {
     board.truncateToCurrentPosition();
     const fen = board.fen;
     const orientation = isBlackToMove(fen) ? "black" : "white";
+    board.setBoardOrientation(orientation);
     const { label, event } = lastPgn
       ? extractPgnMeta(lastPgn)
       : { label: "Custom Position", event: "" };
@@ -76,7 +77,12 @@ function PracticePageContent() {
   if (isIdle) {
     return (
       <main className="flex flex-col lg:flex-row gap-8 p-8 max-w-6xl mx-auto">
-        <BoardPanel snap={null} locked={false} onReset={board.reset} />
+        <BoardPanel
+          snap={null}
+          locked={false}
+          onReset={board.reset}
+          onResetBoard={board.resetToStartingPosition}
+        />
         <div className="flex-1 flex flex-col gap-5">
           <FenInput
             value={board.fenInput}
@@ -125,7 +131,7 @@ function PracticePageContent() {
               navigate("/study", { state: { fen: board.fen } })
             }
             onPlayFromPosition={() =>
-              navigate("/practice", { state: { fen: board.fen } })
+              navigate("/custom", { state: { fen: board.fen } })
             }
           />
         }
@@ -135,12 +141,12 @@ function PracticePageContent() {
   );
 }
 
-export default function PracticePage() {
+export default function CustomPage() {
   const location = useLocation();
   const initialFen = (location.state as { fen?: string } | null)?.fen;
   return (
     <BoardProvider initialFen={initialFen}>
-      <PracticePageContent />
+      <CustomPageContent />
     </BoardProvider>
   );
 }

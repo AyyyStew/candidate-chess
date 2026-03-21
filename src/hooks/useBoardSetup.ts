@@ -266,6 +266,7 @@ export function useBoardSetup({
     fenInput,
     setFenInput,
     boardOrientation,
+    setBoardOrientation,
     flipOrientation,
     moveHistory,
     historyIndex,
