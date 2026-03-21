@@ -28,6 +28,7 @@ import { getDailySolve } from "../services/api";
 import type { Position, Candidate } from "../types";
 import { candidateToSquare } from "../utils/daily";
 import DailyResultsPanel from "../components/DailyResultsPanel";
+import NextDailyCountdown from "../components/NextDailyCountdown";
 
 function formatDateString(isoDate: string): string {
   return new Date(isoDate + "T00:00:00").toLocaleDateString("en-US", {
@@ -261,16 +262,19 @@ function DailyPageContent({
       <main className="max-w-6xl mx-auto px-8 py-8 flex flex-col gap-6">
         {/* Page title */}
         <div className="flex flex-row items-baseline justify-between gap-2 sm:gap-0">
-          <div className="flex items-baseline gap-2 sm:gap-4">
-            <h1 className="font-black text-xl sm:text-3xl tracking-tight">
-              Daily Challenge
-            </h1>
-            {user && (
-              <StreakDisplay
-                participationStreak={participationStreak}
-                winStreak={winStreak}
-              />
-            )}
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-baseline gap-2 sm:gap-4">
+              <h1 className="font-black text-xl sm:text-3xl tracking-tight">
+                Daily Challenge
+              </h1>
+              {user && (
+                <StreakDisplay
+                  participationStreak={participationStreak}
+                  winStreak={winStreak}
+                />
+              )}
+            </div>
+            <NextDailyCountdown />
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             {existingRecord && (
