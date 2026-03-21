@@ -5,13 +5,34 @@ import {
   type PositionFilters,
 } from "../services/positionService";
 import type { Position } from "../types";
+import {
+  Sprout,
+  Swords,
+  Clock,
+  Crown,
+  TrendingDown,
+  Minus,
+  TrendingUp,
+  Trophy,
+  Brain,
+  Zap,
+  Crosshair,
+  Shield,
+  type LucideIcon,
+} from "lucide-react";
 
 type FilterKey = keyof PositionFilters;
 
 const FILTER_GROUPS: Array<{
   key: FilterKey;
   label: string;
-  options: { value: string; label: string; description: string }[];
+  options: {
+    value: string;
+    label: string;
+    description: string;
+    icon: LucideIcon;
+    activeColor: string;
+  }[];
 }> = [
   {
     key: "phase",
@@ -21,73 +42,64 @@ const FILTER_GROUPS: Array<{
         value: "opening",
         label: "Opening",
         description: "Pieces still developing, structure being decided",
+        icon: Sprout,
+        activeColor: "bg-sky-600 border-sky-600 shadow-sky-600/30",
       },
       {
         value: "middlegame",
         label: "Middlegame",
         description: "Both sides mobilized, plans in full clash",
-      },
-      {
-        value: "endgame",
-        label: "Endgame",
-        description: "Few pieces remain, king becomes active",
+        icon: Swords,
+        activeColor: "bg-amber-600 border-amber-600 shadow-amber-600/30",
       },
       {
         value: "early_endgame",
         label: "Early Endgame",
         description: "Transition out of middlegame, imbalances settling",
+        icon: Clock,
+        activeColor: "bg-orange-600 border-orange-600 shadow-orange-600/30",
+      },
+      {
+        value: "endgame",
+        label: "Endgame",
+        description: "Few pieces remain, king becomes active",
+        icon: Crown,
+        activeColor: "bg-violet-700 border-violet-700 shadow-violet-700/30",
       },
     ],
   },
-  {
-    key: "category",
-    label: "Category",
-    options: [
-      {
-        value: "balanced",
-        label: "Balanced",
-        description: "No clear advantage, position in equilibrium",
-      },
-      {
-        value: "complex",
-        label: "Complex",
-        description: "Many competing ideas, difficult to evaluate objectively",
-      },
-      {
-        value: "crushing",
-        label: "Crushing",
-        description: "One side holds a decisive, near-winning edge",
-      },
-      {
-        value: "dominant",
-        label: "Dominant",
-        description: "Clear positional or material superiority",
-      },
-    ],
-  },
+
   {
     key: "balance",
     label: "Balance",
     options: [
       {
+        value: "worse",
+        label: "Worse",
+        description: "The side to move is at a disadvantage",
+        icon: TrendingDown,
+        activeColor: "bg-red-700 border-red-700 shadow-red-700/30",
+      },
+      {
         value: "equal",
         label: "Equal",
         description: "Engine score near zero — objectively level",
+        icon: Minus,
+        activeColor: "bg-blue-600 border-blue-600 shadow-blue-600/30",
       },
       {
         value: "better",
         label: "Better",
         description: "Slight edge for the side to move",
+        icon: TrendingUp,
+        activeColor: "bg-green-700 border-green-700 shadow-green-700/30",
       },
       {
         value: "winning",
         label: "Winning",
         description: "Decisive advantage, outcome likely decided",
-      },
-      {
-        value: "worse",
-        label: "Worse",
-        description: "The side to move is at a disadvantage",
+        icon: Trophy,
+        activeColor: "bg-yellow-600 border-yellow-600 shadow-yellow-600/30",
       },
     ],
   },
@@ -99,21 +111,29 @@ const FILTER_GROUPS: Array<{
         value: "rich",
         label: "Rich",
         description: "Many plausible candidates to weigh up",
+        icon: Brain,
+        activeColor: "bg-blue-700 border-blue-700 shadow-blue-700/30",
       },
       {
         value: "active",
         label: "Active",
         description: "Tactical opportunities available for both sides",
+        icon: Zap,
+        activeColor: "bg-orange-600 border-orange-600 shadow-orange-600/30",
       },
       {
         value: "sharp",
         label: "Sharp",
         description: "Critical moment — precision is required",
+        icon: Crosshair,
+        activeColor: "bg-red-700 border-red-700 shadow-red-700/30",
       },
       {
         value: "balanced",
         label: "Balanced",
         description: "Calmer position with fewer competing ideas",
+        icon: Shield,
+        activeColor: "bg-teal-700 border-teal-700 shadow-teal-700/30",
       },
     ],
   },
@@ -145,15 +165,10 @@ export default function LibraryPage() {
   }, [filters]);
 
   function toggle(key: FilterKey, value: string) {
-    setFilters((prev) => {
-      const current = prev[key];
-      return {
-        ...prev,
-        [key]: current.includes(value)
-          ? current.filter((v) => v !== value)
-          : [...current, value],
-      };
-    });
+    setFilters((prev) => ({
+      ...prev,
+      [key]: prev[key][0] === value ? [] : [value],
+    }));
   }
 
   const hasAnyFilter = Object.values(filters).some((arr) => arr.length > 0);
@@ -184,11 +199,14 @@ export default function LibraryPage() {
                     onClick={() => toggle(group.key, opt.value)}
                     className={`flex flex-col items-start gap-0.5 px-3 py-2.5 rounded-lg text-left transition-all border ${
                       active
-                        ? "bg-accent text-white border-accent shadow-md shadow-accent/30"
+                        ? `${opt.activeColor} text-white shadow-md`
                         : "bg-interactive hover:bg-interactive-hi text-label border-edge-hi"
                     }`}
                   >
-                    <span className="text-sm font-semibold">{opt.label}</span>
+                    <span className="flex items-center gap-1.5 text-sm font-semibold">
+                      <opt.icon size={14} />
+                      {opt.label}
+                    </span>
                     <span
                       className={`text-xs leading-snug ${active ? "text-white/70" : "text-muted"}`}
                     >
