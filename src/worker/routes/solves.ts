@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { eq, desc, and, sql } from "drizzle-orm";
-import { userSolves, dailyPuzzles, users } from "../db/schema";
+import { userSolves, dailyPuzzles, users, puzzleStats } from "../db/schema";
 import type { AppVariables } from "../context";
 
 export const solves = new Hono<{ Variables: AppVariables }>();
@@ -21,6 +21,24 @@ solves.post("/", async (c) => {
     hiddenGems?: string | null;
     timeMs: number;
   }>();
+
+  // Ensure puzzle_stats row exists so the FK on user_solves.zobrist is satisfied,
+  // even if the puzzle solve endpoint hasn't completed yet.
+  if (body.zobrist) {
+    await db
+      .insert(puzzleStats)
+      .values({
+        zobrist: body.zobrist,
+        visitorCount: 0,
+        solveCount: 0,
+        totalMovesFound: 0,
+        totalTargetMoves: 0,
+        totalStrikesUsed: 0,
+        totalTimeMs: 0,
+        createdAt: new Date(),
+      })
+      .onConflictDoNothing();
+  }
 
   const result = await db
     .insert(userSolves)
