@@ -309,8 +309,16 @@ function DailyPageContent({
           <GameLayout
             snap={snap}
             activeGame={!record}
-            onReset={() => navigate("/random")}
-            resetMessage="Play a Random Position"
+            actions={
+              !record && snap.phase === "done" ? (
+                <button
+                  onClick={() => navigate("/random")}
+                  className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
+                >
+                  Play a Random Position
+                </button>
+              ) : null
+            }
             board={
               <BoardPanel
                 snap={boardSnap}
@@ -338,12 +346,7 @@ function DailyPageContent({
                   onPlayRandom={() => navigate("/random")}
                 />
               ) : (
-                <GamePanel
-                  snap={snap}
-                  onNext={() => navigate("/random")}
-                  resetMessage="Play a Random Position"
-                  showHeader={false}
-                />
+                <GamePanel snap={snap} showHeader={false} />
               )
             }
           />

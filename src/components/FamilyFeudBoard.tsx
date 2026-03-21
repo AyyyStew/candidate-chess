@@ -16,8 +16,6 @@ interface FamilyFeudBoardProps {
   isDone: boolean;
   strikes: number;
   maxStrikes: number;
-  onReset: () => void;
-  resetMessage?: string;
   /** Mobile context: hides the header and misses section since GameLayout
    *  renders StrikesPipsBar and GuessList above/below the board instead. */
   isMobile?: boolean;
@@ -31,8 +29,6 @@ export default function FamilyFeudBoard({
   isDone,
   strikes,
   maxStrikes,
-  onReset,
-  resetMessage,
   isMobile = false,
 }: FamilyFeudBoardProps) {
   const [revealedMoves, setRevealedMoves] = useState<Set<string>>(new Set());
@@ -182,15 +178,6 @@ export default function FamilyFeudBoard({
         <p className="text-sm text-muted animate-pulse text-center tracking-wide">
           Evaluating...
         </p>
-      )}
-
-      {isDone && (
-        <button
-          onClick={onReset}
-          className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
-        >
-          {resetMessage ?? "Start Over"}
-        </button>
       )}
     </div>
   );

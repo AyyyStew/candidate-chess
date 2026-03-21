@@ -16,8 +16,7 @@ function extractPgnMeta(pgn: string): { label: string; event: string } {
   const white = pgn.match(/\[White "([^"]+)"\]/i)?.[1];
   const black = pgn.match(/\[Black "([^"]+)"\]/i)?.[1];
   const event = pgn.match(/\[Event "([^"]+)"\]/i)?.[1] ?? "";
-  const label =
-    white && black ? `${white} vs ${black}` : "Custom Position";
+  const label = white && black ? `${white} vs ${black}` : "Custom Position";
   return { label, event };
 }
 
@@ -50,11 +49,15 @@ function PracticePageContent() {
       ? extractPgnMeta(lastPgn)
       : { label: "Custom Position", event: "" };
     const moveNumber =
-      board.historyIndex >= 0
-        ? Math.floor(board.historyIndex / 2) + 1
-        : 1;
+      board.historyIndex >= 0 ? Math.floor(board.historyIndex / 2) + 1 : 1;
 
-    const position = makePosition({ fen, label, event, moveNumber, orientation });
+    const position = makePosition({
+      fen,
+      label,
+      event,
+      moveNumber,
+      orientation,
+    });
     const analysis = createEngineAnalysis({
       pool: engine,
       goCommand: "go depth 15",
@@ -96,25 +99,37 @@ function PracticePageContent() {
     );
   }
 
+  const isDone = snap?.phase === "done";
+
   return (
     <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
       <GameLayout
         snap={snap}
         activeGame
-        onReset={handleReset}
-        resetMessage="Play Again"
+        actions={
+          isDone ? (
+            <button
+              onClick={handleReset}
+              className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
+            >
+              Play Again
+            </button>
+          ) : null
+        }
         board={
           <BoardPanel
             snap={snap}
             onDrop={(from, to) => session?.submitMove(from, to)}
             locked={true}
-            onStudyFromPosition={() => navigate("/study", { state: { fen: board.fen } })}
-            onPlayFromPosition={() => navigate("/practice", { state: { fen: board.fen } })}
+            onStudyFromPosition={() =>
+              navigate("/study", { state: { fen: board.fen } })
+            }
+            onPlayFromPosition={() =>
+              navigate("/practice", { state: { fen: board.fen } })
+            }
           />
         }
-        panel={
-          <GamePanel snap={snap!} onNext={handleReset} resetMessage="Play Again" />
-        }
+        panel={<GamePanel snap={snap!} />}
       />
     </main>
   );

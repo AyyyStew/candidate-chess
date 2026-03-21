@@ -71,6 +71,25 @@ function RandomPageContent() {
     );
   }
 
+  const isDone = snap.phase === "done";
+
+  const actions = isDone ? (
+    <div className="flex flex-col gap-3">
+      <button
+        onClick={startNext}
+        className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
+      >
+        Play Another Position
+      </button>
+      <button
+        onClick={() => navigate("/library")}
+        className="w-full py-3 rounded-xl font-bold text-base bg-interactive hover:bg-interactive-hi transition-colors"
+      >
+        Position Library
+      </button>
+    </div>
+  ) : null;
+
   return (
     <main className="max-w-6xl mx-auto px-8 py-8 flex flex-col gap-6">
       {/* Page title */}
@@ -90,8 +109,7 @@ function RandomPageContent() {
       <GameLayout
         snap={snap}
         activeGame
-        onReset={startNext}
-        resetMessage="Play Another Position?"
+        actions={actions}
         board={
           <BoardPanel
             snap={snap}
@@ -105,7 +123,7 @@ function RandomPageContent() {
             }
           />
         }
-        panel={<GamePanel snap={snap} onNext={startNext} showHeader={false} />}
+        panel={<GamePanel snap={snap} showHeader={false} />}
       />
     </main>
   );

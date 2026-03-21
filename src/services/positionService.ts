@@ -135,8 +135,56 @@ export async function getDailyPosition(
   return getPositionById(id);
 }
 
+// ── Filtered random ──────────────────────────────────────────────────────────
+
+export interface PositionFilters {
+  phase?: string[];
+  category?: string[];
+  balance?: string[];
+  complexity?: string[];
+}
+
+function matchesFilters(pos: RawPosition, filters: PositionFilters): boolean {
+  if (filters.phase?.length && !filters.phase.includes(pos.phase)) return false;
+  if (filters.category?.length && !filters.category.includes(pos.category))
+    return false;
+  if (filters.balance?.length && !filters.balance.includes(pos.balance))
+    return false;
+  if (
+    filters.complexity?.length &&
+    !filters.complexity.some((c) => pos.complexity?.includes(c))
+  )
+    return false;
+  return true;
+}
+
+export async function getRandomPositionByFilters(
+  filters: PositionFilters,
+): Promise<Position> {
+  const hasFilters = Object.values(filters).some((v) => v && v.length > 0);
+  if (!hasFilters) return getRandomPosition();
+
+  // Shuffle chunk order so we don't always start from the same place
+  const shuffled = [...HEX_DIGITS].sort(() => Math.random() - 0.5);
+
+  for (const digit of shuffled) {
+    const chunk = await loadChunk(digit);
+    const matches = chunk.filter((pos) => matchesFilters(pos, filters));
+    if (matches.length > 0) {
+      return toPosition(matches[Math.floor(Math.random() * matches.length)]);
+    }
+  }
+
+  // Filters too restrictive — fall back to fully random
+  return getRandomPosition();
+}
+
 // ── Preload ──────────────────────────────────────────────────────────────────
 
 export async function preload(): Promise<void> {
   await Promise.all([loadDailySchedule(), loadChunk("0")]);
+  // Background-warm remaining chunks so Library page filtering is instant
+  for (const digit of HEX_DIGITS.slice(1)) {
+    loadChunk(digit);
+  }
 }

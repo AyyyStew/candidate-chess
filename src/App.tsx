@@ -15,6 +15,7 @@ import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsPage from "./pages/TermsPage";
 import NewsPage from "./pages/NewsPage";
 import NewsPostPage from "./pages/NewsPostPage";
+import LibraryPage from "./pages/LibraryPage";
 import { preload } from "./services/positionService";
 import { trackVisit, initPuzzleTurnstile } from "./services/api";
 
@@ -93,6 +94,7 @@ export default function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/news/:slug" element={<NewsPostPage />} />
+            <Route path="/library" element={<LibraryPage />} />
           </Routes>
         </EngineProvider>
         <Footer />

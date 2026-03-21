@@ -16,8 +16,8 @@ interface GameLayoutProps {
   /** Set false when the right panel is a results panel rather than an active
    *  game panel — mobile will just stack board + panel instead. */
   activeGame?: boolean;
-  onReset: () => void;
-  resetMessage?: string;
+  /** Action buttons rendered below the panel/board when the game is done. */
+  actions?: React.ReactNode;
 }
 
 export default function GameLayout({
@@ -25,17 +25,19 @@ export default function GameLayout({
   panel,
   snap,
   activeGame = true,
-  onReset,
-  resetMessage,
+  actions,
 }: GameLayoutProps) {
   const isMobile = useIsMobile();
 
-  // ── Desktop: two-column layout (unchanged) ────────────────────────────────
+  // ── Desktop: two-column layout ────────────────────────────────────────────
   if (!isMobile) {
     return (
       <div className="flex gap-8">
         {board}
-        <div className="flex-1 flex flex-col gap-5">{panel}</div>
+        <div className="flex-1 flex flex-col gap-5">
+          {panel}
+          {actions}
+        </div>
       </div>
     );
   }
@@ -46,6 +48,7 @@ export default function GameLayout({
       <div className="flex flex-col gap-5">
         {board}
         {panel}
+        {actions}
       </div>
     );
   }
@@ -72,11 +75,10 @@ export default function GameLayout({
           isDone={isDone}
           strikes={snap.strikes}
           maxStrikes={snap.maxStrikes}
-          onReset={onReset}
-          resetMessage={resetMessage}
           isMobile
         />
       )}
+      {isDone && actions}
     </div>
   );
 }

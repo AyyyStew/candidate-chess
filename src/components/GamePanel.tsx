@@ -6,17 +6,10 @@ import { useIsMobile } from "../hooks/useIsMobile";
 
 interface GamePanelProps {
   snap: GameSnapshot;
-  onNext: () => void;
-  resetMessage?: string;
   showHeader?: boolean;
 }
 
-export default function GamePanel({
-  snap,
-  onNext,
-  resetMessage,
-  showHeader = true,
-}: GamePanelProps) {
+export default function GamePanel({ snap, showHeader = true }: GamePanelProps) {
   const isMobile = useIsMobile();
   // On mobile the GameLayout renders the full game stack directly;
   // GamePanel would duplicate FamilyFeudBoard (and its sound effects).
@@ -44,8 +37,6 @@ export default function GamePanel({
         isDone={isDone}
         strikes={snap.strikes}
         maxStrikes={snap.maxStrikes}
-        onReset={onNext}
-        resetMessage={resetMessage ?? "Play Another Position?"}
       />
     </div>
   );
