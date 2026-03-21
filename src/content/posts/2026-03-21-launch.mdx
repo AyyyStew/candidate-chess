@@ -1,0 +1,25 @@
+export const meta = {
+  title: "Candidate Chess is live",
+  date: "2026-03-21",
+  description:
+    "The app is officially up. Here's what it is and where it's going.",
+};
+
+# Candidate Chess is live
+
+After a few weeks of hacking on this in my spare time, Candidate Chess is now live at [candidatechess.com](https://candidatechess.com).
+
+## What it is
+
+The idea is simple: you're shown a chess position and asked to find the engine's top 5 moves, Family Feud style. No eval bar. No hints. Just you and the board.
+
+The goal is to force deliberate candidate move thinking before reaching for the engine — something I noticed I was completely skipping in my own games.
+
+## How it works
+
+Select positions are filtered through a custom pipeline to find instructive middlegame positions. The full pipeline is [open source on GitHub](https://github.com/AyyyStew/candidate-chess/tree/master/position_generation).
+This pipeline includes precomputed Stockfish 18 results to use as the engine's top moves.
+
+For moves outside of the precomputed moves the app itself runs Stockfish in the browser via WASM to verify your guesses in real time.
+
+Built by an 800 elo player, so take everything with a grain of salt. Feedback welcome on [GitHub](https://github.com/AyyyStew/candidate-chess).

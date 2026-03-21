@@ -16,6 +16,13 @@ export default function Footer() {
             About
           </NavLink>
           <span className="text-edge-hi">·</span>
+          <NavLink
+            to="/news"
+            className="px-2 py-1 text-xs text-muted hover:text-label transition-colors rounded"
+          >
+            Dev Log
+          </NavLink>
+          <span className="text-edge-hi">·</span>
           <a
             href="https://github.com/AyyyStew/candidate-chess"
             target="_blank"
