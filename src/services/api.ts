@@ -1,5 +1,53 @@
 const BASE = "/api/v1";
 
+// ── Puzzle Turnstile ──────────────────────────────────────────────────────────
+
+let puzzleWidgetId: string | null = null;
+let puzzleToken: string | null = null;
+let puzzleTokenResolve: ((token: string | null) => void) | null = null;
+
+export function initPuzzleTurnstile(sitekey: string) {
+  console.log("[turnstile] initPuzzleTurnstile called", {
+    hasTurnstile: !!window.turnstile,
+    alreadyInit: puzzleWidgetId !== null,
+  });
+  if (puzzleWidgetId !== null || !window.turnstile) return;
+  puzzleWidgetId = window.turnstile.render("#puzzle-turnstile-widget", {
+    sitekey,
+    appearance: "interaction-only",
+    callback: (token: string) => {
+      console.log("[turnstile] puzzle token ready");
+      puzzleToken = token;
+      puzzleTokenResolve?.(token);
+      puzzleTokenResolve = null;
+    },
+    "error-callback": () => {
+      console.warn("[turnstile] puzzle widget error");
+      puzzleTokenResolve?.(null);
+      puzzleTokenResolve = null;
+    },
+  });
+  console.log("[turnstile] puzzle widget rendered, widgetId:", puzzleWidgetId);
+}
+
+async function getPuzzleTurnstileToken(): Promise<string | null> {
+  console.log("[turnstile] getPuzzleTurnstileToken called", {
+    puzzleWidgetId,
+    hasToken: !!puzzleToken,
+  });
+  if (!puzzleWidgetId || !window.turnstile) return null;
+  if (puzzleToken) {
+    const token = puzzleToken;
+    puzzleToken = null;
+    window.turnstile.reset?.(puzzleWidgetId); // refresh for next use
+    return token;
+  }
+  // token not ready yet — wait for callback
+  return new Promise((resolve) => {
+    puzzleTokenResolve = resolve;
+  });
+}
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface ApiUser {
@@ -54,7 +102,19 @@ export async function trackVisit(turnstileToken: string): Promise<void> {
 
 export async function trackPuzzleVisit(zobrist: string): Promise<void> {
   try {
-    await fetch(`${BASE}/puzzles/${zobrist}/visit`, { method: "POST" });
+    console.log("[puzzle] trackPuzzleVisit", zobrist);
+    const turnstileToken = await getPuzzleTurnstileToken();
+    console.log(
+      "[puzzle] visit token:",
+      turnstileToken ? "ok" : "null — skipping",
+    );
+    if (!turnstileToken) return;
+    const res = await fetch(`${BASE}/puzzles/${zobrist}/visit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ turnstileToken }),
+    });
+    console.log("[puzzle] visit response:", res.status, await res.text());
   } catch {
     // fire and forget
   }
@@ -65,10 +125,17 @@ export async function trackPuzzleSolve(
   data: SolveData,
 ): Promise<void> {
   try {
+    console.log("[puzzle] trackPuzzleSolve", zobrist);
+    const turnstileToken = await getPuzzleTurnstileToken();
+    console.log(
+      "[puzzle] solve token:",
+      turnstileToken ? "ok" : "null — skipping",
+    );
+    if (!turnstileToken) return;
     await fetch(`${BASE}/puzzles/${zobrist}/solve`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, turnstileToken }),
     });
   } catch {
     // fire and forget
@@ -77,9 +144,7 @@ export async function trackPuzzleSolve(
 
 // ── Solves (user history) ─────────────────────────────────────────────────────
 
-export async function getDailySolve(
-  date: string,
-): Promise<{
+export async function getDailySolve(date: string): Promise<{
   movesFound: number;
   targetMoves: number;
   guesses: string;

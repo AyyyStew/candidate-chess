@@ -9,7 +9,7 @@ import StudyPage from "./pages/StudyPage";
 import PracticePage from "./pages/PracticePage";
 import AboutPage from "./pages/AboutPage";
 import { preload } from "./services/positionService";
-import { trackVisit } from "./services/api";
+import { trackVisit, initPuzzleTurnstile } from "./services/api";
 
 declare global {
   interface Window {
@@ -18,6 +18,8 @@ declare global {
         container: string | HTMLElement,
         options: Record<string, unknown>,
       ) => string;
+      execute?: (widgetId: string) => void;
+      reset?: (widgetId: string) => void;
     };
     onTurnstileLoad?: () => void;
   }
@@ -54,8 +56,12 @@ export default function App() {
 
     if (window.turnstile) {
       render();
+      initPuzzleTurnstile(sitekey);
     } else {
-      window.onTurnstileLoad = render;
+      window.onTurnstileLoad = () => {
+        render();
+        initPuzzleTurnstile(sitekey);
+      };
     }
   }, []);
 
@@ -63,6 +69,7 @@ export default function App() {
     <AuthProvider>
       <div className="min-h-screen bg-bg text-text">
         <div id="turnstile-widget" className="hidden" />
+        <div id="puzzle-turnstile-widget" className="hidden" />
         <Header />
         <EngineProvider>
           <Routes>
