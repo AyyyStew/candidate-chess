@@ -94,6 +94,15 @@ export async function logout(): Promise<void> {
   await fetch(`${BASE}/auth/logout`, { method: "POST" });
 }
 
+export async function deleteAccount(): Promise<boolean> {
+  try {
+    const res = await fetch(`${BASE}/auth/account`, { method: "DELETE" });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 // ── Telemetry ─────────────────────────────────────────────────────────────────
 
 export async function trackVisit(turnstileToken: string): Promise<void> {

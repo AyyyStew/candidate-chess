@@ -78,9 +78,7 @@ export const dailyPuzzles = sqliteTable("daily_puzzles", {
 
 export const userSolves = sqliteTable("user_solves", {
   id: int("id").primaryKey({ autoIncrement: true }),
-  userId: int("user_id")
-    .notNull()
-    .references(() => users.id),
+  userId: int("user_id").references(() => users.id),
   zobrist: text("zobrist").references(() => puzzleStats.zobrist),
   strikesAllowed: int("strikes_allowed").notNull(),
   strikesUsed: int("strikes_used").notNull(),

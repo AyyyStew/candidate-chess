@@ -2,7 +2,7 @@ import { Hono, type Context } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { eq, and } from "drizzle-orm";
 import { Google, Lichess, generateState, generateCodeVerifier } from "arctic";
-import { users, oauthAccounts, sessions } from "../db/schema";
+import { users, oauthAccounts, sessions, userSolves } from "../db/schema";
 import type { AppBindings, AppVariables, AppDb } from "../context";
 
 export const auth = new Hono<{
@@ -184,6 +184,27 @@ auth.post("/logout", async (c) => {
   if (token) {
     await db.delete(sessions).where(eq(sessions.id, token));
   }
+
+  deleteCookie(c, "session", { path: "/" });
+  return c.json({ ok: true });
+});
+
+// ── Delete account ────────────────────────────────────────────────────────────
+
+auth.delete("/account", async (c) => {
+  const user = c.var.user;
+  if (!user) return c.json({ error: "Unauthorized" }, 401);
+
+  const db = c.var.db;
+
+  // Anonymise solves — keep the data, just detach the user
+  await db
+    .update(userSolves)
+    .set({ userId: null })
+    .where(eq(userSolves.userId, user.id));
+  await db.delete(sessions).where(eq(sessions.userId, user.id));
+  await db.delete(oauthAccounts).where(eq(oauthAccounts.userId, user.id));
+  await db.delete(users).where(eq(users.id, user.id));
 
   deleteCookie(c, "session", { path: "/" });
   return c.json({ ok: true });
