@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { eq, and } from "drizzle-orm";
 import { Google, Lichess, generateState, generateCodeVerifier } from "arctic";
@@ -161,8 +161,6 @@ auth.get("/lichess/callback", async (c) => {
   return c.redirect("/");
 });
 
-// ── Logout ────────────────────────────────────────────────────────────────────
-
 // ── Me ────────────────────────────────────────────────────────────────────────
 
 auth.get("/me", (c) => {
@@ -193,7 +191,10 @@ auth.post("/logout", async (c) => {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function setSessionCookie(c: any, token: string) {
+function setSessionCookie(
+  c: Context<{ Bindings: AppBindings; Variables: AppVariables }>,
+  token: string,
+) {
   setCookie(c, "session", token, {
     httpOnly: true,
     sameSite: "Lax",

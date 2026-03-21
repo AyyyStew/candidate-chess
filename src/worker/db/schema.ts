@@ -1,4 +1,10 @@
-import { int, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  int,
+  primaryKey,
+  sqliteTable,
+  text,
+  unique,
+} from "drizzle-orm/sqlite-core";
 
 export const counter = sqliteTable("counter", {
   id: int("id").primaryKey(),
@@ -15,13 +21,17 @@ export const users = sqliteTable("users", {
   lastDailyDate: text("last_daily_date"),
 });
 
-export const oauthAccounts = sqliteTable("oauth_accounts", {
-  userId: int("user_id")
-    .notNull()
-    .references(() => users.id),
-  provider: text("provider", { enum: ["google", "lichess"] }).notNull(),
-  providerUserId: text("provider_user_id").notNull(),
-});
+export const oauthAccounts = sqliteTable(
+  "oauth_accounts",
+  {
+    userId: int("user_id")
+      .notNull()
+      .references(() => users.id),
+    provider: text("provider", { enum: ["google", "lichess"] }).notNull(),
+    providerUserId: text("provider_user_id").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.provider, t.providerUserId] })],
+);
 
 export const sessions = sqliteTable("sessions", {
   id: text("id").primaryKey(),

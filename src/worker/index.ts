@@ -1,7 +1,5 @@
 import { Hono } from "hono";
 import { lt } from "drizzle-orm";
-import { ping } from "./routes/ping";
-import { counter } from "./routes/counter";
 import { telemetry } from "./routes/telemetry";
 import { puzzles } from "./routes/puzzles";
 import { auth } from "./routes/auth";

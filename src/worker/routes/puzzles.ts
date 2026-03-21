@@ -1,11 +1,26 @@
 import { Hono } from "hono";
 import { eq, sql } from "drizzle-orm";
 import { puzzleStats, puzzleMoveAttempts, dailyPuzzles } from "../db/schema";
-import type { AppVariables } from "../context";
+import type { AppBindings, AppVariables } from "../context";
 
-type Variables = AppVariables;
+export const puzzles = new Hono<{
+  Bindings: AppBindings;
+  Variables: AppVariables;
+}>();
 
-export const puzzles = new Hono<{ Variables: Variables }>();
+async function verifyTurnstile(
+  secretKey: string,
+  token: string,
+): Promise<boolean> {
+  const form = new FormData();
+  form.append("secret", secretKey);
+  form.append("response", token);
+  const { success } = await fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    { method: "POST", body: form },
+  ).then((r) => r.json<{ success: boolean }>());
+  return success;
+}
 
 // GET /daily - get today's daily puzzle with its stats
 puzzles.get("/daily", async (c) => {
@@ -35,6 +50,11 @@ puzzles.get("/daily", async (c) => {
 
 // POST /:zobrist/visit - increment visitor count for a puzzle
 puzzles.post("/:zobrist/visit", async (c) => {
+  const { turnstileToken } = await c.req.json<{ turnstileToken: string }>();
+  if (!(await verifyTurnstile(c.env.TURNSTILE_SECRET_KEY, turnstileToken))) {
+    return c.json({ error: "Bot detected" }, 403);
+  }
+
   const db = c.var.db;
   const { zobrist } = c.req.param();
 
@@ -93,7 +113,14 @@ puzzles.post("/:zobrist/solve", async (c) => {
     targetMoves: number;
     guesses: string;
     timeMs: number;
+    turnstileToken: string;
   }>();
+
+  if (
+    !(await verifyTurnstile(c.env.TURNSTILE_SECRET_KEY, body.turnstileToken))
+  ) {
+    return c.json({ error: "Bot detected" }, 403);
+  }
 
   const guesses = body.guesses
     .split(",")
@@ -123,15 +150,17 @@ puzzles.post("/:zobrist/solve", async (c) => {
       },
     });
 
-  for (const move of guesses) {
-    await db
-      .insert(puzzleMoveAttempts)
-      .values({ zobrist, move, count: 1 })
-      .onConflictDoUpdate({
-        target: [puzzleMoveAttempts.zobrist, puzzleMoveAttempts.move],
-        set: { count: sql`${puzzleMoveAttempts.count} + 1` },
-      });
-  }
+  await Promise.all(
+    guesses.map((move) =>
+      db
+        .insert(puzzleMoveAttempts)
+        .values({ zobrist, move, count: 1 })
+        .onConflictDoUpdate({
+          target: [puzzleMoveAttempts.zobrist, puzzleMoveAttempts.move],
+          set: { count: sql`${puzzleMoveAttempts.count} + 1` },
+        }),
+    ),
+  );
 
   return c.json({ ok: true });
 });
