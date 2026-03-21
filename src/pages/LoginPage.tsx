@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const providers = [
   {
     key: "google",
@@ -68,6 +70,24 @@ export default function LoginPage() {
             </a>
           ))}
         </div>
+
+        <p className="text-xs text-muted text-center leading-relaxed">
+          By signing in, you agree to our{" "}
+          <Link
+            to="/terms"
+            className="text-accent hover:text-accent-hi underline underline-offset-2 transition-colors"
+          >
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link
+            to="/privacy"
+            className="text-accent hover:text-accent-hi underline underline-offset-2 transition-colors"
+          >
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );
