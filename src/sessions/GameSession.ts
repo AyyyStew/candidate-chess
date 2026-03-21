@@ -49,6 +49,7 @@ export function createGameSession({
       targetMoves,
       liveTopMoves: analysisReady ? analysis.getTopMoves() : [],
       analysisReady,
+      engineDepth: analysis.getDepth(),
     };
   }
 

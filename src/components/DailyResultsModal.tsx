@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { GameSnapshot } from "../types";
-import type { DailyRecord } from "../services/dailyStatsService";
+import type { DailyRecord } from "../services/localDailyService";
 import StreakDisplay from "./StreakDisplay";
 import { candidateToSquare } from "../utils/daily";
 
 interface DailyResultsModalProps {
   activeDate: string;
-  participationStreak: number;
-  winStreak: number;
+  participationStreak?: number;
+  winStreak?: number;
   onClose: () => void;
   // One of these must be provided
   snap?: GameSnapshot;
@@ -183,8 +183,8 @@ export default function DailyResultsModal({
           </div>
         </div>
 
-        {/* Streaks */}
-        {(participationStreak > 0 || winStreak > 0) && (
+        {/* Streaks — only shown when logged in */}
+        {participationStreak !== undefined && winStreak !== undefined && (
           <div className="flex flex-col gap-1.5">
             <p className="text-xs text-faint uppercase tracking-widest">
               Your streaks

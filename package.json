@@ -14,7 +14,9 @@
     "deploy": "npm run build && wrangler deploy",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "node scripts/db-migrate-local.mjs",
-    "db:reset:local": "node -e \"require('fs').rmSync('.wrangler/state/v3/d1', {recursive: true, force: true})\" && npm run db:migrate:local"
+    "db:reset:local": "node -e \"require('fs').rmSync('.wrangler/state/v3/d1', {recursive: true, force: true})\" && npm run db:migrate:local && npm run db:seed:daily",
+    "db:seed:daily": "node scripts/db-seed-daily.mjs",
+    "db:seed:daily:remote": "node scripts/db-seed-daily.mjs --remote"
   },
   "dependencies": {
     "@lichess-org/chessground": "^10.1.0",

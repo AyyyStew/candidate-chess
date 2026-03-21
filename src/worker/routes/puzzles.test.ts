@@ -42,7 +42,7 @@ describe("POST /api/v1/puzzles/:zobrist/solve", () => {
       body: JSON.stringify({
         strikesUsed: 2,
         movesFound: 3,
-        totalMoves: 5,
+        targetMoves: 5,
         guesses: "Rd1,Be4,Nf3,Qd2",
         timeMs: 30000,
       }),
@@ -64,7 +64,7 @@ describe("POST /api/v1/puzzles/:zobrist/solve", () => {
       body: JSON.stringify({
         strikesUsed: 2,
         movesFound: 3,
-        totalMoves: 5,
+        targetMoves: 5,
         guesses: "Rd1,Be4,Nf3",
         timeMs: 30000,
       }),
@@ -85,7 +85,7 @@ describe("POST /api/v1/puzzles/:zobrist/solve", () => {
         body: JSON.stringify({
           strikesUsed: 1,
           movesFound: 2,
-          totalMoves: 5,
+          targetMoves: 5,
           guesses,
           timeMs: 10000,
         }),

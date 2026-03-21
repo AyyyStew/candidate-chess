@@ -45,7 +45,7 @@ puzzles.post("/:zobrist/visit", async (c) => {
       visitorCount: 1,
       solveCount: 0,
       totalMovesFound: 0,
-      totalPossibleMoves: 0,
+      totalTargetMoves: 0,
       totalStrikesUsed: 0,
       totalTimeMs: 0,
       createdAt: new Date(),
@@ -90,7 +90,7 @@ puzzles.post("/:zobrist/solve", async (c) => {
   const body = await c.req.json<{
     strikesUsed: number;
     movesFound: number;
-    totalMoves: number;
+    targetMoves: number;
     guesses: string;
     timeMs: number;
   }>();
@@ -107,7 +107,7 @@ puzzles.post("/:zobrist/solve", async (c) => {
       visitorCount: 0,
       solveCount: 1,
       totalMovesFound: body.movesFound,
-      totalPossibleMoves: body.totalMoves,
+      totalTargetMoves: body.targetMoves,
       totalStrikesUsed: body.strikesUsed,
       totalTimeMs: body.timeMs,
       createdAt: new Date(),
@@ -117,7 +117,7 @@ puzzles.post("/:zobrist/solve", async (c) => {
       set: {
         solveCount: sql`${puzzleStats.solveCount} + 1`,
         totalMovesFound: sql`${puzzleStats.totalMovesFound} + ${body.movesFound}`,
-        totalPossibleMoves: sql`${puzzleStats.totalPossibleMoves} + ${body.totalMoves}`,
+        totalTargetMoves: sql`${puzzleStats.totalTargetMoves} + ${body.targetMoves}`,
         totalStrikesUsed: sql`${puzzleStats.totalStrikesUsed} + ${body.strikesUsed}`,
         totalTimeMs: sql`${puzzleStats.totalTimeMs} + ${body.timeMs}`,
       },

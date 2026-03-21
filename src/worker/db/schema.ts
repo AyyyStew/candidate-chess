@@ -10,6 +10,9 @@ export const users = sqliteTable("users", {
   email: text("email").notNull().unique(),
   displayName: text("display_name").notNull(),
   createdAt: int("created_at", { mode: "timestamp" }).notNull(),
+  participationStreak: int("participation_streak").notNull().default(0),
+  winStreak: int("win_streak").notNull().default(0),
+  lastDailyDate: text("last_daily_date"),
 });
 
 export const oauthAccounts = sqliteTable("oauth_accounts", {
@@ -38,7 +41,7 @@ export const puzzleStats = sqliteTable("puzzle_stats", {
   visitorCount: int("visitor_count").notNull().default(0),
   solveCount: int("solve_count").notNull().default(0),
   totalMovesFound: int("total_moves_found").notNull().default(0),
-  totalPossibleMoves: int("total_possible_moves").notNull().default(0),
+  totalTargetMoves: int("total_target_moves").notNull().default(0),
   totalStrikesUsed: int("total_strikes_used").notNull().default(0),
   totalTimeMs: int("total_time_ms").notNull().default(0),
   createdAt: int("created_at", { mode: "timestamp" }).notNull(),
@@ -72,8 +75,9 @@ export const userSolves = sqliteTable("user_solves", {
   strikesAllowed: int("strikes_allowed").notNull(),
   strikesUsed: int("strikes_used").notNull(),
   movesFound: int("moves_found").notNull(),
-  totalMoves: int("total_moves").notNull(),
+  targetMoves: int("target_moves").notNull(),
   guesses: text("guesses").notNull(), // comma-separated e.g. "Rd1,Be4,Nf3"
+  hiddenGems: text("hidden_gems"), // nullable JSON array of {move, san, eval, diffBest, diffPos, depth}
   timeMs: int("time_ms").notNull(),
   createdAt: int("created_at", { mode: "timestamp" }).notNull(),
 });

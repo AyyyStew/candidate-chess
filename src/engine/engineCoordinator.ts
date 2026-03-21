@@ -4,6 +4,7 @@ import { debug } from "../utils/debug";
 import { createEngineAnalysis } from "./engineAnalysis";
 import type { EngineAnalysis } from "./engineAnalysis";
 import type { Position, TopMove, PositionPV } from "../types";
+import { getMoveCategory } from "../utils/chess";
 import { getRandomPosition } from "../services/positionService";
 
 export function buildFromPvs(
@@ -11,7 +12,7 @@ export function buildFromPvs(
   pvs: PositionPV[],
 ): { topMoves: TopMove[]; positionEval: number } {
   const isBlack = fen.includes(" b ");
-  const topMoves: TopMove[] = pvs.map((pv) => {
+  const rawMoves = pvs.map((pv) => {
     const uciMoves = pv.line.split(" ").filter(Boolean);
     const sans: string[] = [];
     try {
@@ -33,14 +34,24 @@ export function buildFromPvs(
       move: pv.best_move,
       san: sans[0] ?? pv.best_move,
       rawEval,
-      eval: rawEval,
-      diffBest: 0,
-      diffPos: 0,
-      category: null as TopMove["category"],
       line: { moves: uciMoves, sans },
     };
   });
-  const positionEval = topMoves[0]?.rawEval ?? 0;
+
+  const positionEval = rawMoves[0]?.rawEval ?? 0;
+  const bestEval = rawMoves[0]?.rawEval ?? 0;
+
+  const topMoves: TopMove[] = rawMoves.map((m) => ({
+    move: m.move,
+    san: m.san,
+    rawEval: m.rawEval,
+    eval: m.rawEval,
+    diffBest: m.rawEval - bestEval,
+    diffPos: m.rawEval - positionEval,
+    category: getMoveCategory(positionEval, m.rawEval, isBlack, bestEval),
+    line: m.line,
+  }));
+
   return { topMoves, positionEval };
 }
 
@@ -151,10 +162,15 @@ export function createEngineCoordinator({
     pool.destroy();
   }
 
-  async function advanceWithPosition(position: Position): Promise<AdvanceResult> {
+  async function advanceWithPosition(
+    position: Position,
+  ): Promise<AdvanceResult> {
     const analysis = createEngineAnalysis({ pool, goCommand });
     if (position.pvs && position.pvs.length > 0) {
-      const { topMoves, positionEval } = buildFromPvs(position.fen, position.pvs);
+      const { topMoves, positionEval } = buildFromPvs(
+        position.fen,
+        position.pvs,
+      );
       analysis.loadPrecomputed(position.fen, topMoves, positionEval);
       return { position, analysis, preloaded: true };
     }

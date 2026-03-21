@@ -1,11 +1,11 @@
-import type { DailyRecord } from "../services/dailyStatsService";
+import type { DailyRecord } from "../services/localDailyService";
 import StreakDisplay from "./StreakDisplay";
 import MoveRowCard from "./MoveRowCard";
 
 interface DailyResultsPanelProps {
   record: DailyRecord;
-  participationStreak: number;
-  winStreak: number;
+  participationStreak?: number;
+  winStreak?: number;
   onShare: () => void;
   onPlayRandom?: () => void;
 }
@@ -42,8 +42,8 @@ export default function DailyResultsPanel({
         </div>
       </div>
 
-      {/* Streaks */}
-      {(participationStreak > 0 || winStreak > 0) && (
+      {/* Streaks — only shown when logged in */}
+      {participationStreak !== undefined && winStreak !== undefined && (
         <StreakDisplay
           participationStreak={participationStreak}
           winStreak={winStreak}

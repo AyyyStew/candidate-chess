@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Chess } from "chess.js";
 import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DailyResultsModal from "../components/DailyResultsModal";
 import StreakDisplay from "../components/StreakDisplay";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
-import { createEngineAnalysis } from "../engine/engineAnalysis";
+import {
+  createEngineAnalysis,
+  type EngineAnalysis,
+} from "../engine/engineAnalysis";
 import { buildFromPvs } from "../engine/engineCoordinator";
 import { createGameSession, type GameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
@@ -16,12 +20,11 @@ import { getDailyPosition } from "../services/positionService";
 import {
   getDailyRecord,
   saveDailyResult,
-  getParticipationStreak,
-  getWinStreak,
   type DailyRecord,
-} from "../services/dailyStatsService";
-import { trackPuzzleVisit, trackPuzzleSolve, saveSolve } from "../services/api";
+} from "../services/localDailyService";
 import { useAuth } from "../contexts/AuthContext";
+import { usePuzzleTracking } from "../hooks/usePuzzleTracking";
+import { getDailySolve } from "../services/api";
 import type { Position, Candidate } from "../types";
 import { candidateToSquare } from "../utils/daily";
 import DailyResultsPanel from "../components/DailyResultsPanel";
@@ -48,21 +51,91 @@ function DailyPageContent({
   const navigate = useNavigate();
   const board = useBoard();
   const engine = useEnginePool();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [session, setSession] = useState<GameSession | null>(null);
+  const [analysis, setAnalysis] = useState<EngineAnalysis | null>(null);
   const snap = useSessionSnapshot(session);
   const [showModal, setShowModal] = useState(false);
   const [record, setRecord] = useState<DailyRecord | null>(existingRecord);
   const hasStartedRef = useRef(false);
-  const startTimeRef = useRef(Date.now());
+  const evaluatedMissesRef = useRef(false);
 
-  const today = new Date().toISOString().split("T")[0];
-  const participationStreak = getParticipationStreak(today);
-  const winStreak = getWinStreak(today);
+  const today = new Date().toISOString().slice(0, 10);
+  const participationStreak = user?.participationStreak ?? 0;
+  const winStreak = user?.winStreak ?? 0;
 
+  // If user is logged in but localStorage was cleared, check backend
   useEffect(() => {
-    trackPuzzleVisit(daily.id);
-  }, [daily.id]);
+    if (!user || record) return;
+    getDailySolve(activeDate).then((solve) => {
+      if (!solve) return;
+      const topMoves = daily.pvs?.length
+        ? buildFromPvs(daily.fen, daily.pvs).topMoves
+        : [];
+      const answers = topMoves.slice(0, solve.targetMoves);
+      const hitMoves = new Set(answers.map((m) => m.move));
+      const hiddenGemMoves = new Set<string>(
+        solve.hiddenGems
+          ? (JSON.parse(solve.hiddenGems) as { move: string }[]).map(
+              (g) => g.move,
+            )
+          : [],
+      );
+      const guessUcis = solve.guesses
+        ? solve.guesses.split(",").filter(Boolean)
+        : [];
+      const candidates: Candidate[] = guessUcis.map((uci) => {
+        const top = topMoves.find((m) => m.move === uci);
+        const status = hitMoves.has(uci)
+          ? "hit"
+          : hiddenGemMoves.has(uci)
+            ? "hidden_gem"
+            : "miss";
+        let san = top?.san ?? uci;
+        if (!top) {
+          try {
+            const parsed = new Chess(daily.fen).move({
+              from: uci.slice(0, 2),
+              to: uci.slice(2, 4),
+              promotion: uci[4] ?? "q",
+            });
+            if (parsed) san = parsed.san;
+          } catch {
+            /* keep uci */
+          }
+        }
+        return {
+          move: uci,
+          san,
+          status,
+          eval: top?.eval,
+          diffBest: top?.diffBest,
+          diffPos: top?.diffPos,
+          category: top?.category,
+          line: top?.line,
+        };
+      });
+      const squares = candidates.map((c) => candidateToSquare(c, topMoves));
+      setRecord({
+        date: activeDate,
+        fen: daily.fen,
+        hits: solve.movesFound,
+        target: solve.targetMoves,
+        won: solve.movesFound >= solve.targetMoves,
+        squares,
+        candidates,
+        answers,
+      });
+    });
+  }, [user]);
+
+  usePuzzleTracking({
+    snap,
+    positionId: daily.id,
+    user,
+    onStreakUpdate: (participationStreak, winStreak) =>
+      updateUser({ participationStreak, winStreak }),
+  });
 
   useEffect(() => {
     if (hasStartedRef.current) return;
@@ -73,22 +146,63 @@ function DailyPageContent({
 
     hasStartedRef.current = true;
 
-    const analysis = createEngineAnalysis({
+    const newAnalysis = createEngineAnalysis({
       pool: engine,
       goCommand: "go depth 15",
     });
     if (hasPVs) {
       const { topMoves, positionEval } = buildFromPvs(daily.fen, daily.pvs);
-      analysis.loadPrecomputed(daily.fen, topMoves, positionEval);
+      newAnalysis.loadPrecomputed(daily.fen, topMoves, positionEval);
     } else {
-      analysis.startAnalysis(daily.fen);
+      newAnalysis.startAnalysis(daily.fen);
     }
 
-    const newSession = createGameSession({ analysis, position: daily });
+    setAnalysis(newAnalysis);
+    const newSession = createGameSession({
+      analysis: newAnalysis,
+      position: daily,
+    });
     setSession(newSession);
 
     // Results shown inline for already-played dates — no auto-modal
   }, [engine.ready]);
+
+  // Evaluate miss candidates from backend-reconstructed record using browser engine
+  useEffect(() => {
+    if (!analysis || !record || evaluatedMissesRef.current) return;
+    const misses = record.candidates.filter(
+      (c) => c.status === "miss" && c.eval === undefined,
+    );
+    if (misses.length === 0) {
+      evaluatedMissesRef.current = true;
+      return;
+    }
+    evaluatedMissesRef.current = true;
+    Promise.all(misses.map((c) => analysis.evaluateMove(c.move, c.san))).then(
+      (results) => {
+        const evalMap = new Map(results.map((r) => [r.move, r]));
+        setRecord((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            candidates: prev.candidates.map((c) => {
+              const ev = evalMap.get(c.move);
+              return ev
+                ? {
+                    ...c,
+                    eval: ev.eval,
+                    diffBest: ev.diffBest,
+                    diffPos: ev.diffPos,
+                    category: ev.category,
+                    line: ev.line,
+                  }
+                : c;
+            }),
+          };
+        });
+      },
+    );
+  }, [analysis, record]);
 
   useEffect(() => {
     if (snap?.phase !== "done" || existingRecord || activeDate !== today)
@@ -115,24 +229,9 @@ function DailyPageContent({
     saveDailyResult(newRecord);
     setRecord(newRecord);
 
-    const timeMs = Date.now() - startTimeRef.current;
-    const guesses = resolved.map((c: Candidate) => c.move).join(",");
-    const solveData = {
-      strikesAllowed: snap.maxStrikes,
-      strikesUsed: snap.strikes,
-      movesFound: hits,
-      totalMoves: snap.targetMoves,
-      guesses,
-      timeMs,
-    };
-    trackPuzzleSolve(daily.id, solveData);
-    if (user) {
-      saveSolve(daily.id, solveData);
-    }
-
     const t = setTimeout(() => setShowModal(true), 800);
     return () => clearTimeout(t);
-  }, [snap?.phase, user]);
+  }, [snap?.phase]);
 
   const boardSnap = useMemo(
     () =>
@@ -152,8 +251,8 @@ function DailyPageContent({
       {showModal && (
         <DailyResultsModal
           activeDate={activeDate}
-          participationStreak={participationStreak}
-          winStreak={winStreak}
+          participationStreak={user ? participationStreak : undefined}
+          winStreak={user ? winStreak : undefined}
           onClose={() => setShowModal(false)}
           snap={record ? undefined : snap}
           record={record ?? undefined}
@@ -166,10 +265,12 @@ function DailyPageContent({
             <h1 className="font-black text-xl sm:text-3xl tracking-tight">
               Daily Challenge
             </h1>
-            <StreakDisplay
-              participationStreak={participationStreak}
-              winStreak={winStreak}
-            />
+            {user && (
+              <StreakDisplay
+                participationStreak={participationStreak}
+                winStreak={winStreak}
+              />
+            )}
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             {existingRecord && (
@@ -210,7 +311,7 @@ function DailyPageContent({
               <BoardPanel
                 snap={boardSnap}
                 onDrop={
-                  existingRecord
+                  record
                     ? undefined
                     : (from, to) => session?.submitMove(from, to)
                 }
@@ -227,8 +328,8 @@ function DailyPageContent({
               record ? (
                 <DailyResultsPanel
                   record={record}
-                  participationStreak={participationStreak}
-                  winStreak={winStreak}
+                  participationStreak={user ? participationStreak : undefined}
+                  winStreak={user ? winStreak : undefined}
                   onShare={() => setShowModal(true)}
                   onPlayRandom={() => navigate("/random")}
                 />

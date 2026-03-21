@@ -86,6 +86,7 @@ export interface GameSnapshot {
   targetMoves: number;
   liveTopMoves: TopMove[];
   analysisReady: boolean;
+  engineDepth: number | null;
 }
 
 export interface StudySnapshot {

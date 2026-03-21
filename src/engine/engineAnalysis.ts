@@ -1,6 +1,11 @@
 import { getMoveCategory } from "../utils/chess";
 import { makeAnalysisResult } from "../types";
-import type { TopMove, Candidate, AnalysisResult, EvaluatedMove } from "../types";
+import type {
+  TopMove,
+  Candidate,
+  AnalysisResult,
+  EvaluatedMove,
+} from "../types";
 import type { EnginePool } from "./enginePool";
 
 interface EngineAnalysisOptions {
@@ -23,6 +28,7 @@ export interface EngineAnalysis {
   getTopMoves: () => TopMove[];
   getPositionEval: () => number;
   getFen: () => string;
+  getDepth: () => number | null;
   reset: () => void;
   waitForAnalysis: () => Promise<void>;
   isReady: () => boolean;
@@ -99,7 +105,10 @@ export function createEngineAnalysis({
     readyResolve = null;
   }
 
-  async function evaluateMove(uci: string, san: string): Promise<EvaluatedMove> {
+  async function evaluateMove(
+    uci: string,
+    san: string,
+  ): Promise<EvaluatedMove> {
     await waitForAnalysis();
     const isBlack = lockedFen!.includes(" b ");
     const rawBestEval = topMoves![0]?.rawEval ?? 0;
@@ -164,6 +173,11 @@ export function createEngineAnalysis({
     return lockedFen ?? "";
   }
 
+  function getDepth(): number | null {
+    const match = goCommand.match(/depth\s+(\d+)/);
+    return match ? parseInt(match[1], 10) : null;
+  }
+
   function reset(): void {
     topMoves = null;
     positionEval = null;
@@ -179,6 +193,7 @@ export function createEngineAnalysis({
     getTopMoves,
     getPositionEval,
     getFen,
+    getDepth,
     reset,
     waitForAnalysis,
     isReady: isAnalysisReady,

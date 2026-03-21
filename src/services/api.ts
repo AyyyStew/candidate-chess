@@ -6,14 +6,17 @@ export interface ApiUser {
   id: number;
   email: string;
   displayName: string;
+  participationStreak: number;
+  winStreak: number;
 }
 
 export interface SolveData {
   strikesAllowed: number;
   strikesUsed: number;
   movesFound: number;
-  totalMoves: number;
+  targetMoves: number;
   guesses: string; // comma-separated UCI moves
+  hiddenGems: string | null; // JSON array of {move, san, eval, diffBest, diffPos, depth}
   timeMs: number;
 }
 
@@ -74,17 +77,50 @@ export async function trackPuzzleSolve(
 
 // ── Solves (user history) ─────────────────────────────────────────────────────
 
+export async function getDailySolve(
+  date: string,
+): Promise<{
+  movesFound: number;
+  targetMoves: number;
+  guesses: string;
+  hiddenGems: string | null;
+} | null> {
+  try {
+    const res = await fetch(`${BASE}/solves/daily/${date}`);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function saveSolve(
   zobrist: string | null,
   data: SolveData,
-): Promise<void> {
+): Promise<{ participationStreak: number; winStreak: number } | null> {
   try {
-    await fetch(`${BASE}/solves`, {
+    const res = await fetch(`${BASE}/solves`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ zobrist, ...data }),
     });
+    if (!res.ok) return null;
+    const json = await res.json<{
+      id: number;
+      participationStreak?: number;
+      winStreak?: number;
+    }>();
+    if (
+      json.participationStreak !== undefined &&
+      json.winStreak !== undefined
+    ) {
+      return {
+        participationStreak: json.participationStreak,
+        winStreak: json.winStreak,
+      };
+    }
+    return null;
   } catch {
-    // fire and forget
+    return null;
   }
 }

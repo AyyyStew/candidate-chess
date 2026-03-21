@@ -172,6 +172,8 @@ auth.get("/me", (c) => {
     id: user.id,
     email: user.email,
     displayName: user.displayName,
+    participationStreak: user.participationStreak,
+    winStreak: user.winStreak,
   });
 });
 

@@ -5,8 +5,8 @@ import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useGameCoordinator } from "../hooks/useGameCoordinator";
 import { createGameSession, type GameSession } from "../sessions/GameSession";
 import { getPositionById } from "../services/positionService";
-import { trackPuzzleVisit, trackPuzzleSolve, saveSolve } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
+import { usePuzzleTracking } from "../hooks/usePuzzleTracking";
 import { debug } from "../utils/debug";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
@@ -24,8 +24,8 @@ function RandomPageContent() {
   const hasStartedRef = useRef(false);
 
   const posParam = searchParams.get("pos");
-  const startTimeRef = useRef(Date.now());
-  const currentPosIdRef = useRef<string | null>(null);
+
+  usePuzzleTracking({ snap, positionId: posParam, user });
 
   useEffect(() => {
     if (!ready) return;
@@ -42,15 +42,12 @@ function RandomPageContent() {
 
   async function loadById(id: string) {
     setSession(null);
-    startTimeRef.current = Date.now();
     try {
       const position = await getPositionById(id);
       debug("RandomPage", position);
       const { analysis } =
         await coordinatorRef.current!.advanceWithPosition(position);
       board.resetTo(position.fen, position.orientation);
-      trackPuzzleVisit(position.id);
-      currentPosIdRef.current = position.id;
       setSession(createGameSession({ analysis, position }));
     } catch {
       setSearchParams({}, { replace: true });
@@ -60,34 +57,11 @@ function RandomPageContent() {
 
   async function startNext() {
     setSession(null);
-    startTimeRef.current = Date.now();
     const { position, analysis } = await coordinatorRef.current!.advance();
     board.resetTo(position.fen, position.orientation);
     setSearchParams({ pos: position.id }, { replace: true });
-    trackPuzzleVisit(position.id);
-    currentPosIdRef.current = position.id;
     setSession(createGameSession({ analysis, position }));
   }
-
-  useEffect(() => {
-    if (snap?.phase !== "done" || !currentPosIdRef.current) return;
-    const resolved = snap.candidates.filter((c) => c.status !== "pending");
-    const hits = resolved.filter(
-      (c) => c.status === "hit" || c.status === "hidden_gem",
-    ).length;
-    const solveData = {
-      strikesAllowed: snap.maxStrikes,
-      strikesUsed: snap.strikes,
-      movesFound: hits,
-      totalMoves: snap.targetMoves,
-      guesses: resolved.map((c) => c.move).join(","),
-      timeMs: Date.now() - startTimeRef.current,
-    };
-    trackPuzzleSolve(currentPosIdRef.current, solveData);
-    if (user) {
-      saveSolve(currentPosIdRef.current, solveData);
-    }
-  }, [snap?.phase, user]);
 
   if (!snap) {
     return (
