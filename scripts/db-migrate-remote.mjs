@@ -9,7 +9,7 @@ for (const file of files) {
   console.log(`Applying ${file}...`);
   try {
     execSync(
-      `npx wrangler d1 execute candidate-chess-db --local --file=./drizzle/${file}`,
+      `npx wrangler d1 execute candidate-chess-db --remote --file=./drizzle/${file}`,
       { stdio: "inherit" }
     );
   } catch {
