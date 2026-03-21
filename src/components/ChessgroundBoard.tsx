@@ -15,6 +15,7 @@ export default function ChessgroundBoard({ config, apiRef }: Props) {
   useEffect(() => {
     if (!elRef.current) return;
     const el = elRef.current;
+
     const suppressContext = (e: MouseEvent) => e.preventDefault();
     el.addEventListener("contextmenu", suppressContext);
     const api = Chessground(el, config);
