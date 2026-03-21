@@ -57,6 +57,12 @@ function StudyPageContent() {
     setSession(null);
   }
 
+  function handleResetBoard() {
+    session?.reset();
+    board.resetToStartingPosition();
+    setSession(null);
+  }
+
   function handleReset() {
     session?.reset();
     board.resetToCheckpoint();
@@ -84,6 +90,7 @@ function StudyPageContent() {
       onDrop={handleDrop}
       locked={false}
       onReset={handleClearBoard}
+      onResetBoard={handleResetBoard}
       onStudyFromPosition={handleStudyFromPreview}
     />
   );

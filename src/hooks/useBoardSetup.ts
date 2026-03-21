@@ -12,7 +12,9 @@ export function useBoardSetup({
   initialOrientation = "white" as "white" | "black",
 } = {}) {
   const [fen, setFen] = useState(initialFen);
-  const [fenInput, setFenInput] = useState("");
+  const [fenInput, setFenInput] = useState(
+    initialFen === STARTING_FEN ? "" : initialFen,
+  );
   const [boardOrientation, setBoardOrientation] = useState<"white" | "black">(
     initialOrientation,
   );
@@ -27,7 +29,9 @@ export function useBoardSetup({
     baselineFen: string;
   }
   const [checkpoint, setCheckpoint] = useState<Checkpoint | null>(null);
-  const previewIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const previewIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
   const previewSavedFenRef = useRef<string | null>(null);
   const [isPreviewing, setIsPreviewing] = useState(false);
 
@@ -46,7 +50,12 @@ export function useBoardSetup({
     setFen(fenInput.trim());
     setMoveHistory([]);
     setHistoryIndex(-1);
-    setCheckpoint({ fen: fenInput.trim(), moveHistory: [], historyIndex: -1, baselineFen: fenInput.trim() });
+    setCheckpoint({
+      fen: fenInput.trim(),
+      moveHistory: [],
+      historyIndex: -1,
+      baselineFen: fenInput.trim(),
+    });
   }
 
   function handleNavigate(index: number): void {
@@ -68,7 +77,12 @@ export function useBoardSetup({
     setHistoryIndex(moves.length - 1);
     setFen(moves[moves.length - 1].fenAfter);
     setFenInput(moves[moves.length - 1].fenAfter);
-    setCheckpoint({ fen: moves[moves.length - 1].fenAfter, moveHistory: moves, historyIndex: moves.length - 1, baselineFen: pgnInitialFen });
+    setCheckpoint({
+      fen: moves[moves.length - 1].fenAfter,
+      moveHistory: moves,
+      historyIndex: moves.length - 1,
+      baselineFen: pgnInitialFen,
+    });
     return true;
   }
 
@@ -109,10 +123,19 @@ export function useBoardSetup({
 
   function reset(): void {
     setFen(initialFen);
-    setFenInput("");
+    setFenInput(initialFen === STARTING_FEN ? "" : initialFen);
     setMoveHistory([]);
     setHistoryIndex(-1);
     setBaselineFen(initialFen);
+    setCheckpoint(null);
+  }
+
+  function resetToStartingPosition(): void {
+    setFen(STARTING_FEN);
+    setFenInput("");
+    setMoveHistory([]);
+    setHistoryIndex(-1);
+    setBaselineFen(STARTING_FEN);
     setCheckpoint(null);
   }
 
@@ -210,7 +233,12 @@ export function useBoardSetup({
     setMoveHistory([]);
     setHistoryIndex(-1);
     setBaselineFen(newFen);
-    setCheckpoint({ fen: newFen, moveHistory: [], historyIndex: -1, baselineFen: newFen });
+    setCheckpoint({
+      fen: newFen,
+      moveHistory: [],
+      historyIndex: -1,
+      baselineFen: newFen,
+    });
   }
 
   function snapToEnd(): void {
@@ -255,5 +283,6 @@ export function useBoardSetup({
     clearPreview,
     isPreviewing,
     startFromFen,
+    resetToStartingPosition,
   };
 }

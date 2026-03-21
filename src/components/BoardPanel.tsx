@@ -21,6 +21,7 @@ interface BoardPanelProps {
   onDrop?: (sourceSquare: string, targetSquare: string) => void;
   locked?: boolean;
   onReset?: () => void;
+  onResetBoard?: () => void;
   onStudyFromPosition?: () => void;
   onPlayFromPosition?: () => void;
 }
@@ -41,6 +42,7 @@ export default function BoardPanel({
   onDrop,
   locked = false,
   onReset,
+  onResetBoard,
   onStudyFromPosition,
   onPlayFromPosition,
 }: BoardPanelProps) {
@@ -67,9 +69,9 @@ export default function BoardPanel({
   const topMovesForArrows =
     results?.topMoves ?? (isDone ? (snap?.liveTopMoves ?? []) : []);
 
-  // ── Legal destinations (active mode only) ──────────────────────────────────
+  // ── Legal destinations ───────────────────────────────────────────────────────
   function buildDests(): Map<Key, Key[]> | undefined {
-    if (!isActive) return undefined;
+    if (isPreviewing || (!isIdle && !isActive)) return undefined;
     const chess = new Chess(board.fen);
     const map = new Map<Key, Key[]>();
     for (const m of chess.moves({ verbose: true })) {
@@ -151,7 +153,7 @@ export default function BoardPanel({
     turnColor,
     blockTouchScroll: true,
     movable: {
-      free: isIdle && !isPreviewing,
+      free: false,
       color:
         isIdle && !isPreviewing
           ? ("both" as const)
@@ -240,14 +242,31 @@ export default function BoardPanel({
               onNavigate={handleNavigate}
               disabled={!isIdle}
             />
-            <button
-              onClick={() => {
-                onReset ? onReset() : board.reset();
-              }}
-              className="mt-2 w-full py-2.5 rounded-xl font-semibold bg-interactive hover:bg-red-700 hover:text-white transition-colors"
-            >
-              Reset Game
-            </button>
+            {onResetBoard ? (
+              <div className="mt-2 flex gap-2">
+                <button
+                  onClick={() => (onReset ? onReset() : board.reset())}
+                  className="flex-1 py-2.5 rounded-xl font-semibold bg-interactive hover:bg-red-700 hover:text-white transition-colors"
+                >
+                  Reset Position
+                </button>
+                <button
+                  onClick={onResetBoard}
+                  className="flex-1 py-2.5 rounded-xl font-semibold bg-interactive hover:bg-red-700 hover:text-white transition-colors"
+                >
+                  Reset Board
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  onReset ? onReset() : board.reset();
+                }}
+                className="mt-2 w-full py-2.5 rounded-xl font-semibold bg-interactive hover:bg-red-700 hover:text-white transition-colors"
+              >
+                Reset Game
+              </button>
+            )}
           </>
         )}
       </div>
