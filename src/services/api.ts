@@ -5,6 +5,10 @@ const BASE = "/api/v1";
 let puzzleWidgetId: string | null = null;
 let puzzleToken: string | null = null;
 let puzzleTokenResolve: ((token: string | null) => void) | null = null;
+let puzzleInitResolve: (() => void) | null = null;
+const puzzleInitPromise = new Promise<void>((resolve) => {
+  puzzleInitResolve = resolve;
+});
 
 export function initPuzzleTurnstile(sitekey: string) {
   console.log("[turnstile] initPuzzleTurnstile called", {
@@ -28,9 +32,15 @@ export function initPuzzleTurnstile(sitekey: string) {
     },
   });
   console.log("[turnstile] puzzle widget rendered, widgetId:", puzzleWidgetId);
+  puzzleInitResolve?.();
 }
 
 async function getPuzzleTurnstileToken(): Promise<string | null> {
+  // wait up to 10s for widget init — handles race with Turnstile script load on cold page load
+  await Promise.race([
+    puzzleInitPromise,
+    new Promise<void>((r) => setTimeout(r, 10_000)),
+  ]);
   console.log("[turnstile] getPuzzleTurnstileToken called", {
     puzzleWidgetId,
     hasToken: !!puzzleToken,
@@ -39,7 +49,7 @@ async function getPuzzleTurnstileToken(): Promise<string | null> {
   if (puzzleToken) {
     const token = puzzleToken;
     puzzleToken = null;
-    window.turnstile.reset?.(puzzleWidgetId); // refresh for next use
+    window.turnstile.reset?.(puzzleWidgetId);
     return token;
   }
   // token not ready yet — wait for callback
