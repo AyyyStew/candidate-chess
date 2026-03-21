@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { EngineProvider } from "./contexts/EngineContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import DailyPage from "./pages/DailyPage";
 import GamePage from "./pages/RandomPage";
 import StudyPage from "./pages/StudyPage";
@@ -10,6 +11,8 @@ import PracticePage from "./pages/PracticePage";
 import AboutPage from "./pages/AboutPage";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsPage from "./pages/TermsPage";
 import { preload } from "./services/positionService";
 import { trackVisit, initPuzzleTurnstile } from "./services/api";
 
@@ -71,7 +74,7 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-bg text-text">
+      <div className="min-h-screen bg-bg text-text flex flex-col">
         <div id="turnstile-widget" className="hidden" />
         <div id="puzzle-turnstile-widget" className="hidden" />
         <Header />
@@ -84,8 +87,11 @@ export default function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
           </Routes>
         </EngineProvider>
+        <Footer />
       </div>
     </AuthProvider>
   );
