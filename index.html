@@ -6,6 +6,12 @@
   <link rel="icon" type="image/svg+xml" href="/candidate_chess_logo.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Candidate Chess ♟️</title>
+  <script>
+    function onTurnstileLoad() {
+      window.__turnstileReady = true;
+      window.__pendingTurnstileLoad?.();
+    }
+  </script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" async defer></script>
 </head>
 

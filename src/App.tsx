@@ -22,6 +22,8 @@ declare global {
       reset?: (widgetId: string) => void;
     };
     onTurnstileLoad?: () => void;
+    __turnstileReady?: boolean;
+    __pendingTurnstileLoad?: () => void;
   }
 }
 
@@ -54,14 +56,14 @@ export default function App() {
       }
     }
 
-    if (window.turnstile) {
+    const init = () => {
       render();
       initPuzzleTurnstile(sitekey);
+    };
+    if (window.__turnstileReady || window.turnstile) {
+      init();
     } else {
-      window.onTurnstileLoad = () => {
-        render();
-        initPuzzleTurnstile(sitekey);
-      };
+      window.__pendingTurnstileLoad = init;
     }
   }, []);
 
