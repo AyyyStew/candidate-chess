@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  getRandomPositionByFilters,
+  getFilteredSamples,
   type PositionFilters,
 } from "../services/positionService";
 import type { Position } from "../types";
+import PositionCarousel from "../components/PositionCarousel";
 import {
   Sprout,
   Swords,
@@ -51,13 +52,6 @@ const FILTER_GROUPS: Array<{
         description: "Both sides mobilized, plans in full clash",
         icon: Swords,
         activeColor: "bg-amber-600 border-amber-600 shadow-amber-600/30",
-      },
-      {
-        value: "early_endgame",
-        label: "Early Endgame",
-        description: "Transition out of middlegame, imbalances settling",
-        icon: Clock,
-        activeColor: "bg-orange-600 border-orange-600 shadow-orange-600/30",
       },
       {
         value: "endgame",
@@ -148,18 +142,20 @@ function emptyFilters(): Filters {
 export default function LibraryPage() {
   const navigate = useNavigate();
   const [filters, setFilters] = useState<Filters>(emptyFilters());
-  const [position, setPosition] = useState<Position | null>(null);
+  const [count, setCount] = useState<number | null>(null);
+  const [samples, setSamples] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
   const genRef = useRef(0);
 
-  // Pre-fetch a matching position whenever filters change
   useEffect(() => {
     const gen = ++genRef.current;
-    setPosition(null);
+    setSamples([]);
+    setCount(null);
     setLoading(true);
-    getRandomPositionByFilters(filters).then((pos) => {
-      if (genRef.current !== gen) return; // discard stale result
-      setPosition(pos);
+    getFilteredSamples(filters, 30).then(({ count: c, samples: s }) => {
+      if (genRef.current !== gen) return;
+      setCount(c);
+      setSamples(s);
       setLoading(false);
     });
   }, [filters]);
@@ -173,6 +169,11 @@ export default function LibraryPage() {
 
   const hasAnyFilter = Object.values(filters).some((arr) => arr.length > 0);
 
+  const loadMore = useCallback(async () => {
+    const { samples: more } = await getFilteredSamples(filters, 30);
+    return more;
+  }, [filters]);
+
   return (
     <main className="max-w-3xl mx-auto px-8 py-8 flex flex-col gap-8">
       <div>
@@ -184,20 +185,24 @@ export default function LibraryPage() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         {FILTER_GROUPS.map((group) => (
-          <div key={group.key} className="flex flex-col gap-2">
-            <p className="text-xs text-faint uppercase tracking-widest">
-              {group.label}
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div key={group.key} className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <hr className="flex-1 border-edge-hi" />
+              <p className="text-xs text-muted uppercase tracking-widest font-semibold">
+                {group.label}
+              </p>
+              <hr className="flex-1 border-edge-hi" />
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
               {group.options.map((opt) => {
                 const active = filters[group.key].includes(opt.value);
                 return (
                   <button
                     key={`${group.key}-${opt.value}`}
                     onClick={() => toggle(group.key, opt.value)}
-                    className={`flex flex-col items-start gap-0.5 px-3 py-2.5 rounded-lg text-left transition-all border ${
+                    className={`w-36 flex flex-col items-start gap-0.5 px-3 py-2.5 rounded-lg text-left transition-all border ${
                       active
                         ? `${opt.activeColor} text-white shadow-md`
                         : "bg-interactive hover:bg-interactive-hi text-label border-edge-hi"
@@ -220,32 +225,52 @@ export default function LibraryPage() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-3 pt-2 border-t border-edge-hi">
-        <p className="text-xs text-faint text-center pt-2">
-          {loading
-            ? "Finding a matching position..."
-            : hasAnyFilter
-              ? "Position ready."
-              : "No filters selected — a random position will be used."}
-        </p>
+      {/* Count */}
+      <p className="text-sm font-medium">
+        {loading ? (
+          <span className="text-muted">Counting positions…</span>
+        ) : (
+          <span>
+            <span className="font-black text-label">
+              {count?.toLocaleString()}
+            </span>
+            <span className="text-muted">
+              {" "}
+              position{count === 1 ? "" : "s"}{" "}
+              {hasAnyFilter ? "match these filters" : "available"}
+            </span>
+          </span>
+        )}
+      </p>
+
+      {/* Play / Study */}
+      <div className="flex flex-col gap-3">
         <button
-          onClick={() => position && navigate(`/random?pos=${position.id}`)}
-          disabled={!position}
+          onClick={() => samples[0] && navigate(`/random?pos=${samples[0].id}`)}
+          disabled={!samples[0]}
           className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi disabled:opacity-40 disabled:cursor-not-allowed text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
         >
           {loading ? "Loading..." : "Play"}
         </button>
         <button
           onClick={() =>
-            position &&
-            navigate(`/study?fen=${encodeURIComponent(position.fen)}`)
+            samples[0] &&
+            navigate(`/study?fen=${encodeURIComponent(samples[0].fen)}`)
           }
-          disabled={!position}
+          disabled={!samples[0]}
           className="w-full py-3 rounded-xl font-bold text-base bg-interactive hover:bg-interactive-hi disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "Loading..." : "Study"}
         </button>
       </div>
+
+      {/* Carousel */}
+      <PositionCarousel
+        positions={samples}
+        loading={loading}
+        count={count}
+        onLoadMore={loadMore}
+      />
     </main>
   );
 }

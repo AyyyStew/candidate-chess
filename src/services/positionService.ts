@@ -158,6 +158,21 @@ function matchesFilters(pos: RawPosition, filters: PositionFilters): boolean {
   return true;
 }
 
+export async function getFilteredSamples(
+  filters: PositionFilters,
+  n: number,
+): Promise<{ count: number; samples: Position[] }> {
+  const hasFilters = Object.values(filters).some((v) => v && v.length > 0);
+  const allChunks = await Promise.all(HEX_DIGITS.map(loadChunk));
+  const allPositions = allChunks.flat();
+  const matches = hasFilters
+    ? allPositions.filter((p) => matchesFilters(p, filters))
+    : allPositions;
+  const shuffled = [...matches].sort(() => Math.random() - 0.5);
+  const samples = shuffled.slice(0, n).map(toPosition);
+  return { count: matches.length, samples };
+}
+
 export async function getRandomPositionByFilters(
   filters: PositionFilters,
 ): Promise<Position> {
