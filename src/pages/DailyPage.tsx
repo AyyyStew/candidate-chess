@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Chess } from "chess.js";
 import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -421,6 +422,13 @@ export default function DailyPage() {
       initialFen={daily.fen}
       initialOrientation={daily.orientation}
     >
+      <Helmet>
+        <title>Daily Puzzle — Candidate Chess</title>
+        <meta
+          name="description"
+          content="Today's shared chess position. Find the engine's top 5 candidate moves — no hints, no eval bar."
+        />
+      </Helmet>
       {redirectReason && (
         <div className="max-w-6xl mx-auto px-8 pt-6">
           <p className="text-sm text-muted">

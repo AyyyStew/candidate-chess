@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 interface PostMeta {
   title: string;
@@ -23,29 +24,38 @@ const posts = Object.entries(postModules)
 
 export default function NewsPage() {
   return (
-    <main className="max-w-2xl mx-auto px-8 py-16 flex flex-col gap-10">
-      <h1 className="font-black text-3xl tracking-tight">Dev Log</h1>
+    <>
+      <Helmet>
+        <title>Dev Log — Candidate Chess</title>
+        <meta
+          name="description"
+          content="Development updates and release notes for Candidate Chess."
+        />
+      </Helmet>
+      <main className="max-w-2xl mx-auto px-8 py-16 flex flex-col gap-10">
+        <h1 className="font-black text-3xl tracking-tight">Dev Log</h1>
 
-      {posts.length === 0 ? (
-        <p className="text-muted text-sm">Nothing posted yet.</p>
-      ) : (
-        <ul className="flex flex-col gap-8">
-          {posts.map((post) => (
-            <li key={post.slug} className="flex flex-col gap-1">
-              <Link
-                to={`/news/${post.slug}`}
-                className="font-bold text-lg text-text hover:text-accent transition-colors"
-              >
-                {post.title}
-              </Link>
-              <span className="text-xs text-muted">{post.date}</span>
-              <p className="text-sm text-muted leading-relaxed mt-1">
-                {post.description}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
+        {posts.length === 0 ? (
+          <p className="text-muted text-sm">Nothing posted yet.</p>
+        ) : (
+          <ul className="flex flex-col gap-8">
+            {posts.map((post) => (
+              <li key={post.slug} className="flex flex-col gap-1">
+                <Link
+                  to={`/news/${post.slug}`}
+                  className="font-bold text-lg text-text hover:text-accent transition-colors"
+                >
+                  {post.title}
+                </Link>
+                <span className="text-xs text-muted">{post.date}</span>
+                <p className="text-sm text-muted leading-relaxed mt-1">
+                  {post.description}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </main>
+    </>
   );
 }

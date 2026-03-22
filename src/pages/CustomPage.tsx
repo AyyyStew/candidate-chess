@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { RefreshCw } from "lucide-react";
 import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -209,6 +210,13 @@ export default function CustomPage() {
   const initialFen = searchParams.get("fen") ?? undefined;
   return (
     <BoardProvider initialFen={initialFen}>
+      <Helmet>
+        <title>Custom Position — Candidate Chess</title>
+        <meta
+          name="description"
+          content="Paste any FEN and practice candidate move thinking from your own chess position."
+        />
+      </Helmet>
       <CustomPageContent />
     </BoardProvider>
   );

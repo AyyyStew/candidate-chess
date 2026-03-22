@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 const providers = [
   {
@@ -50,45 +51,50 @@ const providers = [
 
 export default function LoginPage() {
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-65px)] px-4">
-      <div className="bg-surface border border-edge-hi rounded-xl p-6 w-80 flex flex-col gap-4 shadow-2xl">
-        <h2 className="font-bold text-lg">Sign in</h2>
+    <>
+      <Helmet>
+        <title>Sign In — Candidate Chess</title>
+      </Helmet>
+      <div className="flex items-center justify-center min-h-[calc(100vh-65px)] px-4">
+        <div className="bg-surface border border-edge-hi rounded-xl p-6 w-80 flex flex-col gap-4 shadow-2xl">
+          <h2 className="font-bold text-lg">Sign in</h2>
 
-        <p className="text-sm text-muted">
-          Sign in to save your solve history.
-        </p>
+          <p className="text-sm text-muted">
+            Sign in to save your solve history.
+          </p>
 
-        <div className="flex flex-col gap-2">
-          {providers.map((p) => (
-            <a
-              key={p.key}
-              href={p.href}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg border border-edge-hi bg-surface-hi hover:bg-accent hover:text-white hover:border-accent transition-all font-semibold text-sm"
+          <div className="flex flex-col gap-2">
+            {providers.map((p) => (
+              <a
+                key={p.key}
+                href={p.href}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg border border-edge-hi bg-surface-hi hover:bg-accent hover:text-white hover:border-accent transition-all font-semibold text-sm"
+              >
+                {p.icon}
+                Sign in with {p.label}
+              </a>
+            ))}
+          </div>
+
+          <p className="text-xs text-muted text-center leading-relaxed">
+            By signing in, you agree to our{" "}
+            <Link
+              to="/terms"
+              className="text-accent hover:text-accent-hi underline underline-offset-2 transition-colors"
             >
-              {p.icon}
-              Sign in with {p.label}
-            </a>
-          ))}
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              to="/privacy"
+              className="text-accent hover:text-accent-hi underline underline-offset-2 transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </div>
-
-        <p className="text-xs text-muted text-center leading-relaxed">
-          By signing in, you agree to our{" "}
-          <Link
-            to="/terms"
-            className="text-accent hover:text-accent-hi underline underline-offset-2 transition-colors"
-          >
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link
-            to="/privacy"
-            className="text-accent hover:text-accent-hi underline underline-offset-2 transition-colors"
-          >
-            Privacy Policy
-          </Link>
-          .
-        </p>
       </div>
-    </div>
+    </>
   );
 }

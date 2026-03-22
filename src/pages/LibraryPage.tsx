@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import {
   getFilteredSamples,
@@ -175,102 +176,113 @@ export default function LibraryPage() {
   }, [filters]);
 
   return (
-    <main className="max-w-3xl mx-auto px-8 py-8 flex flex-col gap-8">
-      <div>
-        <h1 className="font-black text-xl sm:text-3xl tracking-tight">
-          Position Library
-        </h1>
-        <p className="text-muted text-sm mt-1">
-          Select filters to find a matching position, then play or study it.
-        </p>
-      </div>
+    <>
+      <Helmet>
+        <title>Position Library — Candidate Chess</title>
+        <meta
+          name="description"
+          content="Browse and filter the full library of curated chess positions by phase, balance, and complexity."
+        />
+      </Helmet>
+      <main className="max-w-3xl mx-auto px-8 py-8 flex flex-col gap-8">
+        <div>
+          <h1 className="font-black text-xl sm:text-3xl tracking-tight">
+            Position Library
+          </h1>
+          <p className="text-muted text-sm mt-1">
+            Select filters to find a matching position, then play or study it.
+          </p>
+        </div>
 
-      <div className="flex flex-col gap-8">
-        {FILTER_GROUPS.map((group) => (
-          <div key={group.key} className="flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <hr className="flex-1 border-edge-hi" />
-              <p className="text-xs text-muted uppercase tracking-widest font-semibold">
-                {group.label}
-              </p>
-              <hr className="flex-1 border-edge-hi" />
-            </div>
-            <div className="flex flex-wrap justify-center gap-2">
-              {group.options.map((opt) => {
-                const active = filters[group.key].includes(opt.value);
-                return (
-                  <button
-                    key={`${group.key}-${opt.value}`}
-                    onClick={() => toggle(group.key, opt.value)}
-                    className={`w-36 flex flex-col items-start gap-0.5 px-3 py-2.5 rounded-lg text-left transition-all border ${
-                      active
-                        ? `${opt.activeColor} text-white shadow-md`
-                        : "bg-interactive hover:bg-interactive-hi text-label border-edge-hi"
-                    }`}
-                  >
-                    <span className="flex items-center gap-1.5 text-sm font-semibold">
-                      <opt.icon size={14} />
-                      {opt.label}
-                    </span>
-                    <span
-                      className={`text-xs leading-snug ${active ? "text-white/70" : "text-muted"}`}
+        <div className="flex flex-col gap-8">
+          {FILTER_GROUPS.map((group) => (
+            <div key={group.key} className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <hr className="flex-1 border-edge-hi" />
+                <p className="text-xs text-muted uppercase tracking-widest font-semibold">
+                  {group.label}
+                </p>
+                <hr className="flex-1 border-edge-hi" />
+              </div>
+              <div className="flex flex-wrap justify-center gap-2">
+                {group.options.map((opt) => {
+                  const active = filters[group.key].includes(opt.value);
+                  return (
+                    <button
+                      key={`${group.key}-${opt.value}`}
+                      onClick={() => toggle(group.key, opt.value)}
+                      className={`w-36 flex flex-col items-start gap-0.5 px-3 py-2.5 rounded-lg text-left transition-all border ${
+                        active
+                          ? `${opt.activeColor} text-white shadow-md`
+                          : "bg-interactive hover:bg-interactive-hi text-label border-edge-hi"
+                      }`}
                     >
-                      {opt.description}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span className="flex items-center gap-1.5 text-sm font-semibold">
+                        <opt.icon size={14} />
+                        {opt.label}
+                      </span>
+                      <span
+                        className={`text-xs leading-snug ${active ? "text-white/70" : "text-muted"}`}
+                      >
+                        {opt.description}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Count */}
-      <p className="text-sm font-medium">
-        {loading ? (
-          <span className="text-muted">Counting positions…</span>
-        ) : (
-          <span>
-            <span className="font-black text-label">
-              {count?.toLocaleString()}
+        {/* Count */}
+        <p className="text-sm font-medium">
+          {loading ? (
+            <span className="text-muted">Counting positions…</span>
+          ) : (
+            <span>
+              <span className="font-black text-label">
+                {count?.toLocaleString()}
+              </span>
+              <span className="text-muted">
+                {" "}
+                position{count === 1 ? "" : "s"}{" "}
+                {hasAnyFilter ? "match these filters" : "available"}
+              </span>
             </span>
-            <span className="text-muted">
-              {" "}
-              position{count === 1 ? "" : "s"}{" "}
-              {hasAnyFilter ? "match these filters" : "available"}
-            </span>
-          </span>
-        )}
-      </p>
+          )}
+        </p>
 
-      {/* Play / Study */}
-      <div className="flex flex-col gap-3">
-        <button
-          onClick={() => samples[0] && navigate(`/random?pos=${samples[0].id}`)}
-          disabled={!samples[0]}
-          className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi disabled:opacity-40 disabled:cursor-not-allowed text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
-        >
-          {loading ? "Loading..." : "Play"}
-        </button>
-        <button
-          onClick={() =>
-            samples[0] &&
-            navigate(`/study?fen=${encodeURIComponent(samples[0].fen)}`)
-          }
-          disabled={!samples[0]}
-          className="w-full py-3 rounded-xl font-bold text-base bg-interactive hover:bg-interactive-hi disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        >
-          {loading ? "Loading..." : "Study"}
-        </button>
-      </div>
+        {/* Play / Study */}
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() =>
+              samples[0] && navigate(`/random?pos=${samples[0].id}`)
+            }
+            disabled={!samples[0]}
+            className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi disabled:opacity-40 disabled:cursor-not-allowed text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
+          >
+            {loading ? "Loading..." : "Play"}
+          </button>
+          <button
+            onClick={() =>
+              samples[0] &&
+              navigate(`/study?fen=${encodeURIComponent(samples[0].fen)}`)
+            }
+            disabled={!samples[0]}
+            className="w-full py-3 rounded-xl font-bold text-base bg-interactive hover:bg-interactive-hi disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? "Loading..." : "Study"}
+          </button>
+        </div>
 
-      {/* Carousel */}
-      <PositionCarousel
-        positions={samples}
-        loading={loading}
-        count={count}
-        onLoadMore={loadMore}
-      />
-    </main>
+        {/* Carousel */}
+        <PositionCarousel
+          positions={samples}
+          loading={loading}
+          count={count}
+          onLoadMore={loadMore}
+        />
+      </main>
+    </>
   );
 }

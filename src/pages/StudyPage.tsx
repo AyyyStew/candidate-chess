@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
@@ -264,6 +265,13 @@ export default function StudyPage() {
   const initialFen = searchParams.get("fen") ?? undefined;
   return (
     <BoardProvider initialFen={initialFen}>
+      <Helmet>
+        <title>Study — Candidate Chess</title>
+        <meta
+          name="description"
+          content="Analyze any chess position with an engine that keeps evaluations and top moves hidden until you ask."
+        />
+      </Helmet>
       <StudyPageContent />
     </BoardProvider>
   );

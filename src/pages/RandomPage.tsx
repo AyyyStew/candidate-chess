@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Shuffle } from "lucide-react";
@@ -136,6 +137,13 @@ function RandomPageContent() {
 export default function RandomPage() {
   return (
     <BoardProvider>
+      <Helmet>
+        <title>Random Position — Candidate Chess</title>
+        <meta
+          name="description"
+          content="Practice candidate move thinking on a random chess position. Find the engine's top 5 moves — no hints, no eval bar."
+        />
+      </Helmet>
       <RandomPageContent />
     </BoardProvider>
   );

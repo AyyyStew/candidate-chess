@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#030712',
+            surface: '#111827',
+            'surface-hi': '#1f2937',
+            edge: '#374151',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { width: 1200px; height: 630px; overflow: hidden; }
+  </style>
+</head>
+
+<body class="bg-bg flex items-center justify-center w-[1200px] h-[630px] px-24 gap-20">
+
+  <!-- Left: branding -->
+  <div class="flex flex-col gap-5 flex-shrink-0">
+    <div class="flex items-center gap-5">
+      <img src="/candidate_chess_logo.svg" class="w-16 h-16" alt="" />
+      <span class="text-5xl font-black tracking-wide text-white">Candidate Chess</span>
+    </div>
+    <div class="flex flex-col gap-1 pl-1">
+      <span class="text-3xl font-bold text-yellow-400">Find the Best Moves</span>
+      <span class="text-lg text-gray-500 font-medium">candidatechess.com</span>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div class="w-px self-stretch bg-gray-800 flex-shrink-0 my-16"></div>
+
+  <!-- Right: move rows -->
+  <div class="flex flex-col gap-2.5 flex-1">
+
+    <!-- Row 1: hit, Best -->
+    <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4" style="border-left-color:#22c55e; background: linear-gradient(90deg, #22c55e22 0%, transparent 100%);">
+      <span class="font-bold text-sm w-5 shrink-0 text-yellow-400">1</span>
+      <span class="font-semibold text-white flex-1">Qh4#</span>
+      <span class="text-xs font-medium text-green-400">★ Best</span>
+      <span class="text-xs text-gray-500 tabular-nums">-M1</span>
+      <span class="text-xs text-green-400 font-medium">✓</span>
+    </div>
+
+    <!-- Row 2: hit, Excellent -->
+    <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4" style="border-left-color:#84cc16; background: linear-gradient(90deg, #84cc1622 0%, transparent 100%);">
+      <span class="font-bold text-sm w-5 shrink-0 text-yellow-400">2</span>
+      <span class="font-semibold text-white flex-1">Rxf7+</span>
+      <span class="text-xs font-medium" style="color:#84cc16">✦ Excellent</span>
+      <span class="text-xs text-gray-500 tabular-nums">-M3</span>
+      <span class="text-xs text-green-400 font-medium">✓</span>
+    </div>
+
+    <!-- Row 3: hit, Good -->
+    <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4" style="border-left-color:#a3e635; background: linear-gradient(90deg, #a3e63522 0%, transparent 100%);">
+      <span class="font-bold text-sm w-5 shrink-0 text-yellow-400">3</span>
+      <span class="font-semibold text-white flex-1">Nf6+</span>
+      <span class="text-xs font-medium" style="color:#a3e635">✓ Good</span>
+      <span class="text-xs text-gray-500 tabular-nums">+1.4</span>
+      <span class="text-xs text-green-400 font-medium">✓</span>
+    </div>
+
+    <!-- Row 4: hidden -->
+    <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4" style="border-left-color:#1f2937; background:#111827;">
+      <span class="font-bold text-sm w-5 shrink-0 text-yellow-400/50">4</span>
+      <span class="font-black text-xl text-gray-700 tracking-widest flex-1">· · ·</span>
+    </div>
+
+    <!-- Row 5: hidden -->
+    <div class="flex items-center gap-3 rounded-lg px-3 py-2.5 border-l-4" style="border-left-color:#1f2937; background:#111827;">
+      <span class="font-bold text-sm w-5 shrink-0 text-yellow-400/50">5</span>
+      <span class="font-black text-xl text-gray-700 tracking-widest flex-1">· · ·</span>
+    </div>
+
+  </div>
+
+</body>
+
+</html>
