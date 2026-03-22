@@ -6,7 +6,7 @@ import {
   playSuccessSound,
   playFailureSound,
 } from "../utils/sounds";
-import { StrikeIndicator } from "./PipsAndStrikes";
+import { PipsIndicator, StrikeIndicator } from "./PipsAndStrikes";
 
 interface FamilyFeudBoardProps {
   fen: string;
@@ -16,6 +16,7 @@ interface FamilyFeudBoardProps {
   isDone: boolean;
   strikes: number;
   maxStrikes: number;
+  analysisReady?: boolean;
   /** Mobile context: hides the header and misses section since GameLayout
    *  renders StrikesPipsBar and GuessList above/below the board instead. */
   isMobile?: boolean;
@@ -29,6 +30,7 @@ export default function FamilyFeudBoard({
   isDone,
   strikes,
   maxStrikes,
+  analysisReady = false,
   isMobile = false,
 }: FamilyFeudBoardProps) {
   const [revealedMoves, setRevealedMoves] = useState<Set<string>>(new Set());
@@ -81,17 +83,22 @@ export default function FamilyFeudBoard({
     <div className="flex flex-col gap-5">
       {/* Header */}
       {!isMobile && (
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs text-muted uppercase tracking-widest mb-0.5">
-              Challenge
-            </p>
-            <h3 className="font-black text-xl text-text leading-tight">
-              Find the Top{" "}
-              <span className="text-yellow-400">{targetMoves}</span> Moves
-            </h3>
-          </div>
-          <StrikeIndicator strikes={strikes} maxStrikes={maxStrikes} />
+        <div className="flex flex-col gap-2">
+          <h3 className="font-black text-xl text-text leading-tight">
+            Find the Top <span className="text-yellow-400">{targetMoves}</span>{" "}
+            Moves
+          </h3>
+          <PipsIndicator
+            analysisReady={analysisReady}
+            isDone={isDone}
+            targetMoves={targetMoves}
+            hitCount={hitMoves.length}
+          />
+          <StrikeIndicator
+            strikes={strikes}
+            maxStrikes={maxStrikes}
+            size="sm"
+          />
         </div>
       )}
 

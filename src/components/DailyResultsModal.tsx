@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { GameSnapshot } from "../types";
 import type { DailyRecord } from "../services/localDailyService";
 import StreakDisplay from "./StreakDisplay";
+import DiceIcon from "./DiceIcon";
 import { candidateToSquare } from "../utils/daily";
 
 interface DailyResultsModalProps {
@@ -61,28 +62,6 @@ function IconCheck() {
       strokeLinejoin="round"
     >
       <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-function IconDice() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="2" y="2" width="20" height="20" rx="3" />
-      <circle cx="8" cy="8" r="1.5" fill="currentColor" />
-      <circle cx="16" cy="8" r="1.5" fill="currentColor" />
-      <circle cx="8" cy="16" r="1.5" fill="currentColor" />
-      <circle cx="16" cy="16" r="1.5" fill="currentColor" />
-      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
     </svg>
   );
 }
@@ -210,7 +189,7 @@ export default function DailyResultsModal({
             onClick={() => navigate("/random")}
             className="w-full py-3 px-4 rounded-xl font-semibold text-sm bg-interactive hover:bg-interactive-hi transition-colors text-label flex items-center justify-center gap-2"
           >
-            <IconDice />
+            <DiceIcon size={16} />
             Play a random position
           </button>
         </div>

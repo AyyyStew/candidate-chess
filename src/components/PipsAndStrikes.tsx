@@ -56,8 +56,8 @@ export function StrikeIndicator({
   maxStrikes,
   size = "lg",
 }: StrikeIndicatorProps) {
-  const textSize = size === "sm" ? "text-2xl" : "text-3xl";
-  const gap = size === "sm" ? "gap-1.5" : "gap-2";
+  const textSize = size === "sm" ? "text-lg" : "text-3xl";
+  const gap = size === "sm" ? "gap-1" : "gap-2";
   return (
     <div className={`flex ${gap} items-center`}>
       {Array.from({ length: maxStrikes }).map((_, i) => {

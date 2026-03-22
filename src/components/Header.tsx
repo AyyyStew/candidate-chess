@@ -3,7 +3,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
   CalendarDays,
-  Shuffle,
   BookOpen,
   Wrench,
   GraduationCap,
@@ -11,12 +10,17 @@ import {
   UserRound,
   Menu,
   X,
-  type LucideIcon,
 } from "lucide-react";
+import React from "react";
+import DiceIcon from "./DiceIcon";
 
-const navLinks: { to: string; label: string; icon: LucideIcon }[] = [
+const navLinks: {
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number }>;
+}[] = [
   { to: "/", label: "Daily", icon: CalendarDays },
-  { to: "/random", label: "Random", icon: Shuffle },
+  { to: "/random", label: "Random", icon: DiceIcon },
   { to: "/library", label: "Library", icon: BookOpen },
   { to: "/custom", label: "Custom", icon: Wrench },
   { to: "/study", label: "Study", icon: GraduationCap },

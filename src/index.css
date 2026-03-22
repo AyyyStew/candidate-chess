@@ -30,6 +30,11 @@
 
 @source inline("border-green-500 border-orange-400 border-red-500");
 
+/* ── Always reserve scrollbar gutter to prevent layout shift ── */
+body {
+  scrollbar-gutter: stable;
+}
+
 /* ── Chessground board sizing ───────────────────────────────── */
 .cg-wrap {
   width: 100%;

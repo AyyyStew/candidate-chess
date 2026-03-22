@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { RefreshCw } from "lucide-react";
 import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
@@ -8,6 +9,8 @@ import { createGameSession, type GameSession } from "../sessions/GameSession";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
 import GameLayout from "../components/GameLayout";
+import GameResultsPanel from "../components/GameResultsPanel";
+import PositionBanner from "../components/PositionBanner";
 import FenInput from "../components/FenInput";
 import { makePosition } from "../types";
 import { isBlackToMove } from "../utils/chess";
@@ -109,19 +112,16 @@ function CustomPageContent() {
 
   return (
     <main className="flex flex-col gap-4 p-8 max-w-6xl mx-auto">
+      <PositionBanner
+        label={snap.label}
+        event={snap.event}
+        moveNumber={snap.moveNumber}
+        orientation={snap.orientation}
+        pgn={snap.pgn}
+      />
       <GameLayout
         snap={snap}
-        activeGame
-        actions={
-          isDone ? (
-            <button
-              onClick={handleReset}
-              className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
-            >
-              Play Again
-            </button>
-          ) : null
-        }
+        activeGame={!isDone}
         board={
           <BoardPanel
             snap={snap}
@@ -135,7 +135,21 @@ function CustomPageContent() {
             }
           />
         }
-        panel={<GamePanel snap={snap!} />}
+        panel={
+          isDone ? (
+            <GameResultsPanel
+              snap={snap}
+              shareTitle="Custom Position"
+              primaryAction={{
+                label: "Play Again",
+                icon: RefreshCw,
+                onClick: handleReset,
+              }}
+            />
+          ) : (
+            <GamePanel snap={snap} />
+          )
+        }
       />
     </main>
   );

@@ -8,7 +8,7 @@ import type { GameSnapshot } from "../types";
 interface GameLayoutProps {
   /** The BoardPanel node */
   board: React.ReactNode;
-  /** Desktop right-column content (GamePanel or DailyResultsPanel) */
+  /** Desktop right-column content (GamePanel or GameResultsPanel) */
   panel: React.ReactNode;
   /** Current game snapshot — when provided and activeGame=true, enables the
    *  full mobile game layout (strikes+pips, board, guess list, eval board). */
@@ -34,7 +34,7 @@ export default function GameLayout({
     return (
       <div className="flex gap-8">
         {board}
-        <div className="flex-1 flex flex-col gap-5">
+        <div className="flex-1 min-w-md flex flex-col gap-5">
           {panel}
           {actions}
         </div>

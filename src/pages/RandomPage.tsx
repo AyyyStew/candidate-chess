@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Shuffle } from "lucide-react";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useGameCoordinator } from "../hooks/useGameCoordinator";
 import { createGameSession, type GameSession } from "../sessions/GameSession";
@@ -11,6 +12,7 @@ import { debug } from "../utils/debug";
 import BoardPanel from "../components/BoardPanel";
 import GamePanel from "../components/GamePanel";
 import GameLayout from "../components/GameLayout";
+import GameResultsPanel from "../components/GameResultsPanel";
 import PositionBanner from "../components/PositionBanner";
 
 function RandomPageContent() {
@@ -73,23 +75,6 @@ function RandomPageContent() {
 
   const isDone = snap.phase === "done";
 
-  const actions = isDone ? (
-    <div className="flex flex-col gap-3">
-      <button
-        onClick={startNext}
-        className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
-      >
-        Play Another Position
-      </button>
-      <button
-        onClick={() => navigate("/library")}
-        className="w-full py-3 rounded-xl font-bold text-base bg-interactive hover:bg-interactive-hi transition-colors"
-      >
-        Position Library
-      </button>
-    </div>
-  ) : null;
-
   return (
     <main className="max-w-6xl mx-auto px-8 py-8 flex flex-col gap-6">
       {/* Page title */}
@@ -108,8 +93,7 @@ function RandomPageContent() {
 
       <GameLayout
         snap={snap}
-        activeGame
-        actions={actions}
+        activeGame={!isDone}
         board={
           <BoardPanel
             snap={snap}
@@ -123,7 +107,27 @@ function RandomPageContent() {
             }
           />
         }
-        panel={<GamePanel snap={snap} showHeader={false} />}
+        panel={
+          isDone ? (
+            <GameResultsPanel
+              snap={snap}
+              shareTitle="Random Position"
+              shareUrl={
+                posParam
+                  ? `${window.location.origin}/random?pos=${posParam}`
+                  : window.location.origin
+              }
+              primaryAction={{
+                label: "Play Another Position",
+                icon: Shuffle,
+                href: "/random",
+                onClick: startNext,
+              }}
+            />
+          ) : (
+            <GamePanel snap={snap} />
+          )
+        }
       />
     </main>
   );

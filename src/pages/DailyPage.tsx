@@ -25,9 +25,10 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { usePuzzleTracking } from "../hooks/usePuzzleTracking";
 import { getDailySolve } from "../services/api";
+import DiceIcon from "../components/DiceIcon";
 import type { Position, Candidate } from "../types";
 import { candidateToSquare } from "../utils/daily";
-import DailyResultsPanel from "../components/DailyResultsPanel";
+import GameResultsPanel from "../components/GameResultsPanel";
 import NextDailyCountdown from "../components/NextDailyCountdown";
 
 function formatDateString(isoDate: string): string {
@@ -239,7 +240,7 @@ function DailyPageContent({
       record && snap
         ? {
             ...snap,
-            phase: "done",
+            phase: "done" as const,
             liveTopMoves: record.answers,
             candidates: record.candidates,
           }
@@ -309,16 +310,6 @@ function DailyPageContent({
           <GameLayout
             snap={snap}
             activeGame={!record}
-            actions={
-              !record && snap.phase === "done" ? (
-                <button
-                  onClick={() => navigate("/random")}
-                  className="w-full py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hi text-white transition-all shadow-lg shadow-accent/25 hover:shadow-accent/40"
-                >
-                  Play a Random Position
-                </button>
-              ) : null
-            }
             board={
               <BoardPanel
                 snap={boardSnap}
@@ -337,16 +328,28 @@ function DailyPageContent({
               />
             }
             panel={
-              record ? (
-                <DailyResultsPanel
-                  record={record}
-                  participationStreak={user ? participationStreak : undefined}
-                  winStreak={user ? winStreak : undefined}
-                  onShare={() => setShowModal(true)}
-                  onPlayRandom={() => navigate("/random")}
+              record && boardSnap ? (
+                <GameResultsPanel
+                  snap={boardSnap}
+                  shareTitle={`Daily \u2013 ${new Date(activeDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`}
+                  shareUrl={`${window.location.origin}/?date=${activeDate}`}
+                  extraHeader={
+                    user && (
+                      <StreakDisplay
+                        participationStreak={participationStreak}
+                        winStreak={winStreak}
+                      />
+                    )
+                  }
+                  primaryAction={{
+                    label: "Play a Random Position",
+                    icon: DiceIcon,
+                    href: "/random",
+                    onClick: () => navigate("/random"),
+                  }}
                 />
               ) : (
-                <GamePanel snap={snap} showHeader={false} />
+                <GamePanel snap={snap} />
               )
             }
           />
