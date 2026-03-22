@@ -4,12 +4,11 @@ import type { Candidate, GameSnapshot, AnalysisResult } from "../types";
 import type { EngineAnalysis } from "../engine/engineAnalysis";
 import type { Position } from "../types";
 
-const MAX_STRIKES = 5;
-
 interface GameSessionOptions {
   analysis: EngineAnalysis;
   position: Position;
   targetMoves?: number;
+  maxStrikes?: number;
 }
 
 export interface GameSession {
@@ -23,12 +22,14 @@ export function createGameSession({
   analysis,
   position,
   targetMoves: initialTargetMoves = 5,
+  maxStrikes: initialMaxStrikes = 5,
 }: GameSessionOptions): GameSession {
   let phase: "active" | "done" = "active";
   let candidates: Candidate[] = [];
   let strikes = 0;
   let hits = 0;
   let targetMoves = initialTargetMoves;
+  const MAX_STRIKES = initialMaxStrikes;
   let onChange: ((snap: GameSnapshot) => void) | null = null;
   let analysisReady = analysis.isReady();
   let moveQueue: { uci: string; san: string }[] = [];

@@ -100,10 +100,10 @@ function RandomPageContent() {
             onDrop={(from, to) => session?.submitMove(from, to)}
             locked={true}
             onStudyFromPosition={() =>
-              navigate("/study", { state: { fen: board.fen } })
+              navigate(`/study?fen=${encodeURIComponent(board.fen)}`)
             }
             onPlayFromPosition={() =>
-              navigate("/custom", { state: { fen: board.fen } })
+              navigate(`/custom?fen=${encodeURIComponent(board.fen)}`)
             }
           />
         }

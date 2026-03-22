@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -17,16 +17,28 @@ import ResultsPanel from "../components/ResultsPanel";
 import { Candidate } from "../types";
 
 function StudyPageContent() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const board = useBoard();
   const engine = useEnginePool();
   const [session, setSession] = useState<StudySession | null>(null);
   const snap = useSessionSnapshot(session);
-  const [depth, setDepth] = useState(15);
-  const [useMovetime, setUseMovetime] = useState(false);
-  const [movetime, setMovetime] = useState(2000);
-  const [topMoveCount, setTopMoveCount] = useState(5);
-  const [minCandidates, setMinCandidates] = useState(3);
+  const [depth, setDepth] = useState(
+    () => Number(searchParams.get("depth")) || 15,
+  );
+  const [useMovetime, setUseMovetime] = useState(
+    () => searchParams.get("useMovetime") === "1",
+  );
+  const [movetime, setMovetime] = useState(
+    () => Number(searchParams.get("movetime")) || 2000,
+  );
+  const [topMoveCount, setTopMoveCount] = useState(
+    () => Number(searchParams.get("topMoves")) || 5,
+  );
+  const [minCandidates, setMinCandidates] = useState(
+    () => Number(searchParams.get("minCandidates")) || 3,
+  );
 
   const isIdle = !snap || snap.phase === "idle";
   const isActive = snap?.phase === "active";
@@ -35,6 +47,16 @@ function StudyPageContent() {
 
   function handleAnalyze() {
     board.truncateToCurrentPosition();
+    const params = new URLSearchParams();
+    params.set("fen", board.fen);
+    params.set("depth", String(depth));
+    if (useMovetime) {
+      params.set("useMovetime", "1");
+      params.set("movetime", String(movetime));
+    }
+    params.set("topMoves", String(topMoveCount));
+    params.set("minCandidates", String(minCandidates));
+    navigate({ search: `?${params.toString()}` }, { replace: true });
     const cmd = useMovetime ? `go movetime ${movetime}` : `go depth ${depth}`;
     const analysis = createEngineAnalysis({
       pool: engine,
@@ -238,8 +260,8 @@ function StudyPageContent() {
 }
 
 export default function StudyPage() {
-  const location = useLocation();
-  const initialFen = (location.state as { fen?: string } | null)?.fen;
+  const [searchParams] = useSearchParams();
+  const initialFen = searchParams.get("fen") ?? undefined;
   return (
     <BoardProvider initialFen={initialFen}>
       <StudyPageContent />

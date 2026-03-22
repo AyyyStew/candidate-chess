@@ -237,7 +237,8 @@ export default function LibraryPage() {
         </button>
         <button
           onClick={() =>
-            position && navigate("/study", { state: { fen: position.fen } })
+            position &&
+            navigate(`/study?fen=${encodeURIComponent(position.fen)}`)
           }
           disabled={!position}
           className="w-full py-3 rounded-xl font-bold text-base bg-interactive hover:bg-interactive-hi disabled:opacity-40 disabled:cursor-not-allowed transition-colors"

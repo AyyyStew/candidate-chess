@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { useSessionSnapshot } from "../hooks/useSessionSnapshot";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { BoardProvider, useBoard } from "../contexts/BoardContext";
 import { useEnginePool } from "../hooks/useEnginePool";
 import { createEngineAnalysis } from "../engine/engineAnalysis";
@@ -12,6 +12,7 @@ import GameLayout from "../components/GameLayout";
 import GameResultsPanel from "../components/GameResultsPanel";
 import PositionBanner from "../components/PositionBanner";
 import FenInput from "../components/FenInput";
+import GameSettings from "../components/GameSettings";
 import { makePosition } from "../types";
 import { isBlackToMove } from "../utils/chess";
 
@@ -25,11 +26,27 @@ function extractPgnMeta(pgn: string): { label: string; event: string } {
 
 function CustomPageContent() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const board = useBoard();
   const engine = useEnginePool();
   const [session, setSession] = useState<GameSession | null>(null);
   const snap = useSessionSnapshot(session);
   const [lastPgn, setLastPgn] = useState<string>("");
+  const [depth, setDepth] = useState(
+    () => Number(searchParams.get("depth")) || 15,
+  );
+  const [useMovetime, setUseMovetime] = useState(
+    () => searchParams.get("useMovetime") === "1",
+  );
+  const [movetime, setMovetime] = useState(
+    () => Number(searchParams.get("movetime")) || 2000,
+  );
+  const [topMovesToFind, setTopMovesToFind] = useState(
+    () => Number(searchParams.get("topMoves")) || 5,
+  );
+  const [maxStrikes, setMaxStrikes] = useState(
+    () => Number(searchParams.get("maxStrikes")) || 5,
+  );
 
   const isIdle = !snap;
 
@@ -47,6 +64,16 @@ function CustomPageContent() {
   function handleStart() {
     board.truncateToCurrentPosition();
     const fen = board.fen;
+    const params = new URLSearchParams();
+    params.set("fen", fen);
+    params.set("depth", String(depth));
+    if (useMovetime) {
+      params.set("useMovetime", "1");
+      params.set("movetime", String(movetime));
+    }
+    params.set("topMoves", String(topMovesToFind));
+    params.set("maxStrikes", String(maxStrikes));
+    navigate({ search: `?${params.toString()}` }, { replace: true });
     const orientation = isBlackToMove(fen) ? "black" : "white";
     board.setBoardOrientation(orientation);
     const { label, event } = lastPgn
@@ -62,14 +89,24 @@ function CustomPageContent() {
       moveNumber,
       orientation,
     });
+    const goCommand = useMovetime
+      ? `go movetime ${movetime}`
+      : `go depth ${depth}`;
     const analysis = createEngineAnalysis({
       pool: engine,
-      goCommand: "go depth 15",
-      topMoveCount: 20,
+      goCommand,
+      topMoveCount: topMovesToFind,
     });
     analysis.startAnalysis(fen);
 
-    setSession(createGameSession({ analysis, position }));
+    setSession(
+      createGameSession({
+        analysis,
+        position,
+        targetMoves: topMovesToFind,
+        maxStrikes,
+      }),
+    );
   }
 
   function handleReset() {
@@ -95,6 +132,18 @@ function CustomPageContent() {
             disabled={false}
             defaultMode={lastPgn ? "pgn" : "fen"}
             defaultPgn={lastPgn}
+          />
+          <GameSettings
+            depth={depth}
+            useMovetime={useMovetime}
+            movetime={movetime}
+            topMovesToFind={topMovesToFind}
+            maxStrikes={maxStrikes}
+            onDepthChange={setDepth}
+            onUseMovetimeChange={setUseMovetime}
+            onMovetimeChange={setMovetime}
+            onTopMovesToFindChange={setTopMovesToFind}
+            onMaxStrikesChange={setMaxStrikes}
           />
           <button
             onClick={handleStart}
@@ -128,10 +177,10 @@ function CustomPageContent() {
             onDrop={(from, to) => session?.submitMove(from, to)}
             locked={true}
             onStudyFromPosition={() =>
-              navigate("/study", { state: { fen: board.fen } })
+              navigate(`/study?fen=${encodeURIComponent(board.fen)}`)
             }
             onPlayFromPosition={() =>
-              navigate("/custom", { state: { fen: board.fen } })
+              navigate(`/custom?fen=${encodeURIComponent(board.fen)}`)
             }
           />
         }
@@ -156,8 +205,8 @@ function CustomPageContent() {
 }
 
 export default function CustomPage() {
-  const location = useLocation();
-  const initialFen = (location.state as { fen?: string } | null)?.fen;
+  const [searchParams] = useSearchParams();
+  const initialFen = searchParams.get("fen") ?? undefined;
   return (
     <BoardProvider initialFen={initialFen}>
       <CustomPageContent />
