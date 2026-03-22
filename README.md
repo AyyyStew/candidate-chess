@@ -1,22 +1,20 @@
-# Candidate Chess ♟️
+**Candidate Chess ♟️**
 
-A chess training app built around one question:
+A chess training app built around one question: _what do I do here?_
 
-### What do I do here?
+You're shown a position and asked to find the engine's top 5 moves — Family Feud style. No eval bar, no hints, 3 strikes. Loosely inspired by the Kotov method. Built to train middlegame intuition through deliberate candidate move thinking.
 
-You're shown a position and asked to find the engine's top 5 moves, Family Feud style — no eval bar, no hints. Loosely inspired by the Kotov method. Built to develop middlegame intuition without leaning on the eval bar.
+→ **Live app: candidatechess.com**
 
-→ **[Live app](https://candidatechess.com)**
-
----
-
-## Tech Stack
-
-- React + Vite
-- Tailwind CSS
-- Stockfish 18 (WASM)
+![CandidateChess.com Gameplay](images/candidate_chess_promo_2.gif)
 
 ---
+
+**How it works**
+
+- You're shown a middlegame position from high-level games
+- Drag moves onto the board to submit candidates
+- Game ends when you find all top moves or exhaust your strikes
 
 ## Modes
 

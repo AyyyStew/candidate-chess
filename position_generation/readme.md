@@ -12,6 +12,8 @@ PGN files → extract.py → [Redis/Celery workers] → SQLite DB
                                                    enrich.py  (local, no workers)
                                                         ↓
                                               eval.py → [Redis/Celery workers] → SQLite DB
+                                                        ↓
+                                            tactics.py → [Redis/Celery workers] → SQLite DB
 ```
 
 The pipeline scripts (`extract.py`, `enrich.py`, `eval.py`) run **locally on your machine**. Docker is only used for Redis and the Stockfish eval workers.
@@ -20,25 +22,27 @@ The pipeline scripts (`extract.py`, `enrich.py`, `eval.py`) run **locally on you
 
 **1. extract** — reads PGN files, samples positions, runs a cheap Stockfish eval (depth 10, multipv 5), applies a coarse filter to reject already-decided or boring positions, saves survivors to the DB with `STATUS_EXTRACTED`.
 
-**2. enrich** — pure local processing, no workers or Redis needed. Reads extracted positions, computes features (mobility, captures, pawn tension, phase), classifies each position (category, balance, tag), applies fine filters, saves as `STATUS_ENRICHED` or `STATUS_DISCARDED`.
+**2. enrich** — pure local processing, no workers or Redis needed. Reads extracted positions, computes features (mobility, captures, pawn tension, phase), classifies each position (category, balance, complexity, tag), applies fine filters, saves as `fine_filter_passed` or `fine_filter_failed`.
 
-**3. eval** — runs a deep Stockfish eval (depth 20, multipv 20) on all enriched positions via the worker cluster. Saves results as `STATUS_EVALUATED`.
+**3. eval** — runs a deep Stockfish eval (depth 20, multipv 20) on all `fine_filter_passed` positions via the worker cluster. Merges the new eval entry into the position's evals list in the DB.
+
+**4. tactics** — tags each position's PV lines with lichess-cook tactic themes (fork, pin, discoveredAttack, etc.) via the worker cluster. Reads `fine_filter_passed` positions and writes `tactics[]` back to the DB.
 
 ### Position Statuses
 
-| Status      | Meaning                                                |
-| ----------- | ------------------------------------------------------ |
-| `extracted` | Passed coarse filter, cheap eval attached              |
-| `enriched`  | Passed fine filter, features + classification attached |
-| `discarded` | Failed fine filter (kept in DB with discard reason)    |
-| `evaluated` | Deep eval complete, ready for use                      |
+| Status               | Meaning                                                |
+| -------------------- | ------------------------------------------------------ |
+| `extracted`          | Passed coarse filter, cheap eval attached              |
+| `fine_filter_passed` | Passed fine filter, features + classification attached |
+| `fine_filter_failed` | Failed fine filter (kept in DB with discard reason)    |
+
+Positions keep `fine_filter_passed` status after `eval` and `tactics` — there is no separate evaluated status. The evals list and tactics field are updated in-place.
 
 ### Architecture
 
 - **Redis** — Celery broker and result backend, runs in Docker
 - **Workers** — Docker containers running Stockfish (one process per concurrency slot). Can run on multiple machines on the same LAN.
 - **extract.py / eval.py** — three-thread model: dispatcher sends tasks to Redis, main thread polls results via a single Redis MGET per cycle.
-
 - **filter.py** — coarse and fine filter definitions used by extract and enrich respectively.
 
 ---
@@ -48,7 +52,7 @@ The pipeline scripts (`extract.py`, `enrich.py`, `eval.py`) run **locally on you
 ### Main Machine
 
 ```bash
-cd pipeline
+cd position_generation
 
 # Start Redis + worker
 docker-compose up -d
@@ -66,7 +70,7 @@ Requirements:
 - Can reach the main machine's Redis on port 6379
 
 ```bash
-cd pipeline
+cd position_generation
 
 # Set the main machine's IP
 export REDIS_HOST=X.X.X.X
@@ -83,14 +87,15 @@ docker compose -f docker-compose.worker.yml up -d
 Pipeline scripts run locally. Make sure Redis and at least one worker are up first.
 
 ```bash
-cd pipeline
+cd position_generation
 
 python extract.py
 python enrich.py
 python eval.py
+python tactics.py
 ```
 
-Steps must run in order: `extract` → `enrich` → `eval`. Each step is idempotent — re-running skips already-processed positions.
+Steps must run in order: `extract` → `enrich` → `eval` → `tactics`. Each step is idempotent — re-running skips already-processed positions.
 
 The DB is written to `./positions.db` by default (set in `config.toml`).
 
