@@ -4,7 +4,7 @@ A chess training app built around one question: _what do I do here?_
 
 You're shown a position and asked to find the engine's top 5 moves — Family Feud style. No eval bar, no hints, 3 strikes. Loosely inspired by the Kotov method. Built to train middlegame intuition through deliberate candidate move thinking.
 
-→ **Live app: candidatechess.com**
+→ **Live app: [CandidateChess.com](candidatechess.com)**
 
 ![CandidateChess.com Gameplay](images/candidate_chess_promo_2.gif)
 
