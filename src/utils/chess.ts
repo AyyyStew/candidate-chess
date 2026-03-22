@@ -39,6 +39,8 @@ export function parsePgn(
 
 export function formatEval(value: number | undefined | null): string {
   if (value === undefined || value === null) return "-";
+  if (value >= 9000) return `M${10000 - Math.round(value)}`;
+  if (value <= -9000) return `-M${10000 - Math.round(-value)}`;
   return (value > 0 ? "+" : "") + value.toFixed(2);
 }
 

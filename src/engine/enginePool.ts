@@ -45,7 +45,18 @@ export interface EnginePool {
   getTopMoves: (fen: string, n: number, cmd: string) => Promise<TopMove[]>;
   getPositionEval: (fen: string, cmd: string) => Promise<number>;
   getRawMoveEval: (fen: string, move: string, cmd: string) => Promise<number>;
-  getMoveWithLine: (fen: string, move: string, cmd: string) => Promise<{ eval: number; line: PVLine }>;
+  getMoveWithLine: (
+    fen: string,
+    move: string,
+    cmd: string,
+  ) => Promise<{ eval: number; line: PVLine }>;
+}
+
+// Converts a UCI mate-in-N score to the centipawn sentinel used throughout.
+// Positive mateIn  = side-to-move mates   → large positive score
+// Negative mateIn  = side-to-move is mated → large negative score
+function mateScore(mateIn: number): number {
+  return mateIn > 0 ? 10000 - Math.abs(mateIn) : -(10000 - Math.abs(mateIn));
 }
 
 function createEngineInstance(): EngineInstance {
@@ -154,10 +165,11 @@ function createEngineInstance(): EngineInstance {
 
         const pvMatch = line.match(/multipv (\d+)/);
         const scoreMatch = line.match(/score cp (-?\d+)/);
+        const mateSMatch = line.match(/score mate (-?\d+)/);
         const depthInfo = line.match(/depth (\d+)/);
         const pvMovesMatch = line.match(/ pv (.+)$/);
 
-        if (!pvMatch || !scoreMatch) return;
+        if (!pvMatch || (!scoreMatch && !mateSMatch)) return;
         if (targetDepth && parseInt(depthInfo?.[1] ?? "0") !== targetDepth)
           return;
 
@@ -183,7 +195,9 @@ function createEngineInstance(): EngineInstance {
         }
 
         const firstSan = sans[0] ?? uciMove;
-        const rawScore = parseInt(scoreMatch[1]) / 100;
+        const rawScore = scoreMatch
+          ? parseInt(scoreMatch[1]) / 100
+          : mateScore(parseInt(mateSMatch![1]));
         const rawEval = isBlack ? -rawScore : rawScore;
 
         results[pvIndex] = {
@@ -206,9 +220,11 @@ function createEngineInstance(): EngineInstance {
 
     return positionQueue
       .enqueue(["stop", `position fen ${fen}`, goCommand], (line: string) => {
-        if (!line.startsWith("info") || !line.includes("score cp")) return;
-        const m = line.match(/score cp (-?\d+)/);
-        if (m) lastEval = parseInt(m[1]) / 100;
+        if (!line.startsWith("info")) return;
+        const cpMatch = line.match(/score cp (-?\d+)/);
+        const mateMatch = line.match(/score mate (-?\d+)/);
+        if (cpMatch) lastEval = parseInt(cpMatch[1]) / 100;
+        else if (mateMatch) lastEval = mateScore(parseInt(mateMatch[1]));
       })
       .then(() => (lastEval !== null ? (isBlack ? -lastEval : lastEval) : 0));
   }
@@ -241,10 +257,12 @@ function createEngineInstance(): EngineInstance {
       .enqueue(
         ["stop", `position fen ${fenAfter}`, goCommand],
         (line: string) => {
-          if (!line.startsWith("info") || !line.includes("score cp")) return;
+          if (!line.startsWith("info")) return;
           const scoreMatch = line.match(/score cp (-?\d+)/);
+          const mateMatch = line.match(/score mate (-?\d+)/);
           const pvMatch = line.match(/ pv (.+)$/);
           if (scoreMatch) lastEval = parseInt(scoreMatch[1]) / 100;
+          else if (mateMatch) lastEval = mateScore(parseInt(mateMatch[1]));
           if (pvMatch) {
             const uciMoves = pvMatch[1].trim().split(" ");
             const sans: string[] = [];
