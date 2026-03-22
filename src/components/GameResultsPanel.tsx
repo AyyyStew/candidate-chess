@@ -74,7 +74,9 @@ export default function GameResultsPanel({
   const hits = snap.candidates.filter((c) => c.status === "hit").length;
   const target = snap.targetMoves;
   const topMoves = snap.liveTopMoves.slice(0, target);
-  const misses = snap.candidates.filter((c) => c.status === "miss");
+  const misses = snap.candidates.filter(
+    (c) => c.status === "miss" || c.status === "hidden_gem",
+  );
   const foundMoves = new Set(
     snap.candidates.filter((c) => c.status === "hit").map((c) => c.move),
   );
@@ -213,6 +215,7 @@ export default function GameResultsPanel({
                 key={i}
                 rank="miss"
                 san={c.san}
+                hiddenGem={c.status === "hidden_gem"}
                 category={c.category ?? null}
                 eval={c.eval ?? null}
                 pvLine={c.line}
