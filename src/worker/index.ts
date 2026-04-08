@@ -16,6 +16,10 @@ app.use("*", async (c, next) => {
   await next();
 });
 
+app.get("/api/v1/config", (c) =>
+  c.json({ turnstileSiteKey: c.env.TURNSTILE_SITE_KEY }),
+);
+
 app.use("*", sessionMiddleware);
 app.route("/api/v1/telemetry", telemetry);
 app.route("/api/v1/puzzles", puzzles);

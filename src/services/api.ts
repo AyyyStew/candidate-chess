@@ -78,6 +78,20 @@ export interface SolveData {
   timeMs: number;
 }
 
+// ── Config ───────────────────────────────────────────────────────────────────
+
+export async function getConfig(): Promise<{
+  turnstileSiteKey: string;
+} | null> {
+  try {
+    const res = await fetch(`${BASE}/config`);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
 export async function getMe(): Promise<ApiUser | null> {
@@ -106,6 +120,7 @@ export async function deleteAccount(): Promise<boolean> {
 // ── Telemetry ─────────────────────────────────────────────────────────────────
 
 export async function trackVisit(turnstileToken: string): Promise<void> {
+  console.log("[telemetry] trackVisit", turnstileToken);
   try {
     await fetch(`${BASE}/telemetry/visit`, {
       method: "POST",
@@ -114,6 +129,7 @@ export async function trackVisit(turnstileToken: string): Promise<void> {
     });
   } catch {
     // fire and forget — never crash the app over telemetry
+    console.warn("[telemetry] trackVisit failed");
   }
 }
 

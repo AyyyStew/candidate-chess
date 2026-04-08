@@ -9,6 +9,7 @@ export type AppBindings = {
   GOOGLE_CLIENT_SECRET: string;
   LICHESS_CLIENT_ID: string;
   TURNSTILE_SECRET_KEY: string;
+  TURNSTILE_SITE_KEY: string;
 };
 
 export type AppUser = typeof users.$inferSelect;

@@ -17,7 +17,7 @@ import NewsPage from "./pages/NewsPage";
 import NewsPostPage from "./pages/NewsPostPage";
 import LibraryPage from "./pages/LibraryPage";
 import { preload } from "./services/positionService";
-import { trackVisit, initPuzzleTurnstile } from "./services/api";
+import { trackVisit, initPuzzleTurnstile, getConfig } from "./services/api";
 
 declare global {
   interface Window {
@@ -43,36 +43,36 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const sitekey = import.meta.env.VITE_TURNSTILE_SITE_KEY as
-      | string
-      | undefined;
-    if (!sitekey || turnstileRendered) return;
+    getConfig().then((config) => {
+      const sitekey = config?.turnstileSiteKey;
+      if (!sitekey || turnstileRendered) return;
 
-    function render() {
-      if (turnstileRendered) return;
-      turnstileRendered = true;
-      try {
-        window.turnstile!.render("#turnstile-widget", {
-          sitekey,
-          appearance: "interaction-only",
-          retry: "never",
-          callback: (token: string) => trackVisit(token),
-          "error-callback": () => {},
-        });
-      } catch {
-        turnstileRendered = false;
+      function render() {
+        if (turnstileRendered) return;
+        turnstileRendered = true;
+        try {
+          window.turnstile!.render("#turnstile-widget", {
+            sitekey,
+            appearance: "interaction-only",
+            retry: "never",
+            callback: (token: string) => trackVisit(token),
+            "error-callback": () => {},
+          });
+        } catch {
+          turnstileRendered = false;
+        }
       }
-    }
 
-    const init = () => {
-      render();
-      initPuzzleTurnstile(sitekey);
-    };
-    if (window.__turnstileReady || window.turnstile) {
-      init();
-    } else {
-      window.__pendingTurnstileLoad = init;
-    }
+      const init = () => {
+        render();
+        initPuzzleTurnstile(sitekey);
+      };
+      if (window.__turnstileReady || window.turnstile) {
+        init();
+      } else {
+        window.__pendingTurnstileLoad = init;
+      }
+    });
   }, []);
 
   return (
