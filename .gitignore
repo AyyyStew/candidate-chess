@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .claude/*
-
+.codex
 
 # data
 position_generation/LichessEliteDatabase
